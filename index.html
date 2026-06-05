@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DXIGN AI Mastery Course | Master Generative AI for Creation</title>
+  <meta name="description" content="Empower your design, film, avatar, and business workflows with the next generation of generative AI tools. Inspired by Apple design.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Design System Stylesheet -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- Tailwind Configuration for Custom Accent Colors & Fonts -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#0A0F14',
+              bgDarker: '#05080B',
+              cyan: '#00B6E6',
+              cyanGlow: 'rgba(0, 182, 230, 0.15)',
+            }
+          },
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React and ReactDOM UMD builds -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Lucide Icon core library UMD build -->
+  <script src="https://unpkg.com/lucide@latest" crossorigin></script>
+
+  <!-- Babel Standalone compiler for in-browser JSX transpilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+
+  <style>
+    @keyframes draw-path {
+      from { stroke-dashoffset: 1000; }
+      to { stroke-dashoffset: 0; }
+    }
+    .animated-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: draw-path 8s linear infinite alternate;
+    }
+    @keyframes helper-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+    .helper-bounce {
+      animation: helper-bounce 1.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-gray-200 selection:bg-brand-cyan/20 selection:text-brand-cyan">
+  
+  <!-- React App Root Container -->
+  <div id="root"></div>
+
+  <!-- React & JSX Application Source Code -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // Navigation configuration - 8 sections in the required order
+    const navItems = [
+      { id: 'hero', label: 'Home' },
+      { id: 'graphic-design', label: 'Graphic Design' },
+      { id: 'film-making', label: 'Film Making' },
+      { id: 'content-creation', label: 'Content Creation' },
+      { id: 'avatar', label: 'AI Avatar' },
+      { id: 'business', label: 'Business' },
+      { id: 'vibe-coding', label: 'Vibe Coding' },
+      { id: 'showcase', label: 'Showcase' }
+    ];
+
+    // Horizontal Showcase content
+    const showcaseItems = [
+      {
+        type: 'Cinematic AI Film',
+        title: 'Chronicles of Nebula',
+        tag: 'Cinematic Video',
+        img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
+        metric: '4K Cinema Gen',
+        color: 'from-blue-600/20 to-purple-600/20'
+      },
+      {
+        type: 'Surreal Vector Art',
+        title: 'Iridescent Synthesis',
+        tag: 'Graphic Design',
+        img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop',
+        metric: 'Vector SVG Output',
+        color: 'from-cyan-600/20 to-teal-600/20'
+      },
+      {
+        type: 'AI Synthetic Human',
+        title: 'Synthetix Host Evelyn',
+        tag: 'AI Avatar',
+        img: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=800&auto=format&fit=crop',
+        metric: 'Natural Audio Sync',
+        color: 'from-violet-600/20 to-pink-600/20'
+      },
+      {
+        type: 'Autonomous Agent Grid',
+        title: 'Operations Orchestrator',
+        tag: 'AI in Business',
+        img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
+        metric: '99.8% Automation',
+        color: 'from-emerald-600/20 to-sky-600/20'
+      }
+    ];
+
+    // Section 0: Apple-style Scroll-Driven Canvas Image Sequence Hero
+    const HeroSection = ({ scrollY }) => {
+      const heroRef = useRef(null);
+      const canvasRef = useRef(null);
+      const [images, setImages] = useState([]);
+      const [isPreloaded, setIsPreloaded] = useState(false);
+      const totalFrames = 240;
+
+      // Progressive Image Preloading
+      useEffect(() => {
+        const loadedImages = [];
+        let loadedCount = 0;
+        
+        // Helper to format frame file name
+        const getFrameUrl = (index) => {
+          const paddedIndex = String(index).padStart(3, '0');
+          return `./public/Images/heropage/ezgif-frame-${paddedIndex}.png`;
+        };
+
+        // Preload all frames progressively
+        const initialPreloadCount = 40;
+        for (let i = 1; i <= totalFrames; i++) {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+          img.onload = () => {
+            loadedCount++;
+            if (loadedCount >= initialPreloadCount) {
+              setIsPreloaded(true);
+            }
+          };
+          img.onerror = () => {
+            loadedCount++;
+            if (loadedCount >= initialPreloadCount) {
+              setIsPreloaded(true);
+            }
+          };
+          loadedImages[i] = img;
+        }
+        setImages(loadedImages);
+      }, []);
+
+      // Canvas drawing logic on scroll and screen resize
+      useEffect(() => {
+        if (images.length === 0 || !canvasRef.current || !heroRef.current) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const container = heroRef.current;
+
+        // Calculate progress in Hero section
+        const rect = container.getBoundingClientRect();
+        const scrollTop = window.scrollY;
+        const containerHeight = rect.height;
+        const windowHeight = window.innerHeight;
+        
+        const progress = Math.max(0, Math.min(1, scrollTop / (containerHeight - windowHeight)));
+        
+        // Map progress to frame index (1 to 240)
+        const frameIndex = Math.max(1, Math.min(totalFrames, Math.floor(progress * (totalFrames - 1)) + 1));
+        
+        // Fallback helper to find the nearest loaded and valid frame
+        const getBestFrame = (index) => {
+          if (images[index] && images[index].complete && images[index].naturalWidth > 0) {
+            return images[index];
+          }
+          // Search backwards
+          for (let i = index - 1; i >= 1; i--) {
+            if (images[i] && images[i].complete && images[i].naturalWidth > 0) {
+              return images[i];
+            }
+          }
+          // Search forwards
+          for (let i = index + 1; i <= totalFrames; i++) {
+            if (images[i] && images[i].complete && images[i].naturalWidth > 0) {
+              return images[i];
+            }
+          }
+          return null;
+        };
+
+        const img = getBestFrame(frameIndex);
+
+        if (img) {
+          // Adjust canvas size to match viewport
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+
+          // Object-fit: cover implementation on canvas
+          const imgWidth = img.naturalWidth || img.width;
+          const imgHeight = img.naturalHeight || img.height;
+
+          const canvasAspect = canvas.width / canvas.height;
+          const imgAspect = imgWidth / imgHeight;
+
+          let drawWidth, drawHeight, drawX, drawY;
+
+          if (canvasAspect > imgAspect) {
+            drawWidth = canvas.width;
+            drawHeight = canvas.width / imgAspect;
+            drawX = 0;
+            drawY = (canvas.height - drawHeight) / 2;
+          } else {
+            drawWidth = canvas.height * imgAspect;
+            drawHeight = canvas.height;
+            drawX = (canvas.width - drawWidth) / 2;
+            drawY = 0;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        }
+      }, [images, scrollY, isPreloaded]);
+
+      // Calculate container-local scroll progress ratio
+      let currentProgress = 0;
+      if (heroRef.current) {
+        const rect = heroRef.current.getBoundingClientRect();
+        const scrollTop = window.scrollY;
+        const containerHeight = rect.height;
+        const windowHeight = window.innerHeight;
+        currentProgress = Math.max(0, Math.min(1, scrollTop / (containerHeight - windowHeight)));
+      }
+
+      // Transition calculations for sequential phases
+      const getOpacityAndY = (progress, start, end) => {
+        const fadeInZone = 0.06;
+        const fadeOutZone = 0.06;
+        
+        if (progress < start || progress > end) {
+          return { opacity: 0, translateY: 30 };
+        }
+        
+        let opacity = 1;
+        let translateY = 0;
+        
+        if (progress < start + fadeInZone) {
+          const ratio = (progress - start) / fadeInZone;
+          opacity = ratio;
+          translateY = (1 - ratio) * 30; // Move up from 30px
+        } else if (progress > end - fadeOutZone) {
+          const ratio = (end - progress) / fadeOutZone;
+          opacity = ratio;
+          translateY = (1 - ratio) * -30; // Move up to -30px
+        }
+        
+        return { opacity, translateY };
+      };
+
+      const heroContents = [
+        {
+          title: "Master Generative AI.",
+          subtitle: "Empower your creative workflows with the next generation of generative AI tools. Inspired by Apple design.",
+          range: [0.0, 0.25]
+        },
+        {
+          title: "Design Vector Systems.",
+          subtitle: "Translate prompts into clean, mathematical paths. Master prompt templates and layout design rules.",
+          range: [0.25, 0.50]
+        },
+        {
+          title: "Direct Cinematic Films.",
+          subtitle: "Explore advanced camera prompts, character consistency, and custom temporal rendering timelines.",
+          range: [0.50, 0.75]
+        },
+        {
+          title: "Scale Autonomous Swarms.",
+          subtitle: "Deploy grids of autonomous agents, qualify active leads, and automate backend operations 24/7.",
+          range: [0.75, 1.0]
+        }
+      ];
+
+      // Hide scroll helper quickly after starting to scroll
+      const helperOpacity = Math.max(0, 1 - currentProgress * 8);
+
+      return (
+        <section 
+          id="hero" 
+          ref={heroRef} 
+          className="relative h-[350vh] w-full bg-brand-bg z-10 select-none"
+        >
+          {/* Sticky inner container */}
+          <div className="sticky top-0 h-screen w-full overflow-hidden flex justify-center items-center">
+            
+            {/* Canvas layer */}
+            <canvas 
+              ref={canvasRef} 
+              className="absolute inset-0 w-full h-full object-cover z-0" 
+            />
+
+            {/* Stark Bottom-Left Alignment Wrapper */}
+            <div className="absolute bottom-24 left-6 md:left-12 lg:left-24 right-6 md:right-auto max-w-2xl text-left flex flex-col justify-end z-20 pointer-events-none min-h-[220px]">
+              {heroContents.map((content, idx) => {
+                const { opacity, translateY } = getOpacityAndY(currentProgress, content.range[0], content.range[1]);
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      opacity: opacity,
+                      transform: `translateY(${translateY}px)`,
+                      pointerEvents: opacity > 0.1 ? 'auto' : 'none',
+                      position: idx === 0 ? 'relative' : 'absolute',
+                      top: idx === 0 ? 'auto' : 0,
+                      left: idx === 0 ? 'auto' : 0,
+                      width: '100%',
+                      transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
+                    }}
+                    className="flex flex-col select-none"
+                  >
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight text-white leading-tight font-heading mb-4">
+                      {content.title.split(" ").map((word, wIdx) => {
+                        // Apply gradient text to last couple of words to make it premium
+                        const isLastWords = wIdx >= content.title.split(" ").length - 2;
+                        return (
+                          <span key={wIdx} className={isLastWords ? "text-cyan-gradient font-black" : "text-white"}>
+                            {word}{" "}
+                          </span>
+                        );
+                      })}
+                    </h1>
+                    <p className="text-sm md:text-base lg:text-lg text-gray-400 font-light leading-relaxed max-w-xl">
+                      {content.subtitle}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Scroll Indicator positioned at bottom-right */}
+            <div 
+              style={{ opacity: helperOpacity, transition: 'opacity 0.2s ease-out' }}
+              className="absolute bottom-8 right-6 md:right-12 lg:right-24 z-20 pointer-events-auto"
+            >
+              <div
+                onClick={() => {
+                  const nextSec = document.getElementById('graphic-design');
+                  if (nextSec) {
+                    const offset = nextSec.offsetTop - 80;
+                    window.scrollTo({ top: offset, behavior: 'smooth' });
+                  }
+                }}
+                className="flex flex-col items-center text-[10px] font-mono text-brand-cyan/60 uppercase tracking-widest cursor-pointer group hover:text-brand-cyan transition-colors duration-300"
+              >
+                <span className="font-semibold">Explore System</span>
+                <div 
+                  className="w-5 h-8 border border-brand-cyan/30 rounded-full mt-2 flex justify-center p-1 group-hover:border-brand-cyan transition-colors helper-bounce"
+                >
+                  <span className="w-1.5 h-2.5 bg-brand-cyan rounded-full" />
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Glow Ambient Filter */}
+            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-brand-bg to-transparent z-15 pointer-events-none" />
+          </div>
+        </section>
+      );
+    };
+
+    // Section 1: Graphic Design — AI Vector Canvas Mockup
+    const GraphicDesignSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      return (
+        <section 
+          id="graphic-design"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 01 / Graphic Design
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                AI IN DESIGN.<br/>
+                <span className="text-cyan-gradient">VECTOR SYSTEMS.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Translate prompts into mathematical paths. Master AI-driven prompt design tools, automated layout engines, and real-time generation pipelines that output clean SVG coordinates.
+              </p>
+              
+              <ul className="space-y-4 mb-8 text-sm text-gray-300">
+                {[
+                  'Generate high-resolution vector paths from raw text descriptions',
+                  'Automate typography hierarchy and layout rules using generative templates',
+                  'Optimize assets for standard resolution scaling without quality loss',
+                  '10x mockup creation speed for agency presentations'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: High-Fidelity Canvas Mockup */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Interface Header */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                  <span className="text-xs font-mono text-gray-500 ml-4">vector-generator-engine.svg</span>
+                </div>
+                <div className="px-3 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">
+                  Live Canvas
+                </div>
+              </div>
+
+              {/* Central Drawing space */}
+              <div className="relative z-10 flex-grow my-6 border border-white/5 bg-slate-950/40 rounded-xl overflow-hidden dots-grid flex justify-center items-center">
+                
+                {/* SVG glowing graphic being constructed */}
+                <svg width="240" height="240" viewBox="0 0 200 200" className="relative z-10 drop-shadow-[0_0_20px_rgba(0,182,230,0.3)]">
+                  <path 
+                    d="M 50 150 C 50 50, 150 50, 150 150 Z" 
+                    stroke="#00B6E6" 
+                    strokeWidth="3" 
+                    fill="url(#canvas-grad)" 
+                    strokeLinecap="round"
+                    className="animated-path"
+                  />
+                  <defs>
+                    <linearGradient id="canvas-grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#00B6E6" stopOpacity="0.1" />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Bounding box lines */}
+                  <line x1="50" y1="150" x2="50" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
+                  <line x1="150" y1="150" x2="150" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
+                  <line x1="50" y1="50" x2="150" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
+                </svg>
+
+                {/* Vector handles */}
+                <div className="absolute top-[50px] left-[50px] vector-handle rounded" />
+                <div className="absolute top-[50px] left-[150px] vector-handle rounded" />
+                <div className="absolute top-[150px] left-[50px] vector-handle rounded" />
+                <div className="absolute top-[150px] left-[150px] vector-handle rounded" />
+                
+                {/* Overlay Prompt */}
+                <div className="absolute bottom-4 left-4 right-4 py-2.5 px-4 bg-slate-950/80 border border-white/10 rounded-lg text-left text-xs flex justify-between items-center backdrop-blur-md">
+                  <div className="flex items-center space-x-2.5">
+                    <i data-lucide="sparkles" className="text-brand-cyan w-3.5 h-3.5"></i>
+                    <span className="text-gray-300 truncate font-mono">/generate curve flow organic sky-blue...</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">OK</span>
+                </div>
+              </div>
+
+              {/* Interface Footer status */}
+              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="database" className="text-brand-cyan w-3 h-3"></i>
+                  <span>Nodes: 42</span>
+                </div>
+                <span>Coords: X=150, Y=50 | Zoom: 100%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Section 2: Film Making — Cinematic Timeline Editor Mockup
+    const FilmMakingSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      return (
+        <section 
+          id="film-making"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Timeline Preview */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between order-last lg:order-first"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Editor screen header */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="video" className="text-brand-cyan w-3.5 h-3.5"></i>
+                  <span className="text-xs font-mono text-gray-400">Cinematic Editor Timeline v2</span>
+                </div>
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  <span className="text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">Rendering</span>
+                </div>
+              </div>
+
+              {/* Video Monitor frame */}
+              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/50 rounded-xl overflow-hidden flex justify-center items-center group">
+                <img 
+                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=700&auto=format&fit=crop" 
+                  alt="Film rendering target" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-60" 
+                />
+                
+                {/* Scanning gradient laser line overlay */}
+                <div className="pulse-line" />
+                
+                <div className="absolute inset-0 bg-slate-950/20 flex flex-col justify-center items-center z-10">
+                  <div className="w-14 h-14 rounded-full bg-slate-900/80 border border-white/20 flex justify-center items-center text-brand-cyan backdrop-blur-md group-hover:scale-105 transition-transform duration-300 cursor-pointer shadow-[0_0_20px_rgba(0,182,230,0.15)]">
+                    <i data-lucide="play" className="ml-1 w-[22px] h-[22px] text-brand-cyan"></i>
+                  </div>
+                </div>
+
+                {/* Aspect ratio frame marks */}
+                <div className="absolute top-2 left-2 text-[10px] font-mono text-white/40">2.39:1 CINEMASCOPE</div>
+                <div className="absolute bottom-2 right-2 text-[10px] font-mono text-white/40">4K 24FPS</div>
+              </div>
+
+              {/* Timeline Editor Tracks */}
+              <div className="relative z-10 border border-white/5 bg-slate-950/60 p-4 rounded-xl flex flex-col space-y-3 overflow-hidden">
+                {/* Timeline Head indicator */}
+                <div className="absolute inset-y-0 w-[2px] bg-brand-cyan left-[45%] z-20 playhead-glow">
+                  <div className="absolute top-0 -translate-x-[50%] w-2.5 h-2.5 bg-brand-cyan rounded-full" />
+                </div>
+                
+                {/* Track 1 */}
+                <div className="flex justify-between items-center text-[10px] font-mono">
+                  <span className="text-gray-400 w-28 text-left truncate">Track 1: Camera Track</span>
+                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-[20%] right-[30%] bg-brand-cyan/25 border-l border-r border-brand-cyan/40 rounded flex items-center px-2 text-[9px] text-brand-cyan font-bold truncate">Orbit zoom center</div>
+                  </div>
+                  <span className="text-gray-500">00:14:24</span>
+                </div>
+
+                {/* Track 2 */}
+                <div className="flex justify-between items-center text-[10px] font-mono">
+                  <span className="text-gray-400 w-28 text-left truncate">Track 2: Prompt Node</span>
+                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-[10%] right-[50%] bg-purple-500/20 border-l border-r border-purple-500/40 rounded flex items-center px-2 text-[9px] text-purple-400 font-bold truncate">Generate cinematic nebula</div>
+                  </div>
+                  <span className="text-gray-500">00:08:12</span>
+                </div>
+
+                {/* Track 3 */}
+                <div className="flex justify-between items-center text-[10px] font-mono">
+                  <span className="text-gray-400 w-28 text-left truncate">Track 3: SFX Generation</span>
+                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-[40%] right-[10%] bg-emerald-500/20 border-l border-r border-emerald-500/40 rounded flex items-center px-2 text-[9px] text-emerald-400 font-bold truncate">Ambient drone synth</div>
+                  </div>
+                  <span className="text-gray-500">00:18:00</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 02 / Film Making
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                AI FILM PRODUCTION.<br/>
+                <span className="text-cyan-gradient">DIRECT CINEMATICS.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Explore cutting-edge camera movements, cinematic light control, and generate industry-grade film logic. Build scripts directly into temporal consistent frames without artifacts.
+              </p>
+              
+              <ul className="space-y-4 text-sm text-gray-300">
+                {[
+                  'Master camera prompts: pans, orbits, tilts, and zoom ratios',
+                  'Maintain character and object consistency across generative scenes',
+                  'Orchestrate lighting, color gradings, and environment assets via text config',
+                  'Synchronize synthetic audio score generation with film clips'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Section 3: Content Creation — Storytelling Loops Mockup
+    const ContentCreationSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      return (
+        <section 
+          id="content-creation"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 03 / Content Creation
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                AI STORYTELLING.<br/>
+                <span className="text-cyan-gradient">ENGAGEMENT LOOPS.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Automate scripts, visual assets, hook variations, and scheduling. Deploy AI pipelines that auto-adjust tone, duration, and pacing to maximize viewer retention across platforms.
+              </p>
+              
+              <ul className="space-y-4 mb-8 text-sm text-gray-300">
+                {[
+                  'Generate high-hook short scripts tailored to algorithmic feeds',
+                  'Synthesize script templates instantly into layered visual presentations',
+                  'Auto-split longer films into optimized cross-platform micro-clips',
+                  'Create automated scheduling patterns based on active traffic cycles'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: Funnel Flow Mockup */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Funnel header */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="sliders" className="text-brand-cyan w-3.5 h-3.5"></i>
+                  <span className="text-xs font-mono text-gray-400">Algorithmic Distribution Funnel</span>
+                </div>
+                <div className="px-3 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-[10px] font-mono text-purple-400 font-bold uppercase">
+                  ACTIVE PIPELINE
+                </div>
+              </div>
+
+              {/* Central flow illustration */}
+              <div className="relative z-10 flex-grow my-6 flex flex-col justify-center items-center border border-white/5 rounded-xl bg-slate-950/40 p-4">
+                
+                {/* Engine core */}
+                <div className="w-20 h-20 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex flex-col justify-center items-center relative z-10 mb-8 shadow-[0_0_30px_rgba(0,182,230,0.15)] group hover:scale-105 transition-transform duration-300">
+                  <i data-lucide="cpu" className="text-brand-cyan animate-pulse w-7 h-7"></i>
+                  <span className="text-[8px] font-mono text-brand-cyan/60 uppercase tracking-widest mt-1">ENGINE</span>
+                </div>
+
+                {/* Social grid node tracks */}
+                <div className="grid grid-cols-3 gap-6 w-full relative z-10">
+                  {/* YouTube shorts node */}
+                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
+                    <span className="text-[10px] font-mono text-red-500 font-bold uppercase tracking-wider mb-2">YT Shorts</span>
+                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
+                      <div className="bg-red-500 h-full w-[85%]" />
+                    </div>
+                    <span className="text-[9px] font-mono text-gray-500">Retention: 85%</span>
+                  </div>
+
+                  {/* Tiktok node */}
+                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
+                    <span className="text-[10px] font-mono text-white font-bold uppercase tracking-wider mb-2">TikTok Feed</span>
+                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
+                      <div className="bg-brand-cyan h-full w-[92%]" />
+                    </div>
+                    <span className="text-[9px] font-mono text-gray-500">Retention: 92%</span>
+                  </div>
+
+                  {/* Instagram reels node */}
+                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
+                    <span className="text-[10px] font-mono text-pink-500 font-bold uppercase tracking-wider mb-2">IG Reels</span>
+                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
+                      <div className="bg-pink-500 h-full w-[78%]" />
+                    </div>
+                    <span className="text-[9px] font-mono text-gray-500">Retention: 78%</span>
+                  </div>
+                </div>
+
+                {/* Flow lines utilizing SVG */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                  <path d="M 170 120 L 80 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
+                  <path d="M 180 120 L 180 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
+                  <path d="M 190 120 L 280 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
+                </svg>
+
+              </div>
+
+              {/* Interface footer */}
+              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="bar-chart-2" className="text-brand-cyan w-3 h-3"></i>
+                  <span>Pipeline Flow: 2.8k items/hr</span>
+                </div>
+                <span>Sync status: Active</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Section 4: AI Avatar — Presenter Mesh Control Deck Mockup
+    const AvatarSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      return (
+        <section 
+          id="avatar"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Control Deck Mockup */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between order-last lg:order-first"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Header controls */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="bot" className="text-brand-cyan w-3.5 h-3.5"></i>
+                  <span className="text-xs font-mono text-gray-400">AI Avatar Speech & Facial Mesh Deck</span>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-0.5 rounded">
+                  ONLINE
+                </span>
+              </div>
+
+              {/* Facial Mesh and Wavelength overlay */}
+              <div className="relative z-10 flex-grow my-6 border border-white/5 bg-slate-950/40 rounded-xl overflow-hidden flex flex-col justify-center items-center p-6">
+                
+                {/* Silhouette avatar layout mock */}
+                <div className="w-24 h-24 rounded-full border-2 border-brand-cyan/20 flex justify-center items-center relative mb-6 bg-slate-900/60 shadow-[0_0_20px_rgba(0,182,230,0.08)]">
+                  <i data-lucide="bot" className="text-brand-cyan/40 w-10.5 h-10.5"></i>
+                  
+                  {/* Overlay dots representing tracking nodes */}
+                  <div className="absolute top-[20%] left-[50%] -translate-x-[50%] w-1.5 h-1.5 bg-brand-cyan rounded-full animate-ping" />
+                  <div className="absolute top-[50%] left-[30%] w-1 h-1 bg-brand-cyan rounded-full" />
+                  <div className="absolute top-[50%] left-[70%] w-1 h-1 bg-brand-cyan rounded-full" />
+                  <div className="absolute bottom-[20%] left-[50%] -translate-x-[50%] w-1.5 h-1 bg-brand-cyan rounded-full" />
+                </div>
+
+                {/* Animated Voice bars */}
+                <div className="h-16 flex items-center justify-center space-x-1 mb-2">
+                  {[12, 36, 48, 24, 30, 42, 18, 38, 26, 12].map((val, idx) => (
+                    <div 
+                      key={idx} 
+                      className="voice-bar" 
+                      style={{ 
+                        animationDelay: `${idx * 0.1}s`,
+                        height: `${val}px`
+                      }} 
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] font-mono text-gray-500">Audio Wavelength: Speech Synthesizer synced</span>
+              </div>
+
+              {/* Control Deck values */}
+              <div className="relative z-10 grid grid-cols-2 gap-4 text-xs font-mono">
+                <div className="p-3 border border-white/5 bg-slate-950/60 rounded-lg flex flex-col text-left">
+                  <span className="text-gray-500 text-[10px] uppercase">Vocal Tone</span>
+                  <span className="text-white font-bold mt-1">Professional / Crisp</span>
+                </div>
+                <div className="p-3 border border-white/5 bg-slate-950/60 rounded-lg flex flex-col text-left">
+                  <span className="text-gray-500 text-[10px] uppercase">Lipsync Sync</span>
+                  <span className="text-brand-cyan font-bold mt-1">99.8% Calibrated</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 04 / AI Avatar
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                CREATE AI AVATARS.<br/>
+                <span className="text-cyan-gradient">VIRTUAL HOSTS.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Explore virtual presenter loops with cloned audio voices and custom head poses. Reach global markets dynamically without setting up physical stages.
+              </p>
+              
+              <ul className="space-y-4 text-sm text-gray-300">
+                {[
+                  'Clone customized vocal characteristics from 30-second audio files',
+                  'Synthesize realistic head pose and hand motions linked to scripts',
+                  'Translate voice presentations into 12+ international languages instantly',
+                  'Eliminate editing pipeline delays by generating presenters directly from text'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Section 5: AI in Business — Agent Logs Terminal Mockup
+    const BusinessSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      return (
+        <section 
+          id="business"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 05 / Business AI
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                SCALE YOUR BUSINESS.<br/>
+                <span className="text-cyan-gradient">AUTONOMOUS SWARMS.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Orchestrate swarms of autonomous agents. Connect webhooks to scrapers, automatically qualify leads, draft responses, and link operational grids to run businesses 24/7 without overhead.
+              </p>
+              
+              <ul className="space-y-4 mb-8 text-sm text-gray-300">
+                {[
+                  'Deploy automated scrapers that qualify incoming buyer leads',
+                  'Trigger autonomous agents to customize proposals and outreach emails',
+                  'Integrate APIs to bridge graphic, video, and text generation pipelines',
+                  'Monitor operational health logs through centralized console grids'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: Code Console Terminal Mockup */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Terminal header */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="database" className="text-brand-cyan w-3.5 h-3.5"></i>
+                  <span className="text-xs font-mono text-gray-400">root@dxign-agent-swarm:~$</span>
+                </div>
+                <div className="flex space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse" />
+                  <span className="text-[10px] font-mono text-brand-cyan uppercase font-bold tracking-wider">SWARM ONLINE</span>
+                </div>
+              </div>
+
+              {/* Terminal code logs container */}
+              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/80 p-5 rounded-xl text-left overflow-hidden flex flex-col justify-between">
+                
+                {/* Stats cards overlaid inside terminal */}
+                <div className="grid grid-cols-3 gap-3 mb-6 relative z-10">
+                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
+                    <span className="text-[8px] font-mono text-gray-500 uppercase">Active Swarm</span>
+                    <span className="text-sm font-extrabold text-white block">14 Agents</span>
+                  </div>
+                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
+                    <span className="text-[8px] font-mono text-gray-500 uppercase">Daily Calls</span>
+                    <span className="text-sm font-extrabold text-brand-cyan block">12,850 API</span>
+                  </div>
+                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
+                    <span className="text-[8px] font-mono text-gray-500 uppercase">Automation Margin</span>
+                    <span className="text-sm font-extrabold text-white block">99.8% Match</span>
+                  </div>
+                </div>
+
+                {/* Live print output */}
+                <div className="flex-grow space-y-2.5 overflow-hidden text-[11px] font-mono select-text selection:bg-brand-cyan/20 selection:text-brand-cyan">
+                  <div className="text-gray-500">[INFO] Launching Email Capture Swarm v1.4</div>
+                  <div className="text-emerald-400 font-semibold">[SUCCESS] Scraped 142 qualified leads from active pipelines</div>
+                  <div className="text-purple-400">[TRIGGER] Prompting Auto-Agent: 'Draft customized proposal'</div>
+                  <div className="text-brand-cyan font-bold">[LOG] Asset render completed and attached - Success (240ms)</div>
+                  <div className="text-yellow-400 font-semibold">[METRIC] Conversion predicted: 84.6% margin matching</div>
+                  <div className="text-brand-cyan flex items-center">
+                    <span>root@dxign-agent-swarm:~$ listening_for_webhooks...</span>
+                    <span className="w-1.5 h-3 bg-brand-cyan ml-1.5 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Interface footer status */}
+              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="sliders" className="text-brand-cyan w-3 h-3"></i>
+                  <span>Agent Core: API-Bridge active</span>
+                </div>
+                <span>Latency: 48ms</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Section 6: Vibe Coding — Interactive Code Editor Mockup
+    const VibeCodingSection = () => {
+      const containerRef = useRef(null);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+      const [isGenerating, setIsGenerating] = useState(false);
+      const [generationProgress, setGenerationProgress] = useState(0);
+      const [editorCode, setEditorCode] = useState(
+`// Vibe Code your UI layout
+vibe("a futuristic premium dark-mode dashboard") {
+  theme: "iridescent-glass",
+  components: [
+    "GridMatrixBackground",
+    "GlowingPillTabs",
+    "AppleStyleParallaxHero",
+    "InteractiveTimeline"
+  ],
+  effects: ["blur-24px", "cyan-glow", "smooth-easing"]
+}`
+      );
+      const [statusText, setStatusText] = useState("Idle - waiting for prompt");
+
+      const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      };
+
+      const handleGenerate = () => {
+        if (isGenerating) return;
+        setIsGenerating(true);
+        setGenerationProgress(0);
+        setStatusText("Analyzing prompt and layout structure...");
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 5;
+          setGenerationProgress(progress);
+          if (progress === 25) {
+            setStatusText("Synthesizing tailwind system classes...");
+          } else if (progress === 55) {
+            setStatusText("Structuring React components tree...");
+          } else if (progress === 80) {
+            setStatusText("Polishing micro-interactions and transitions...");
+          } else if (progress >= 100) {
+            clearInterval(interval);
+            setIsGenerating(false);
+            setStatusText("Generation successful! 100% compiled.");
+          }
+        }, 150);
+      };
+
+      return (
+        <section 
+          id="vibe-coding"
+          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
+        >
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-5 flex flex-col text-left">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Module 06 / Vibe Coding
+              </span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
+                VIBE CODING.<br/>
+                <span className="text-cyan-gradient">PROMPT TO LAYOUT.</span>
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
+                Build full production layouts by simply describing your aesthetic vibes. Leverage advanced LLMs to write styling, build structure, and connect components dynamically.
+              </p>
+              
+              <ul className="space-y-4 mb-8 text-sm text-gray-300">
+                {[
+                  'Convert abstract design themes directly into responsive tailwind structures',
+                  'Synthesize interactive states and transitions automatically',
+                  'Vibe code full landing pages without writing single HTML elements manually',
+                  'Iterate components through interactive real-time updates'
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: Code Editor Mockup */}
+            <div 
+              ref={containerRef}
+              onMouseMove={handleMouseMove}
+              style={{
+                '--mouse-x': `${mousePos.x}px`,
+                '--mouse-y': `${mousePos.y}px`
+              }}
+              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between"
+            >
+              <div className="glow-card-bg" />
+              
+              {/* Editor Header */}
+              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="sliders" className="text-brand-cyan w-3.5 h-3.5"></i>
+                  <span className="text-xs font-mono text-gray-400">interactive-vibe-editor.js</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    className="px-4 py-1.5 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-xs font-mono text-brand-cyan font-bold uppercase tracking-wider hover:bg-brand-cyan/20 active:scale-95 transition-all disabled:opacity-50 flex items-center space-x-1.5"
+                  >
+                    <i data-lucide="zap" className="w-3.5 h-3.5 text-brand-cyan"></i>
+                    <span>{isGenerating ? "Generating..." : "Generate UI"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Central Editor Area */}
+              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/70 p-4 rounded-xl overflow-hidden flex flex-col font-mono text-xs text-left">
+                {/* Line numbers and code editor container */}
+                <div className="flex-grow flex space-x-3 select-text overflow-y-auto">
+                  <div className="text-gray-600 border-r border-white/5 pr-3 text-right select-none space-y-1">
+                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+                  </div>
+                  <textarea
+                    value={editorCode}
+                    onChange={(e) => setEditorCode(e.target.value)}
+                    className="flex-grow bg-transparent text-gray-300 focus:outline-none resize-none h-full font-mono text-xs leading-relaxed"
+                    spellCheck="false"
+                    disabled={isGenerating}
+                  />
+                </div>
+
+                {/* Progress bar overlay during generation */}
+                {isGenerating && (
+                  <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col justify-center items-center p-6 z-20">
+                    <span className="text-xs font-mono text-brand-cyan mb-2">{statusText}</span>
+                    <div className="w-full max-w-xs bg-white/5 h-2 rounded-full overflow-hidden border border-white/10">
+                      <div 
+                        className="bg-brand-cyan/80 h-full transition-all duration-150" 
+                        style={{ width: `${generationProgress}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-gray-500 mt-1">{generationProgress}% compiled</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Status bar */}
+              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <i data-lucide="shield-alert" className="text-brand-cyan w-3 h-3"></i>
+                  <span>Status: <span className={isGenerating ? "text-yellow-400" : "text-emerald-400"}>{statusText}</span></span>
+                </div>
+                <span>Lines: {editorCode.split("\n").length} | Focus: OK</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // Main App Component
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('hero');
+      const [scrollY, setScrollY] = useState(0);
+      const [showcaseProgress, setShowcaseProgress] = useState(0);
+
+      const showcaseParentRef = useRef(null);
+
+      // Section auto-tracking & custom transforms calculation
+      useEffect(() => {
+        const handleScroll = () => {
+          const scrollTop = window.scrollY;
+          setScrollY(scrollTop);
+
+          // Calculate showcase progress
+          if (showcaseParentRef.current) {
+            const rect = showcaseParentRef.current.getBoundingClientRect();
+            const elementTop = rect.top + scrollTop;
+            const elementHeight = rect.height;
+            const windowHeight = window.innerHeight;
+            
+            const start = elementTop;
+            const end = elementTop + elementHeight - windowHeight;
+            const progress = Math.max(0, Math.min(1, (scrollTop - start) / (end - start)));
+            setShowcaseProgress(progress);
+          }
+
+          // Active tab tracking
+          const scrollPos = scrollTop + 180; // nav buffer offset
+          if (scrollTop < 200) {
+            setActiveTab('hero');
+            return;
+          }
+          for (const item of navItems) {
+            if (item.id === 'hero') continue;
+            const el = document.getElementById(item.id);
+            if (el) {
+              const top = el.offsetTop;
+              const height = el.offsetHeight;
+              if (scrollPos >= top && scrollPos < top + height) {
+                setActiveTab(item.id);
+                break;
+              }
+            }
+          }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        // Initialize once
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      // Trigger Lucide SVG replacements on every render state change
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      return (
+        <div className="min-height-screen flex flex-col relative bg-brand-bg select-none">
+          
+          {/* Section 1: The Glassmorphic Fixed Top Navigation */}
+          <header className="fixed top-0 left-0 right-0 h-20 glass-nav z-50 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
+            {/* Left Brand Area */}
+            <div className="flex items-center cursor-pointer" onClick={() => { setActiveTab('hero'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+              <img
+                src="./public/Images/logo/Dxign logo.png"
+                alt="DXIGN Learn Logo"
+                className="h-10 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                style={{ mixBlendMode: 'screen' }}
+              />
+            </div>
+
+            {/* Navigation tabs */}
+            <nav className="hidden lg:flex items-center space-x-1 relative">
+              {navItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab(item.id);
+                      const target = document.getElementById(item.id);
+                      if (target) {
+                        const offset = target.offsetTop - 80;
+                        window.scrollTo({ top: offset, behavior: 'smooth' });
+                      }
+                    }}
+                    className={`relative px-4 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider transition-colors duration-300 rounded-full ${
+                      isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <div
+                        className="absolute inset-0 bg-brand-cyan/10 border border-brand-cyan/20 rounded-full -z-10 shadow-[0_0_15px_rgba(0,182,230,0.15)] transition-all duration-300"
+                      />
+                    )}
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+
+            {/* Right Action tab indicator/glow */}
+            <div className="flex items-center space-x-4">
+              <a 
+                href="#pricing"
+                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-brand-cyan border border-brand-cyan/30 hover:border-brand-cyan hover:bg-brand-cyan/5 transition-all duration-300 shadow-[0_0_15px_rgba(0,182,230,0.05)] hover:shadow-[0_0_20px_rgba(0,182,230,0.15)]"
+              >
+                Access Portal
+              </a>
+            </div>
+          </header>
+
+          {/* Section 2: The Immersive Parallax Hero using Canvas Sequence */}
+          <HeroSection scrollY={scrollY} />
+
+          {/* Dedicated Full-Screen Focus Pillar Pages */}
+          <GraphicDesignSection />
+          <FilmMakingSection />
+          <ContentCreationSection />
+          <AvatarSection />
+          <BusinessSection />
+          <VibeCodingSection />
+
+          {/* Section 8: The Production Showcase (Horizontal Scroll Viewport Pinned) */}
+          <section id="showcase" ref={showcaseParentRef} className="relative h-[250vh] bg-brand-bg z-20 select-none border-t border-white/5">
+            <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center bg-brand-bg">
+              
+              {/* Lateral background cybernetic lines */}
+              <div className="absolute inset-0 pointer-events-none z-0 opacity-20">
+                <div className="absolute top-[30%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-cyan/40 to-transparent" />
+                <div className="absolute top-[70%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-cyan/40 to-transparent" />
+              </div>
+
+              {/* Title & Info */}
+              <div className="px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full mb-12 relative z-10">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent" />
+                  Interactive Showcase
+                </span>
+                <h2 className="text-3xl md:text-5xl font-extrabold uppercase text-white tracking-tight leading-none font-heading text-left">
+                  PRODUCTION SHOWCASE.
+                </h2>
+                <p className="text-gray-400 mt-3 text-xs md:text-sm text-left">
+                  Vertical scroll translates directly to a smooth horizontal gallery reveal.
+                </p>
+              </div>
+
+              {/* Horizontal track container */}
+              <div className="w-full relative z-10">
+                <div 
+                  style={{ transform: `translateX(${-showcaseProgress * 55}%)` }} 
+                  className="flex gap-8 px-6 md:px-12 lg:px-24 w-[240%] md:w-[190%] lg:w-[150%] transition-transform duration-100 ease-out"
+                >
+                  {showcaseItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="w-[280px] sm:w-[360px] md:w-[440px] h-[320px] sm:h-[380px] md:h-[420px] flex-shrink-0 glass-panel rounded-2xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden relative group cursor-grab active:cursor-grabbing"
+                    >
+                      {/* Gradient overlay tint */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${item.color} mix-blend-multiply opacity-40 z-10 transition-opacity duration-500 group-hover:opacity-60`} />
+                      
+                      {/* Interactive background image */}
+                      <img 
+                        src={item.img} 
+                        alt={item.title} 
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 scale-100 group-hover:scale-105 transition-transform duration-700 pointer-events-none" 
+                      />
+
+                      {/* Content panel */}
+                      <div className="absolute inset-0 p-8 flex flex-col justify-between z-20 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent">
+                        <div className="flex justify-between items-start">
+                          <span className="px-3 py-1 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 text-[10px] uppercase font-mono font-bold tracking-wider text-brand-cyan">
+                            {item.tag}
+                          </span>
+                          <span className="text-xs font-mono text-gray-500">0{idx + 1}</span>
+                        </div>
+                        
+                        <div className="text-left">
+                          <p className="text-xs font-mono text-brand-cyan font-semibold uppercase tracking-wider mb-1">
+                            {item.type}
+                          </p>
+                          <h3 className="text-xl md:text-2xl font-bold text-white font-heading tracking-tight leading-tight group-hover:text-brand-cyan transition-colors duration-300">
+                            {item.title}
+                          </h3>
+                          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-gray-400 font-mono">
+                            <span>Standard Output:</span>
+                            <span className="text-white font-semibold">{item.metric}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Section 9: The Transaction Value Proposition */}
+          <section id="pricing" className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg z-20 border-t border-white/5 flex flex-col justify-center select-none">
+            
+            {/* Glow ambient background sphere */}
+            <div className="absolute top-[40%] left-[50%] -translate-x-[50%] -translate-y-[50%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-brand-cyan/5 filter blur-[100px] rounded-full pointer-events-none z-0" />
+            
+            <div className="max-w-6xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+              
+              {/* Left Side: Stats and Value */}
+              <div className="lg:col-span-7 flex flex-col text-left">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent" />
+                  Value Proposition
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                  ACCELERATE YOUR CREATIVITY TODAY.
+                </h2>
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-12 max-w-xl">
+                  By joining DXIGN AI Mastery, you skip thousands of hours of trial and error. Master Midjourney, Runway, Stable Diffusion, ElevenLabs, and autonomous AI agents in one cohesive curriculum.
+                </p>
+
+                {/* Grid stats */}
+                <div className="grid grid-cols-3 gap-6 md:gap-8 text-left">
+                  <div className="flex flex-col">
+                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">98%</span>
+                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">Completion Rate</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">10K+</span>
+                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">Active Creators</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">12+</span>
+                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">AI Tools Mastered</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Pricing glassmorphic container */}
+              <div className="lg:col-span-5">
+                <div className="glass-panel p-8 md:p-10 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-lg flex flex-col justify-between">
+                  <div className="text-left">
+                    <span className="px-3.5 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-xs font-bold font-mono tracking-wider text-brand-cyan self-start mb-6 inline-block">
+                      LAUNCH INTRO OFFER
+                    </span>
+                    
+                    <h3 className="text-2xl font-bold text-white font-heading mb-2">Lifetime Access</h3>
+                    <p className="text-gray-400 text-xs mb-8">One-time payment. All future updates included.</p>
+                    
+                    {/* Price structure */}
+                    <div className="flex items-baseline mb-8">
+                      <span className="text-5xl font-black text-white font-heading tracking-tight">$249</span>
+                      <span className="text-xl text-gray-500 line-through font-medium ml-3">$899</span>
+                      <span className="text-xs font-mono text-brand-cyan uppercase ml-4 bg-brand-cyan/10 border border-brand-cyan/20 px-2.5 py-0.5 rounded-md font-bold">
+                        Save 72%
+                      </span>
+                    </div>
+
+                    {/* Features checklist */}
+                    <ul className="space-y-4 text-sm text-gray-300 mb-10 text-left border-t border-white/5 pt-8">
+                      {[
+                        'Over 40+ high-fidelity video modules',
+                        'Private community workspace on Discord',
+                        'All vector presets, prompt databases, and pipelines',
+                        'Lifetime access to update cycles',
+                        'Verifiable digital course certificate'
+                      ].map((item, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Pricing Action triggers */}
+                  <div className="flex flex-col gap-4">
+                    <button className="w-full py-4 rounded-xl bg-brand-cyan/10 border-2 border-brand-cyan text-brand-cyan hover:bg-brand-cyan hover:text-black font-bold uppercase tracking-wider text-xs transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,182,230,0.4)]">
+                      Enroll Now
+                    </button>
+                    <button className="w-full py-4 rounded-xl border border-white/10 hover:border-white hover:bg-white/5 text-white font-semibold transition-all duration-300 text-xs uppercase tracking-wider">
+                      Explore Curriculum
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Premium Footer */}
+          <footer className="bg-brand-bgDarker text-gray-500 py-16 px-6 md:px-12 lg:px-24 border-t border-white/5 z-20 select-none relative">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
+              <div>
+                <div className="flex items-center justify-center md:justify-start mb-4">
+                  <img
+                    src="./public/Images/logo/Dxign logo.png"
+                    alt="DXIGN Learn Logo"
+                    className="h-9 w-auto object-contain"
+                    style={{ mixBlendMode: 'screen' }}
+                  />
+                </div>
+                <p className="text-xs text-gray-600 max-w-sm">
+                  DXIGN AI Course is an independent organization. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
+                </p>
+              </div>
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 text-xs">
+                <a href="#" className="hover:text-white transition-colors duration-300">Privacy Policy</a>
+                <a href="#" className="hover:text-white transition-colors duration-300">Terms of Service</a>
+                <a href="#" className="hover:text-white transition-colors duration-300">Student Portal</a>
+              </div>
+            </div>
+            <div className="max-w-7xl mx-auto border-t border-white/5 mt-10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
+              <span>&copy; 2026 DXIGN AI Academy. All rights reserved.</span>
+              <span className="text-gray-600">Site inspired by Apple. Engineered using React, CSS, and Tailwind CSS.</span>
+            </div>
+          </footer>
+
+        </div>
+      );
+    };
+
+    // Render the React application inside the DOM
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
