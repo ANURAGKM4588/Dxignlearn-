@@ -73,98 +73,328 @@
 
     // --- 3D CANVAS COMPONENTS ---
 
-    // 0. Apple-style Full-Screen Scroll-Driven Image Sequence (Hero BG)
-    const TOTAL_FRAMES = 184;
-    const frameUrl = (n) => `/public/Images/heropage/ezgif-frame-${String(n).padStart(3, '0')}.png`;
+    // ── HERO SCENES CONFIG ───────────────────────────────────────────────────
+    const HERO_SCENES = [
+      {
+        range: [0, 0.22],
+        badge: '🚀  Future-Ready AI Education',
+        lines: ['MASTER AI.', 'CREATE FASTER.', 'BUILD SMARTER.'],
+        colors: ['white', 'cyan', 'violet'],
+        sub: 'Learn practical AI skills for design, filmmaking, content creation, business growth, and no-code development — through industry-focused programs built for the future.',
+        type: 'intro',
+      },
+      {
+        range: [0.22, 0.44],
+        badge: '✦  AI Graphic Design',
+        lines: ['DESIGN WITH', 'AI TOOLS', 'THAT AMAZE.'],
+        colors: ['white', 'cyan', 'white'],
+        sub: 'Master Midjourney, Adobe Firefly, and Photoroom. Create stunning visuals, product renders, ad creatives, and brand identities in minutes — not days.',
+        type: 'feature',
+        tags: ['Midjourney', 'Adobe Firefly', 'Photoroom', 'Ideogram'],
+        card: { duration: '6 Weeks', price: '₹4,999', label: 'AI Graphic Design', color: '#10b981' },
+      },
+      {
+        range: [0.44, 0.64],
+        badge: '🎬  AI Film Making',
+        lines: ['DIRECT.', 'PRODUCE.', 'PUBLISH.'],
+        colors: ['white', 'violet', 'white'],
+        sub: 'Create cinematic reels, AI commercials, and storytelling videos using Runway Gen-2, Sora, HeyGen, and CapCut AI — zero film crew needed.',
+        type: 'feature',
+        tags: ['Runway Gen-2', 'Sora AI', 'HeyGen', 'CapCut AI'],
+        card: { duration: '8 Weeks', price: '₹7,999', label: 'AI Film Making', color: '#ec4899' },
+      },
+      {
+        range: [0.64, 0.82],
+        badge: '💼  AI for Business',
+        lines: ['AUTOMATE.', 'SCALE UP.', 'WIN MORE.'],
+        colors: ['white', 'white', 'cyan'],
+        sub: 'Automate your entire operations, marketing, and customer systems using Make.com, Zapier, and intelligent AI Agents — work smarter, not harder.',
+        type: 'feature',
+        tags: ['Make.com', 'Zapier AI', 'ChatGPT', 'AI Agents'],
+        card: { duration: '6 Weeks', price: '₹8,999', label: 'AI Business', color: '#f59e0b' },
+      },
+      {
+        range: [0.82, 1.01],
+        badge: '🎯  Join 1000+ Students',
+        lines: ['YOUR AI', 'JOURNEY', 'STARTS NOW.'],
+        colors: ['white', 'cyan', 'violet'],
+        sub: '5 industry-focused programs. Real projects. Real skills. Real career impact. Join the next generation of AI-powered creators and builders.',
+        type: 'cta',
+      },
+    ];
 
-    const HeroSequenceCanvas = ({ canvasId }) => {
+    // ── HERO SECTION ─────────────────────────────────────────────────────────
+    const HeroSection = ({ handleGeneralEnroll, navigateToSection }) => {
       const canvasRef = useRef(null);
+      const sectionRef = useRef(null);
       const imagesRef = useRef([]);
       const currentFrameRef = useRef(0);
       const rafRef = useRef(null);
+      const [activeScene, setActiveScene] = useState(0);
+      const [scrollPct, setScrollPct] = useState(0);
+      const TOTAL = 184;
 
       useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        // Match canvas to viewport
-        const setSize = () => {
+        const fit = () => {
           canvas.width = window.innerWidth;
           canvas.height = window.innerHeight;
-          // Redraw current frame after resize
           const img = imagesRef.current[Math.round(currentFrameRef.current)];
           if (img && img.complete && img.naturalWidth) drawFrame(Math.round(currentFrameRef.current));
         };
-        setSize();
-        window.addEventListener('resize', setSize);
+        fit();
+        window.addEventListener('resize', fit);
 
-        // Draw a frame — cover-fit
-        const drawFrame = (index) => {
-          const idx = Math.max(0, Math.min(TOTAL_FRAMES - 1, index));
-          const img = imagesRef.current[idx];
+        const drawFrame = (idx) => {
+          const img = imagesRef.current[Math.max(0, Math.min(TOTAL - 1, Math.round(idx)))];
           if (!img || !img.complete || !img.naturalWidth) return;
           const cw = canvas.width, ch = canvas.height;
-          const iw = img.naturalWidth, ih = img.naturalHeight;
-          const scale = Math.max(cw / iw, ch / ih);
-          const dw = iw * scale, dh = ih * scale;
-          const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+          const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+          const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
           ctx.clearRect(0, 0, cw, ch);
-          ctx.drawImage(img, dx, dy, dw, dh);
+          ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
         };
 
-        // Preload all frames
-        const images = new Array(TOTAL_FRAMES);
-        let firstLoaded = false;
-        for (let i = 0; i < TOTAL_FRAMES; i++) {
+        const imgs = new Array(TOTAL).fill(null);
+        let drawn0 = false;
+        for (let i = 0; i < TOTAL; i++) {
           const img = new Image();
-          img.src = frameUrl(i + 1);
+          img.src = `/public/Images/heropage/ezgif-frame-${String(i + 1).padStart(3, '0')}.png`;
           img.onload = () => {
-            images[i] = img;
-            if (!firstLoaded && i === 0) { firstLoaded = true; drawFrame(0); }
+            imgs[i] = img;
+            if (!drawn0 && i === 0) { drawn0 = true; drawFrame(0); }
           };
-          images[i] = img;
         }
-        imagesRef.current = images;
+        imagesRef.current = imgs;
 
-        // Map scroll inside #hero section to frame index
-        const getTargetFrame = () => {
-          const section = document.getElementById('hero');
-          if (!section) return 0;
-          const sectionScrollable = section.offsetHeight - window.innerHeight;
-          const scrolled = Math.max(0, window.scrollY - section.offsetTop);
-          const progress = Math.min(1, scrolled / Math.max(1, sectionScrollable));
-          return Math.floor(progress * (TOTAL_FRAMES - 1));
+        let target = 0;
+        const getP = () => {
+          const el = sectionRef.current;
+          if (!el) return 0;
+          return Math.min(1, Math.max(0, (window.scrollY - el.offsetTop) / Math.max(1, el.offsetHeight - window.innerHeight)));
         };
 
-        let targetFrame = 0;
-        const onScroll = () => { targetFrame = getTargetFrame(); };
+        const onScroll = () => {
+          const p = getP();
+          setScrollPct(p);
+          target = Math.floor(p * (TOTAL - 1));
+          const si = HERO_SCENES.findIndex(sc => p >= sc.range[0] && p < sc.range[1]);
+          setActiveScene(si >= 0 ? si : HERO_SCENES.length - 1);
+        };
         window.addEventListener('scroll', onScroll, { passive: true });
 
-        // Smooth lerp render loop
-        const animate = () => {
-          rafRef.current = requestAnimationFrame(animate);
-          const diff = targetFrame - currentFrameRef.current;
-          currentFrameRef.current += Math.abs(diff) > 0.3 ? diff * 0.1 : (diff > 0 ? diff : 0);
-          if (Math.abs(diff) <= 0.3) currentFrameRef.current = targetFrame;
-          drawFrame(Math.round(currentFrameRef.current));
+        const loop = () => {
+          rafRef.current = requestAnimationFrame(loop);
+          const d = target - currentFrameRef.current;
+          if (Math.abs(d) > 0.4) currentFrameRef.current += d * 0.12;
+          else currentFrameRef.current = target;
+          drawFrame(currentFrameRef.current);
         };
-        animate();
+        loop();
 
         return () => {
           cancelAnimationFrame(rafRef.current);
           window.removeEventListener('scroll', onScroll);
-          window.removeEventListener('resize', setSize);
+          window.removeEventListener('resize', fit);
         };
       }, []);
 
+      const sc = HERO_SCENES[activeScene] || HERO_SCENES[0];
+
+      const lineClass = (c) => {
+        if (c === 'cyan') return 'block text-cyan-glow';
+        if (c === 'violet') return 'block text-violet-glow';
+        return 'block text-white';
+      };
+
       return (
-        <canvas
-          id={canvasId}
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'cover' }}
-        />
+        <section id="hero" ref={sectionRef} className="relative select-none" style={{ minHeight: '580vh' }}>
+          <div className="sticky top-0 overflow-hidden" style={{ height: '100vh' }}>
+
+            {/* Full-screen canvas */}
+            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+            {/* Gradient overlays */}
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background: 'linear-gradient(to right, rgba(3,3,3,0.88) 0%, rgba(3,3,3,0.55) 45%, rgba(3,3,3,0.08) 100%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background: 'linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.0) 32%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background: 'linear-gradient(to bottom, rgba(5,5,5,0.55) 0%, transparent 16%)' }} />
+            <div className="absolute inset-0 cyber-grid pointer-events-none opacity-15" style={{ zIndex:1 }} />
+
+            {/* Scroll progress bar */}
+            <div className="absolute bottom-0 left-0 z-30 h-[2px] transition-all duration-75" style={{ width: `${scrollPct * 100}%`, background: 'linear-gradient(90deg,#00f0ff,#a855f7)' }} />
+
+            {/* Side scene dot nav */}
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
+              {HERO_SCENES.map((_, i) => (
+                <div key={i} className="rounded-full transition-all duration-500" style={{ width: '5px', height: activeScene === i ? '28px' : '5px', background: activeScene === i ? '#00f0ff' : 'rgba(255,255,255,0.18)', boxShadow: activeScene === i ? '0 0 10px #00f0ff' : 'none' }} />
+              ))}
+            </div>
+
+            {/* ── Main content overlay ── */}
+            <div className="absolute inset-0 z-10 flex flex-col justify-center px-8 md:px-14 lg:px-24" style={{ paddingTop: '80px' }}>
+
+              {/* Scene text block — all scenes use opacity transition */}
+              {HERO_SCENES.map((scene, i) => (
+                <div key={i} className="absolute" style={{
+                  left: 0, right: 0, top: 0, bottom: 0,
+                  display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                  padding: 'inherit',
+                  paddingLeft: 'clamp(2rem, 5.5vw, 6rem)',
+                  paddingTop: '80px',
+                  opacity: activeScene === i ? 1 : 0,
+                  transform: activeScene === i ? 'translateY(0px)' : (activeScene > i ? 'translateY(-22px)' : 'translateY(22px)'),
+                  transition: 'opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1)',
+                  pointerEvents: activeScene === i ? 'auto' : 'none',
+                }}>
+                  <div style={{ maxWidth: '640px' }}>
+
+                    {/* Badge */}
+                    <div className="mb-7 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                      <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{scene.badge}</span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="font-heading font-black uppercase tracking-tight leading-[0.9] mb-7" style={{ fontSize: 'clamp(3rem, 8vw, 7.5rem)' }}>
+                      {scene.lines.map((line, li) => (
+                        <span key={li} className={lineClass(scene.colors[li])}>{line}</span>
+                      ))}
+                    </h1>
+
+                    {/* Sub */}
+                    <p className="text-gray-300 font-light leading-relaxed mb-8" style={{ fontSize: 'clamp(0.85rem, 1.35vw, 1.05rem)', maxWidth: '540px' }}>
+                      {scene.sub}
+                    </p>
+
+                    {/* Feature tags */}
+                    {scene.type === 'feature' && scene.tags && (
+                      <div className="flex flex-wrap gap-2.5 mb-8">
+                        {scene.tags.map((tag, ti) => (
+                          <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* CTA for intro & cta scenes */}
+                    {(scene.type === 'intro' || scene.type === 'cta') && (
+                      <div className="flex flex-wrap gap-4 mb-10">
+                        <button onClick={handleGeneralEnroll}
+                          className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300"
+                          style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 36px rgba(0,240,255,0.38)' }}>
+                          Enroll Now — Free
+                        </button>
+                        <button onClick={() => navigateToSection('courses')}
+                          className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 transition-all duration-300">
+                          Explore Courses
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Feature enroll button */}
+                    {scene.type === 'feature' && (
+                      <button onClick={handleGeneralEnroll}
+                        className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2 mb-8"
+                        style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 28px rgba(0,240,255,0.28)' }}>
+                        Join This Program →
+                      </button>
+                    )}
+
+                    {/* Stats strip — intro only */}
+                    {scene.type === 'intro' && (
+                      <div className="flex flex-wrap gap-8 pt-7" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                        {[{v:'1000+',l:'Students'},{v:'5',l:'AI Programs'},{v:'100%',l:'Project-Based'},{v:'Live',l:'Industry Tools'}].map((stat,si) => (
+                          <div key={si} className="flex flex-col">
+                            <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.4rem,2.5vw,2.1rem)' }}>{stat.v}</span>
+                            <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{stat.l}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+              ))}
+
+            </div>
+
+            {/* ── Course card — feature scenes (bottom-right) ── */}
+            {HERO_SCENES.map((scene, i) => (
+              scene.type === 'feature' && scene.card && (
+                <div key={i} className="absolute bottom-14 right-10 z-20 hidden lg:block liquid-glass rounded-2xl overflow-hidden" style={{
+                  minWidth: '230px',
+                  opacity: activeScene === i ? 1 : 0,
+                  transform: activeScene === i ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.96)',
+                  transition: 'opacity 0.55s ease, transform 0.55s ease',
+                  pointerEvents: activeScene === i ? 'auto' : 'none',
+                }}>
+                  <div style={{ height: '3px', background: `linear-gradient(90deg, ${scene.card.color}, #a855f7)` }} />
+                  <div className="px-5 py-4">
+                    <div className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Current Program</div>
+                    <div className="text-sm font-black text-white uppercase mb-4" style={{ color: scene.card.color }}>{scene.card.label}</div>
+                    <div className="flex items-center justify-between gap-8">
+                      <div>
+                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Duration</div>
+                        <div className="text-xs font-bold text-white">{scene.card.duration}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Starts at</div>
+                        <div className="text-xs font-bold" style={{ color: '#00f0ff' }}>{scene.card.price}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            ))}
+
+            {/* ── Float badges — intro scene (bottom-right) ── */}
+            <div className="absolute bottom-14 right-10 z-20 hidden lg:flex flex-col gap-3" style={{
+              opacity: activeScene === 0 ? 1 : 0,
+              transition: 'opacity 0.5s ease',
+              pointerEvents: activeScene === 0 ? 'auto' : 'none',
+            }}>
+              <div className="liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-slow">
+                <div className="w-7 h-7 rounded-lg bg-brand-cyan/20 flex items-center justify-center shrink-0">
+                  <svg className="w-3.5 h-3.5 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div>
+                  <div className="text-[7px] font-mono text-gray-400 uppercase tracking-wider">AI Output</div>
+                  <div className="text-[10px] font-black text-white uppercase">Live Render</div>
+                </div>
+              </div>
+              <div className="liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-medium">
+                <div className="w-7 h-7 rounded-lg bg-brand-violet/20 flex items-center justify-center shrink-0">
+                  <svg className="w-3.5 h-3.5 text-brand-violet" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div>
+                  <div className="text-[7px] font-mono text-gray-400 uppercase tracking-wider">Programs</div>
+                  <div className="text-[10px] font-black text-white uppercase">5 AI Courses</div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Scroll cue — scene 0 only ── */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 hero-scroll-cue" style={{ opacity: activeScene === 0 ? 1 : 0, transition: 'opacity 0.5s ease' }}>
+              <span className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.22em]">Scroll to explore</span>
+              <div className="w-px h-8 bg-gradient-to-b from-brand-cyan/60 to-transparent animate-pulse" />
+            </div>
+
+            {/* ── Scene label — bottom left (feature scenes) ── */}
+            {sc.type === 'feature' && (
+              <div className="absolute bottom-10 left-8 md:left-14 lg:left-24 z-20 flex items-center gap-3">
+                <div className="w-6 h-px bg-brand-cyan/50" />
+                <span className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.2em]">
+                  {`Scene ${activeScene} of ${HERO_SCENES.length - 1}`}
+                </span>
+              </div>
+            )}
+
+          </div>
+        </section>
       );
     };
 
@@ -1264,122 +1494,9 @@
             </div>
           </header>
 
-          {/* ========= FULL-SCREEN HERO SECTION ========= */}
-          <section
-            id="hero"
-            className="relative w-full select-none"
-            style={{ minHeight: '600vh' }}
-          >
-            {/* Sticky Viewport — canvas + content pinned during scroll */}
-            <div className="sticky top-0 w-full overflow-hidden" style={{ height: '100vh' }}>
+          {/* ========= HERO SECTION ========= */}
+          <HeroSection handleGeneralEnroll={handleGeneralEnroll} navigateToSection={navigateToSection} />
 
-              {/* Full-screen canvas background */}
-              <div className="absolute inset-0 z-0">
-                <HeroSequenceCanvas canvasId="hero-canvas" />
-              </div>
-
-              {/* Dark gradient overlays for readability */}
-              <div className="absolute inset-0 z-[1] pointer-events-none" style={{
-                background: 'linear-gradient(to right, rgba(5,5,5,0.75) 0%, rgba(5,5,5,0.3) 55%, transparent 100%)'
-              }} />
-              <div className="absolute inset-0 z-[1] pointer-events-none" style={{
-                background: 'linear-gradient(to top, rgba(5,5,5,0.95) 0%, transparent 40%)'
-              }} />
-              <div className="absolute inset-0 z-[1] pointer-events-none" style={{
-                background: 'linear-gradient(to bottom, rgba(5,5,5,0.6) 0%, transparent 20%)'
-              }} />
-
-              {/* Dot grid overlay */}
-              <div className="absolute inset-0 z-[1] cyber-grid pointer-events-none opacity-30" />
-
-              {/* Hero Content — overlaid on canvas */}
-              <div className="relative z-[2] h-full flex flex-col justify-center px-6 md:px-14 lg:px-24" style={{ paddingTop: '80px' }}>
-                <div className="max-w-3xl">
-
-                  {/* Eyebrow badge */}
-                  <div className="hero-badge mb-8 self-start inline-flex items-center space-x-2.5 py-2 px-5 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">🚀 Future-Ready AI Education</span>
-                  </div>
-
-                  {/* Main headline */}
-                  <h1 className="hero-headline font-heading font-black uppercase tracking-tight text-white leading-none mb-8" style={{ fontSize: 'clamp(3rem, 7vw, 6.5rem)' }}>
-                    MASTER AI.<br />
-                    <span className="text-cyan-glow">CREATE FASTER.</span><br />
-                    <span className="text-violet-glow">BUILD SMARTER.</span>
-                  </h1>
-
-                  {/* Subline */}
-                  <p className="hero-sub text-gray-300 font-light leading-relaxed mb-10 max-w-2xl" style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.15rem)' }}>
-                    Learn practical AI skills for design, filmmaking, content creation,
-                    business growth, and no-code development — through industry-focused
-                    programs built for the future.
-                  </p>
-
-                  {/* CTA Row */}
-                  <div className="hero-cta flex flex-wrap gap-4 mb-16">
-                    <button
-                      onClick={handleGeneralEnroll}
-                      className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black transition-all duration-500 hover:scale-[1.04]"
-                      style={{ background: 'linear-gradient(135deg, #00f0ff, #2563eb)', boxShadow: '0 0 32px rgba(0,240,255,0.35)' }}
-                    >
-                      Enroll Now — Free
-                    </button>
-                    <button
-                      onClick={() => navigateToSection('courses')}
-                      className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 backdrop-blur-md bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all duration-300"
-                    >
-                      Explore Courses
-                    </button>
-                  </div>
-
-                  {/* Stats strip */}
-                  <div className="hero-stats flex flex-wrap gap-8 pt-8 border-t border-white/10">
-                    {[
-                      { val: '1000+', label: 'Students Enrolled' },
-                      { val: '5', label: 'AI Programs' },
-                      { val: '100%', label: 'Project-Based' },
-                      { val: 'Live', label: 'Industry Tools' },
-                    ].map((s, i) => (
-                      <div key={i} className="flex flex-col">
-                        <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 2rem)' }}>{s.val}</span>
-                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.15em] mt-0.5">{s.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating glass badges — bottom right */}
-              <div className="absolute bottom-10 right-8 z-[3] hidden lg:flex flex-col gap-3">
-                <div className="hero-float-card liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-slow">
-                  <div className="w-8 h-8 rounded-xl bg-brand-cyan/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                  </div>
-                  <div>
-                    <div className="text-[8px] font-mono text-gray-400 uppercase tracking-wider">AI Output</div>
-                    <div className="text-[11px] font-black text-white uppercase">Live Render</div>
-                  </div>
-                </div>
-                <div className="hero-float-card liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-medium">
-                  <div className="w-8 h-8 rounded-xl bg-brand-violet/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-brand-violet" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  </div>
-                  <div>
-                    <div className="text-[8px] font-mono text-gray-400 uppercase tracking-wider">Programs</div>
-                    <div className="text-[11px] font-black text-white uppercase">5 AI Courses</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scroll indicator */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2 hero-scroll-cue">
-                <span className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.2em]">Scroll to explore</span>
-                <div className="w-px h-10 bg-gradient-to-b from-brand-cyan/60 to-transparent animate-pulse" />
-              </div>
-
-            </div>
-          </section>
 
           {/* Courses grid section */}
           <section id="courses" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
