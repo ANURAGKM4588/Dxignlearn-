@@ -994,16 +994,35 @@
                 </div>
 
                 {/* Trust Indicators */}
-                <div className="hero-reveal-text grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-white/5">
+                <div className="hero-reveal-text grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 border-t border-white/5">
                   {[
-                    { val: '1000+', label: 'Students' },
-                    { val: 'Project-Based', label: 'Learning' },
-                    { val: 'Industry-Relevant', label: 'Skills' },
-                    { val: 'Future-Ready', label: 'Curriculum' }
+                    { val: '1000+', label: 'Active Students', icon: 'users', color: '#00f0ff', bg: 'rgba(0,240,255,0.03)' },
+                    { val: 'Project-Based', label: 'Hands-on Learning', icon: 'terminal', color: '#a855f7', bg: 'rgba(168,85,247,0.03)' },
+                    { val: 'Industry-Ready', label: 'Premium Skills', icon: 'award', color: '#10b981', bg: 'rgba(16,185,129,0.03)' },
+                    { val: 'Future-Proof', label: 'AI-First Focus', icon: 'sparkles', color: '#ec4899', bg: 'rgba(236,72,153,0.03)' }
                   ].map((item, idx) => (
-                    <div key={idx} className="flex flex-col text-left">
-                      <span className="text-sm font-heading font-black text-white tracking-tight uppercase">{item.val}</span>
-                      <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-1">{item.label}</span>
+                    <div key={idx} className="flex items-center space-x-3.5 group select-none">
+                      <div 
+                        className="w-10 h-10 rounded-xl border border-white/5 flex justify-center items-center transition-all duration-300 group-hover:border-white/15"
+                        style={{ 
+                          background: item.bg,
+                          boxShadow: `0 0 20px ${item.color}03`
+                        }}
+                      >
+                        <i 
+                          data-lucide={item.icon} 
+                          className="w-4 h-4 transition-transform duration-300 group-hover:scale-110"
+                          style={{ color: item.color }}
+                        ></i>
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="text-xs md:text-sm font-black font-heading text-white tracking-tight uppercase leading-none mb-1">
+                          {item.val}
+                        </span>
+                        <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest leading-none mt-0.5">
+                          {item.label}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
