@@ -805,6 +805,8 @@
               loop
               muted
               playsInline
+              controlsList="nodownload"
+              onContextMenu={(e) => e.preventDefault()}
               className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -2057,6 +2059,9 @@
                     controls
                     autoPlay
                     playsInline
+                    controlsList="nodownload nofullscreen"
+                    disablePictureInPicture
+                    onContextMenu={(e) => e.preventDefault()}
                     className="w-full h-full object-contain"
                   />
                 </div>
