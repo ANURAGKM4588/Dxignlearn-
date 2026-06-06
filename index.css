@@ -24,7 +24,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background-color: var(--color-bg-dark);
 }
 
@@ -543,4 +542,37 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(to bottom, transparent, #050505);
   pointer-events: none;
   z-index: 1;
+}
+
+/* Loading screen animations */
+@keyframes loader-scan-anim {
+  0%   { top: -2px; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.loader-scanline {
+  animation: loader-scan-anim 3.5s linear infinite;
+}
+
+@keyframes loader-ring-pulse {
+  0%   { transform: scale(0.95); opacity: 0.3; border-width: 1px; }
+  50%  { transform: scale(1.05); opacity: 0.06; border-width: 1px; }
+  100% { transform: scale(0.95); opacity: 0.3; border-width: 1px; }
+}
+
+.loader-pulse-ring {
+  border: 1px solid;
+  animation: loader-ring-pulse 4s ease-in-out infinite;
+}
+
+/* About Us icon float animation */
+@keyframes about-icon-float {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-12px); }
+}
+
+.about-icon-float {
+  animation: about-icon-float 4s ease-in-out infinite;
 }

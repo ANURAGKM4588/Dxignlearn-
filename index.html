@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Mastery Academy | Master Generative AI for Creation & Business</title>
+  <title>Dxign.learn | Master Generative AI for Creation & Business</title>
   <meta name="description" content="Unlock the future of design, film, content, and code with the next generation of AI tools. Luxury Apple-inspired UI with immersive 3D WebGL visuals.">
   
   <!-- Tailwind CSS CDN -->
@@ -118,8 +118,6 @@
         line1: 'BUILD THE',
         line2: 'FUTURE.',
         sub: 'Master the skills, tools, and strategies needed to lead the next generation of AI-powered businesses and careers.',
-        status: 'ENROLLMENT OPEN',
-        seats: 'Limited seats remaining'
       }
     ];
 
@@ -143,18 +141,22 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        // Find the closest loaded image in the array
-        let img = null;
-        let closestDist = Infinity;
         const images = imagesRef.current;
+        let img = images[index];
 
-        for (let i = 0; i < TOTAL_FRAMES; i++) {
-          const tempImg = images[i];
-          if (tempImg && tempImg.complete && tempImg.naturalWidth > 0) {
-            const dist = Math.abs(i - index);
-            if (dist < closestDist) {
-              closestDist = dist;
-              img = tempImg;
+        // O(1) Cache Fast Path: Check if exact target frame image is fully loaded and complete
+        if (!(img && img.complete && img.naturalWidth > 0)) {
+          img = null;
+          let closestDist = Infinity;
+          // Scan for closest loaded frame as fallback
+          for (let i = 0; i < TOTAL_FRAMES; i++) {
+            const tempImg = images[i];
+            if (tempImg && tempImg.complete && tempImg.naturalWidth > 0) {
+              const dist = Math.abs(i - index);
+              if (dist < closestDist) {
+                closestDist = dist;
+                img = tempImg;
+              }
             }
           }
         }
@@ -188,16 +190,25 @@
         let criticalLoadedCount = 0;
         const totalCritical = CRITICAL_FRAMES.length;
 
-        const onCriticalFrameLoad = () => {
-          criticalLoadedCount++;
-          setProgress(Math.min(100, Math.round((criticalLoadedCount / totalCritical) * 100)));
-          if (criticalLoadedCount >= totalCritical) {
-            // Draw initial frame
-            drawFrame(0);
-            setTimeout(() => {
-              setIsLoading(false);
-            }, 600);
-            loadBackgroundFrames();
+        const onCriticalFrameLoad = (imgElement) => {
+          const proceed = () => {
+            criticalLoadedCount++;
+            setProgress(Math.min(100, Math.round((criticalLoadedCount / totalCritical) * 100)));
+            if (criticalLoadedCount >= totalCritical) {
+              // Draw initial frame
+              drawFrame(0);
+              setTimeout(() => {
+                setIsLoading(false);
+              }, 600);
+              loadBackgroundFrames();
+            }
+          };
+
+          // Optimize rendering smoothness: pre-decode image off the main thread
+          if (imgElement && typeof imgElement.decode === 'function') {
+            imgElement.decode().then(proceed).catch(proceed);
+          } else {
+            proceed();
           }
         };
 
@@ -205,8 +216,8 @@
         CRITICAL_FRAMES.forEach((frameNum) => {
           const img = new Image();
           img.src = frameUrl(frameNum);
-          img.onload = onCriticalFrameLoad;
-          img.onerror = onCriticalFrameLoad;
+          img.onload = () => onCriticalFrameLoad(img);
+          img.onerror = () => onCriticalFrameLoad(null);
           images[frameNum - 1] = img;
         });
 
@@ -216,14 +227,29 @@
             if (CRITICAL_FRAMES.includes(i)) continue;
             const img = new Image();
             img.src = frameUrl(i);
-            img.onload = ((index) => {
+            img.onload = ((index, imageElement) => {
               return () => {
-                images[index] = img;
-                if (Math.abs(index - currentFrameRef.current) < 2) {
-                  drawFrame(Math.round(currentFrameRef.current));
+                // Async image decode in browser background thread to prevent scroll layout freezing
+                if (typeof imageElement.decode === 'function') {
+                  imageElement.decode().then(() => {
+                    images[index] = imageElement;
+                    if (Math.abs(index - currentFrameRef.current) < 2) {
+                      drawFrame(Math.round(currentFrameRef.current));
+                    }
+                  }).catch(() => {
+                    images[index] = imageElement;
+                    if (Math.abs(index - currentFrameRef.current) < 2) {
+                      drawFrame(Math.round(currentFrameRef.current));
+                    }
+                  });
+                } else {
+                  images[index] = imageElement;
+                  if (Math.abs(index - currentFrameRef.current) < 2) {
+                    drawFrame(Math.round(currentFrameRef.current));
+                  }
                 }
               };
-            })(i - 1);
+            })(i - 1, img);
           }
         };
       }, []);
@@ -275,10 +301,15 @@
           // Unlock body scroll immediately
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
-          isAnimatingRef.current = false;
+          if (window.lenis) window.lenis.start();
 
           // Perform a small scroll offset to trigger native scroll handoff
           window.scrollTo(0, 10);
+
+          // Cool-down duration to protect transition from immediate scroll-up repinning
+          setTimeout(() => {
+            isAnimatingRef.current = false;
+          }, 1000);
         };
 
         return () => {
@@ -292,9 +323,11 @@
         if (activeScene < 4) {
           document.body.style.overflow = 'hidden';
           document.documentElement.style.overflow = 'hidden';
+          if (window.lenis) window.lenis.stop();
         } else {
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
+          if (window.lenis) window.lenis.start();
         }
 
         const handleGlobalWheel = (e) => {
@@ -468,7 +501,7 @@
           // Unlock body scroll immediately
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
-          isAnimatingRef.current = false;
+          if (window.lenis) window.lenis.start();
 
           // Perform a small scroll offset to trigger native scroll handoff
           window.scrollTo(0, 10);
@@ -479,6 +512,7 @@
           // Lock body scroll
           document.body.style.overflow = 'hidden';
           document.documentElement.style.overflow = 'hidden';
+          if (window.lenis) window.lenis.stop();
 
           // Reset window scroll to top
           window.scrollTo(0, 0);
@@ -513,32 +547,32 @@
 
       if (isLoading) {
         return (
-          <section className="relative w-full h-screen bg-[#050505] flex flex-col items-center justify-center z-50">
-            <div className="absolute w-[300px] h-[300px] bg-brand-cyan/10 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute w-[300px] h-[300px] bg-brand-violet/10 blur-[120px] rounded-full pointer-events-none translate-x-12 translate-y-12" />
-            
-            <div className="liquid-glass p-8 rounded-3xl flex flex-col items-center max-w-sm w-full mx-4 border border-white/10 shadow-2xl relative z-10">
-              <div className="w-16 h-16 mb-6 relative">
-                <div className="absolute inset-0 rounded-full border-2 border-brand-cyan/10" />
-                <div className="absolute inset-0 rounded-full border-2 border-t-brand-cyan border-r-brand-violet animate-spin" />
-              </div>
-              <h2 className="text-lg font-heading font-black text-white uppercase tracking-wider mb-2">
-                Loading AI Experience
-              </h2>
-              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-6">
-                Dxign Academy
-              </span>
-              
-              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-3">
-                <div 
-                  className="h-full bg-gradient-to-r from-brand-cyan to-brand-violet transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <span className="text-xs font-mono text-brand-cyan font-bold">
-                {progress}%
-              </span>
+          <section className="fixed inset-0 bg-[#020202] flex flex-col items-center justify-center z-[999]">
+
+            {/* Single minimal spinner */}
+            <div className="relative w-10 h-10 mb-10">
+              <div className="absolute inset-0 rounded-full" style={{ border: '1px solid rgba(255,255,255,0.06)' }} />
+              <div className="absolute inset-0 rounded-full animate-spin" style={{
+                animationDuration: '1.2s',
+                animationTimingFunction: 'linear',
+                borderTop: '1px solid #00f0ff',
+                borderRight: '1px solid rgba(0,240,255,0.15)',
+                borderBottom: '1px solid transparent',
+                borderLeft: '1px solid transparent',
+                filter: 'drop-shadow(0 0 4px rgba(0,240,255,0.6))',
+              }} />
             </div>
+
+            {/* Brand label */}
+            <span className="text-[9px] font-mono uppercase mb-5" style={{ color: 'rgba(255,255,255,0.15)', letterSpacing: '0.35em' }}>
+              DXIGN LEARN
+            </span>
+
+            {/* Progress counter */}
+            <span className="text-[11px] font-mono tabular-nums" style={{ color: 'rgba(0,240,255,0.4)', letterSpacing: '0.15em' }}>
+              {String(progress).padStart(3, '0')}
+            </span>
+
           </section>
         );
       }
@@ -554,7 +588,7 @@
           <div className="absolute inset-0 z-0 bg-black">
             <canvas
               ref={canvasRef}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out"
+              className="absolute inset-0 w-full h-full object-cover"
               style={{
                 width: '100%',
                 height: '100%',
@@ -580,123 +614,102 @@
             <div className="absolute bottom-1/4 right-1/4 w-2.5 h-2.5 rounded-full bg-brand-cyan/20 blur-[2.5px] animate-float-medium" style={{ animationDelay: '0.5s' }} />
           </div>
 
-          {/* Content Scenes Container */}
-          <div className="absolute inset-0 z-20 flex items-center px-6 md:px-12 lg:px-24">
-            <div className="max-w-[700px] w-full text-left">
+          {/* Content Scenes & Controls Container (aligned with site grid) */}
+          <div className="absolute inset-x-0 bottom-0 top-0 z-20 px-6 md:px-12 lg:px-24 pointer-events-none">
+            <div className="max-w-7xl mx-auto w-full h-full relative flex items-end" style={{ paddingBottom: '72px' }}>
               
               {/* Text Wrapper */}
-              <div className="relative w-full min-h-[280px] md:min-h-[320px]">
-                {HERO_SCENES_DATA.map((scene, idx) => (
-                  <div
-                    key={idx}
-                    ref={el => textRefs.current[idx] = el}
-                    className="absolute inset-x-0 top-0 w-full flex flex-col text-left"
-                    style={{
-                      opacity: idx === activeScene ? 1 : 0,
-                      pointerEvents: idx === activeScene ? 'auto' : 'none',
-                      transform: idx === activeScene 
-                        ? 'translateY(0px)' 
-                        : idx < activeScene 
-                          ? 'translateY(-20px)' 
-                          : 'translateY(20px)',
-                      transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}
-                  >
-                    {/* Badge */}
-                    <div className="mb-4 self-start inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/35 bg-brand-cyan/5 backdrop-blur-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                      <span className="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">
-                        {scene.badge}
-                      </span>
+              <div className="max-w-[700px] w-full text-left pointer-events-auto">
+                <div className="relative w-full min-h-[280px] md:min-h-[320px]">
+                  {HERO_SCENES_DATA.map((scene, idx) => (
+                    <div
+                      key={idx}
+                      ref={el => textRefs.current[idx] = el}
+                      className="absolute inset-x-0 top-0 w-full flex flex-col text-left"
+                      style={{
+                        opacity: idx === activeScene ? 1 : (idx === 3 && activeScene === 4) ? 1 : 0,
+                        pointerEvents: idx === activeScene ? 'auto' : 'none',
+                        transform: idx === activeScene 
+                          ? 'translateY(0px)' 
+                          : idx < activeScene 
+                            ? 'translateY(-20px)' 
+                            : 'translateY(20px)',
+                        transition: (idx === 3 && activeScene === 4)
+                          ? 'none'
+                          : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                    >
+                      {/* Badge */}
+                      <div className="mb-4 self-start inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/35 bg-brand-cyan/5 backdrop-blur-md">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                        <span className="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">
+                          {scene.badge}
+                        </span>
+                      </div>
+
+                      {/* Heading */}
+                      <h1 className="font-heading font-black uppercase tracking-tight mb-4" style={{ fontSize: 'clamp(1.8rem, 4.2vw, 3rem)', lineHeight: 1.05 }}>
+                        <span className="block text-white text-white-glow">{scene.line1}</span>
+                        <span className="block text-cyan-glow">{scene.line2}</span>
+                      </h1>
+
+                      {/* Description */}
+                      <p className="text-gray-400 font-normal leading-relaxed mb-5 text-xs md:text-sm" style={{ maxWidth: '420px' }}>
+                        {scene.sub}
+                      </p>
+
+                      {/* Scene-specific content badges/tags */}
+                      {scene.tags && (
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {scene.tags.map((tag, ti) => (
+                            <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Scene 1 Stat grid */}
+                      {idx === 0 && (
+                        <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10" style={{ maxWidth: '420px' }}>
+                          {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
+                            <div key={i} className="flex flex-col">
+                              <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
+                              <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  ))}
+                </div>
+              </div>
 
-                    {/* Heading */}
-                    <h1 className="font-heading font-black uppercase tracking-tight mb-4" style={{ fontSize: 'clamp(1.8rem, 4.2vw, 3rem)', lineHeight: 1.05 }}>
-                      <span className="block text-white text-white-glow">{scene.line1}</span>
-                      <span className="block text-cyan-glow">{scene.line2}</span>
-                    </h1>
-
-                    {/* Description */}
-                    <p className="text-gray-400 font-normal leading-relaxed mb-5 text-xs md:text-sm" style={{ maxWidth: '420px' }}>
-                      {scene.sub}
-                    </p>
-
-                    {/* Scene-specific content badges/tags */}
-                    {scene.tags && (
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {scene.tags.map((tag, ti) => (
-                          <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Scene 1 Stat grid */}
-                    {idx === 0 && (
-                      <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10" style={{ maxWidth: '420px' }}>
-                        {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
-                          <div key={i} className="flex flex-col">
-                            <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
-                            <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+              {/* Dots Indicator (Right Side, aligned to grid edge) */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3.5 hero-controls pointer-events-auto">
+                {[0, 1, 2, 3].map((i) => (
+                  <button
+                    key={i}
+                    onClick={() => goToScene(i)}
+                    className="group flex items-center justify-end"
+                  >
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] font-mono text-brand-cyan uppercase tracking-widest mr-3 select-none pointer-events-none">
+                      {i === 0 ? 'Intro' : i === 1 ? 'Create' : i === 2 ? 'Automate' : ''}
+                    </span>
+                    <div
+                      className="rounded-full transition-all duration-500"
+                      style={{
+                        width: '7px',
+                        height: activeScene === i ? '24px' : '7px',
+                        backgroundColor: activeScene === i ? '#00f0ff' : 'rgba(255,255,255,0.25)',
+                        boxShadow: activeScene === i ? '0 0 12px #00f0ff' : 'none'
+                      }}
+                    />
+                  </button>
                 ))}
               </div>
 
-              {/* Shared Morphing Buttons */}
-              <div className="flex flex-wrap gap-4 mt-6 hero-buttons">
-                <button
-                  onClick={handleGeneralEnroll}
-                  className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] active:scale-[0.98] transition-transform duration-300 relative overflow-hidden group shadow-[0_0_36px_rgba(0,240,255,0.38)]"
-                  style={{
-                    background: 'linear-gradient(135deg, #00f0ff, #2563eb)',
-                  }}
-                >
-                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                  <span className="relative z-10 transition-all duration-300">
-                    {activeScene === 3 ? 'Start Learning Today' : 'Enroll Now — Free'}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => navigateToSection('courses')}
-                  className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 hover:scale-[1.02] transition-all duration-300"
-                >
-                  <span>
-                    {activeScene === 3 ? 'View Programs' : 'Explore Courses'}
-                  </span>
-                </button>
-              </div>
-
             </div>
-          </div>
-
-          {/* Dots Indicator (Right Side) */}
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3.5 hero-controls">
-            {[0, 1, 2, 3].map((i) => (
-              <button
-                key={i}
-                onClick={() => goToScene(i)}
-                className="group flex items-center justify-end"
-              >
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] font-mono text-brand-cyan uppercase tracking-widest mr-3 select-none pointer-events-none">
-                  {i === 0 ? 'Intro' : i === 1 ? 'Create' : i === 2 ? 'Automate' : 'Future'}
-                </span>
-                <div
-                  className="rounded-full transition-all duration-500"
-                  style={{
-                    width: '7px',
-                    height: activeScene === i ? '24px' : '7px',
-                    backgroundColor: activeScene === i ? '#00f0ff' : 'rgba(255,255,255,0.25)',
-                    boxShadow: activeScene === i ? '0 0 12px #00f0ff' : 'none'
-                  }}
-                />
-              </button>
-            ))}
           </div>
 
           {/* Scroll Cue */}
@@ -889,139 +902,138 @@
       );
     };
 
-    // 2. About Glass AI Globe Canvas
+    // 2. About 3D Icon Display
     const About3DCanvas = () => {
-      const mountRef = useRef(null);
+      const containerRef = useRef(null);
+      const cardRef = useRef(null);
 
       useEffect(() => {
-        const container = mountRef.current;
-        if (!container) return;
+        const container = containerRef.current;
+        const card = cardRef.current;
+        if (!container || !card) return;
 
-        const width = container.clientWidth;
-        const height = container.clientHeight || 450;
+        let rafId;
+        let targetRX = 0, targetRY = 0;
+        let currentRX = 0, currentRY = 0;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        camera.position.z = 5.5;
-
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-        container.appendChild(renderer.domElement);
-
-        const group = new THREE.Group();
-        scene.add(group);
-
-        // Core globe mesh wireframe
-        const sphereGeo = new THREE.SphereGeometry(1.6, 20, 20);
-        const sphereMat = new THREE.MeshBasicMaterial({
-          color: 0xa855f7,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.14
-        });
-        const globe = new THREE.Mesh(sphereGeo, sphereMat);
-        group.add(globe);
-
-        // Globe vertices glowing connection points
-        const pointsMat = new THREE.PointsMaterial({
-          color: 0x00f0ff,
-          size: 0.05,
-          transparent: true,
-          opacity: 0.8
-        });
-        const globePoints = new THREE.Points(sphereGeo, pointsMat);
-        group.add(globePoints);
-
-        // Neural network connections orbiting
-        const orbitalLinesMat = new THREE.LineBasicMaterial({
-          color: 0x00f0ff,
-          transparent: true,
-          opacity: 0.2
-        });
-        
-        const orbitCount = 3;
-        const orbits = [];
-        for (let i = 0; i < orbitCount; i++) {
-          const orbitGeom = new THREE.BufferGeometry();
-          const orbitPos = [];
-          const r = 1.8 + i * 0.12;
-          const segments = 40;
-          for (let j = 0; j <= segments; j++) {
-            const theta = (j / segments) * Math.PI * 2;
-            orbitPos.push(r * Math.cos(theta), r * Math.sin(theta), 0);
-          }
-          orbitGeom.setAttribute('position', new THREE.Float32BufferAttribute(orbitPos, 3));
-          const line = new THREE.Line(orbitGeom, orbitalLinesMat);
-          line.rotation.x = Math.random() * Math.PI;
-          line.rotation.y = Math.random() * Math.PI;
-          group.add(line);
-          orbits.push(line);
-        }
-
-        let mouseX = 0, mouseY = 0;
         const onMouseMove = (e) => {
           const rect = container.getBoundingClientRect();
-          mouseX = ((e.clientX - rect.left) / rect.width) - 0.5;
-          mouseY = ((e.clientY - rect.top) / rect.height) - 0.5;
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          targetRY = ((e.clientX - cx) / (rect.width / 2)) * 18;
+          targetRX = -((e.clientY - cy) / (rect.height / 2)) * 18;
         };
+
+        const onMouseLeave = () => {
+          targetRX = 0;
+          targetRY = 0;
+        };
+
+        const tick = () => {
+          currentRX += (targetRX - currentRX) * 0.07;
+          currentRY += (targetRY - currentRY) * 0.07;
+          card.style.transform = `perspective(800px) rotateX(${currentRX}deg) rotateY(${currentRY}deg)`;
+          rafId = requestAnimationFrame(tick);
+        };
+
         container.addEventListener('mousemove', onMouseMove);
-
-        let isVisible = true;
-        const observer = new IntersectionObserver(([entry]) => {
-          isVisible = entry.isIntersecting;
-        }, { threshold: 0.01 });
-        observer.observe(container);
-
-        let reqId;
-        const animate = () => {
-          reqId = requestAnimationFrame(animate);
-          if (!isVisible) return;
-
-          // Tilts based on mouse position inside about container
-          group.rotation.y += (mouseX * 1.2 - group.rotation.y) * 0.05;
-          group.rotation.x += (mouseY * 1.2 - group.rotation.x) * 0.05;
-
-          // Orbit slow rotation
-          group.rotation.y += 0.002;
-          orbits.forEach((orb, index) => {
-            orb.rotation.z += 0.004 * (index + 1);
-          });
-
-          renderer.render(scene, camera);
-        };
-        animate();
-
-        const onResize = () => {
-          if (!container) return;
-          const w = container.clientWidth;
-          const h = container.clientHeight || 450;
-          camera.aspect = w / h;
-          camera.updateProjectionMatrix();
-          renderer.setSize(w, h);
-        };
-        window.addEventListener('resize', onResize);
+        container.addEventListener('mouseleave', onMouseLeave);
+        tick();
 
         return () => {
-          observer.disconnect();
           container.removeEventListener('mousemove', onMouseMove);
-          window.removeEventListener('resize', onResize);
-          cancelAnimationFrame(reqId);
-          renderer.dispose();
-          if (container.contains(renderer.domElement)) {
-            container.removeChild(renderer.domElement);
-          }
+          container.removeEventListener('mouseleave', onMouseLeave);
+          cancelAnimationFrame(rafId);
         };
       }, []);
 
       return (
-        <div ref={mountRef} className="w-full h-[320px] md:h-[450px] relative z-10" />
+        <div ref={containerRef} className="w-full h-[320px] md:h-[450px] flex items-center justify-center relative select-none">
+
+          {/* Ambient background glow */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-64 h-64 rounded-full" style={{
+              background: 'radial-gradient(circle, rgba(0,240,255,0.12) 0%, rgba(168,85,247,0.06) 50%, transparent 75%)',
+              filter: 'blur(40px)',
+            }} />
+          </div>
+
+          {/* Outer slow-spinning ring */}
+          <div className="absolute w-72 h-72 rounded-full pointer-events-none animate-spin" style={{
+            animationDuration: '20s',
+            animationTimingFunction: 'linear',
+            border: '1px dashed rgba(0,240,255,0.15)',
+          }} />
+
+          {/* Middle counter-spin ring */}
+          <div className="absolute w-56 h-56 rounded-full pointer-events-none animate-spin" style={{
+            animationDuration: '14s',
+            animationTimingFunction: 'linear',
+            animationDirection: 'reverse',
+            border: '1px solid rgba(168,85,247,0.12)',
+          }} />
+
+          {/* Orbiting cyan dot on outer ring */}
+          <div className="absolute w-72 h-72 animate-spin pointer-events-none" style={{ animationDuration: '20s', animationTimingFunction: 'linear' }}>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: '#00f0ff', boxShadow: '0 0 10px 3px rgba(0,240,255,0.7)' }} />
+          </div>
+
+          {/* Orbiting violet dot on inner ring */}
+          <div className="absolute w-56 h-56 animate-spin pointer-events-none" style={{ animationDuration: '14s', animationTimingFunction: 'linear', animationDirection: 'reverse' }}>
+            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full" style={{ background: '#a855f7', boxShadow: '0 0 8px 2px rgba(168,85,247,0.8)' }} />
+          </div>
+
+          {/* 3D tilt card */}
+          <div ref={cardRef} className="relative flex items-center justify-center" style={{ willChange: 'transform', transition: 'transform 0.05s linear' }}>
+
+            {/* Depth shadow layer (3D depth illusion) */}
+            <div className="absolute w-36 h-36 rounded-full" style={{
+              background: 'radial-gradient(circle, rgba(0,240,255,0.18) 0%, transparent 70%)',
+              filter: 'blur(20px)',
+              transform: 'translateZ(-20px)',
+            }} />
+
+            {/* Icon container with glow border */}
+            <div className="relative w-36 h-36 rounded-full flex items-center justify-center about-icon-float" style={{
+              background: 'radial-gradient(135deg, rgba(0,240,255,0.05) 0%, rgba(168,85,247,0.05) 100%)',
+              border: '1px solid rgba(0,240,255,0.2)',
+              boxShadow: '0 0 40px rgba(0,240,255,0.15), 0 0 80px rgba(168,85,247,0.08), inset 0 0 30px rgba(0,240,255,0.04)',
+              backdropFilter: 'blur(12px)',
+            }}>
+
+              {/* Icon image */}
+              <img
+                src="/public/Images/logo/AboutusIcon.png"
+                alt="Dxign Icon"
+                className="w-20 h-20 object-contain"
+                style={{
+                  filter: 'drop-shadow(0 0 16px rgba(0,240,255,0.6)) drop-shadow(0 0 40px rgba(0,240,255,0.3)) brightness(1.05)',
+                }}
+              />
+
+              {/* Inner highlight ring */}
+              <div className="absolute inset-2 rounded-full pointer-events-none" style={{
+                border: '1px solid rgba(255,255,255,0.06)',
+              }} />
+            </div>
+
+            {/* Reflection shimmer */}
+            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+              <div className="absolute -top-1/2 -left-1/4 w-1/2 h-full rotate-12" style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 60%)',
+              }} />
+            </div>
+          </div>
+
+        </div>
       );
     };
 
-    // 3. CTA Glowing pulsing sphere Canvas
+
+    // 3. CTA Minimal AI Neural Network
     const Cta3DCanvas = () => {
       const mountRef = useRef(null);
+
 
       useEffect(() => {
         const container = mountRef.current;
@@ -1031,8 +1043,8 @@
         const height = container.clientHeight || 400;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        camera.position.z = 5.5;
+        const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+        camera.position.z = 7;
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(width, height);
@@ -1042,77 +1054,86 @@
         const group = new THREE.Group();
         scene.add(group);
 
-        // Icosahedron glowing mesh
-        const geom = new THREE.IcosahedronGeometry(1.6, 2);
-        const mat = new THREE.MeshBasicMaterial({
+        // ── Neural nodes ──
+        const nodePositions = [
+          [0, 0, 0],           // hub
+          [2.0, 0.6, 0.4],
+          [-1.8, 0.9, -0.5],
+          [0.7, -1.9, 0.7],
+          [-0.9, -1.2, 1.5],
+          [1.6, 0.9, -1.4],
+          [-0.5, 2.0, 0.5],
+          [1.8, -0.8, 0.9],
+          [-1.4, -0.5, -1.6],
+        ];
+        const nodeSizes  = [0.16, 0.09, 0.08, 0.07, 0.09, 0.07, 0.08, 0.07, 0.07];
+        const nodeColors = [0x00f0ff, 0x00f0ff, 0xa855f7, 0x00f0ff, 0xa855f7, 0x00f0ff, 0xa855f7, 0x00f0ff, 0xa855f7];
+
+        const nodeMeshes = nodePositions.map((p, i) => {
+          const geo = new THREE.SphereGeometry(nodeSizes[i], 16, 16);
+          const mat = new THREE.MeshBasicMaterial({
+            color: nodeColors[i],
+            transparent: true,
+            opacity: i === 0 ? 0.9 : 0.7,
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(...p);
+          group.add(mesh);
+          return mesh;
+        });
+
+        // ── Connection edges ──
+        const edges = [
+          [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],
+          [1,5],[2,6],[3,7],[4,8],[1,7],[2,4],
+        ];
+        const lineMat = new THREE.LineBasicMaterial({
           color: 0x00f0ff,
-          wireframe: true,
           transparent: true,
-          opacity: 0.18
+          opacity: 0.12,
         });
-        const sphere = new THREE.Mesh(geom, mat);
-        group.add(sphere);
-
-        // Core central glowing point points
-        const glowPointsMat = new THREE.PointsMaterial({
-          color: 0xa855f7,
-          size: 0.08,
-          transparent: true,
-          opacity: 0.7
+        edges.forEach(([a, b]) => {
+          const geo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(...nodePositions[a]),
+            new THREE.Vector3(...nodePositions[b]),
+          ]);
+          group.add(new THREE.Line(geo, lineMat));
         });
-        const points = new THREE.Points(geom, glowPointsMat);
-        group.add(points);
 
-        // Fast warping particles in background
-        const particleCount = 150;
-        const bgGeom = new THREE.BufferGeometry();
-        const bgPositions = new Float32Array(particleCount * 3);
-        const speeds = [];
-
-        for (let i = 0; i < particleCount; i++) {
-          bgPositions[i * 3] = (Math.random() - 0.5) * 10;
-          bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-          bgPositions[i * 3 + 2] = Math.random() * -10;
-          speeds.push(0.02 + Math.random() * 0.03);
+        // ── Soft ambient particles ──
+        const dotCount = 80;
+        const dotGeo = new THREE.BufferGeometry();
+        const dotPos = new Float32Array(dotCount * 3);
+        for (let i = 0; i < dotCount; i++) {
+          dotPos[i*3]   = (Math.random() - 0.5) * 10;
+          dotPos[i*3+1] = (Math.random() - 0.5) * 10;
+          dotPos[i*3+2] = (Math.random() - 0.5) * 4;
         }
-        bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
-        const bgMat = new THREE.PointsMaterial({
-          color: 0xffffff,
-          size: 0.03,
-          transparent: true,
-          opacity: 0.4
-        });
-        const warpingDust = new THREE.Points(bgGeom, bgMat);
-        scene.add(warpingDust);
+        dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
+        scene.add(new THREE.Points(dotGeo, new THREE.PointsMaterial({
+          color: 0xffffff, size: 0.018, transparent: true, opacity: 0.18,
+        })));
 
         let isVisible = true;
-        const observer = new IntersectionObserver(([entry]) => {
-          isVisible = entry.isIntersecting;
-        }, { threshold: 0.01 });
+        const observer = new IntersectionObserver(([e]) => { isVisible = e.isIntersecting; }, { threshold: 0.01 });
         observer.observe(container);
 
-        let reqId;
-        let count = 0;
+        let rafId, t = 0;
         const animate = () => {
-          reqId = requestAnimationFrame(animate);
+          rafId = requestAnimationFrame(animate);
           if (!isVisible) return;
+          t += 0.005;
 
-          count += 0.01;
-          const pulse = Math.sin(count) * 0.1 + 1.0;
-          group.scale.set(pulse, pulse, pulse);
+          // Slow graceful rotation
+          group.rotation.y += 0.0028;
+          group.rotation.x += 0.0012;
 
-          group.rotation.x += 0.003;
-          group.rotation.y += 0.004;
-
-          // Wrap particles coordinates to create continuous warp path
-          const pos = warpingDust.geometry.attributes.position.array;
-          for (let i = 0; i < particleCount; i++) {
-            pos[i * 3 + 2] += speeds[i]; // Move closer in Z
-            if (pos[i * 3 + 2] > 2) {
-              pos[i * 3 + 2] = -10; // reset depth far away
-            }
-          }
-          warpingDust.geometry.attributes.position.needsUpdate = true;
+          // Pulse node opacity
+          nodeMeshes.forEach((m, i) => {
+            m.material.opacity = (i === 0 ? 0.85 : 0.55) + Math.sin(t * 1.4 + i) * 0.15;
+          });
+          // Pulse edge opacity
+          lineMat.opacity = 0.1 + Math.sin(t * 0.9) * 0.05;
 
           renderer.render(scene, camera);
         };
@@ -1120,8 +1141,7 @@
 
         const onResize = () => {
           if (!container) return;
-          const w = container.clientWidth;
-          const h = container.clientHeight || 400;
+          const w = container.clientWidth, h = container.clientHeight || 400;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
@@ -1131,16 +1151,14 @@
         return () => {
           observer.disconnect();
           window.removeEventListener('resize', onResize);
-          cancelAnimationFrame(reqId);
+          cancelAnimationFrame(rafId);
           renderer.dispose();
-          if (container.contains(renderer.domElement)) {
-            container.removeChild(renderer.domElement);
-          }
+          if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
         };
       }, []);
 
       return (
-        <div ref={mountRef} className="w-full h-full absolute inset-0 z-0 pointer-events-none opacity-50" />
+        <div ref={mountRef} className="w-full h-full absolute inset-0 z-0 pointer-events-none opacity-60" />
       );
     };
 
@@ -1244,7 +1262,7 @@
       {
         title: 'Palm tender Coconut Water',
         brand: 'Coconova Beverage',
-        cat: 'Graphic Design',
+        cat: 'Content Creation',
         desc: 'Photorealistic 3D CGI product commercial for organic coconut water, rendered with advanced AI video generators.',
         tags: ['Kling AI', 'Midjourney', 'After Effects'],
         video: '/public/Images/videos/CGI Ad Video Tender coconut.mp4',
@@ -1254,7 +1272,7 @@
       {
         title: 'Chevrolet Ad',
         brand: 'Aether Motors',
-        cat: 'Graphic Design',
+        cat: 'Film Making',
         desc: 'High-octane commercial showcase for a next-gen luxury SUV, modeling reflections and dynamic camera sweeps.',
         tags: ['Runway Gen-3', 'Pika Labs', 'Premiere Pro'],
         video: '/public/Images/videos/Car Ads.mp4',
@@ -1262,14 +1280,50 @@
         studentImg: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=150&auto=format&fit=crop'
       },
       {
+        title: 'Election Campaign Collection',
+        brand: 'Democratic Front',
+        cat: 'Graphic Design',
+        desc: 'Complete campaign poster collection featuring high-contrast political banners, candidate portfolios, and modern layout mockups.',
+        tags: ['Photoshop AI', 'Branding', 'Layouts', 'Carousel'],
+        image: '/public/Images/workimage/Election 1 mockup.jpg',
+        images: [
+          '/public/Images/workimage/Election 1 mockup.jpg',
+          '/public/Images/workimage/Election 1.jpg',
+          '/public/Images/workimage/Election 2.jpg',
+          '/public/Images/workimage/Election 3.jpg',
+          '/public/Images/workimage/Election 1 mockup_2.jpg',
+          '/public/Images/workimage/Election 3 mockup_3.jpg'
+        ],
+        carousel: true,
+        studentName: 'Adarsh Sen',
+        studentImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
+      },
+      {
         title: 'Golden Tea Creative Ad Reel',
         brand: 'Golden Tea Co.',
-        cat: 'Graphic Design',
+        cat: 'Film Making',
         desc: 'Artistic, slow-motion commercial showcasing premium tea leaves brewing with warm ambient particle effects.',
         tags: ['Luma Dream Machine', 'Photoshop AI'],
         video: '/public/Images/videos/Golden tea Ad.mp4',
         studentName: 'Akhil Mohan',
         studentImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop'
+      },
+      {
+        title: 'Toffee Coffee Roasters Campaign',
+        brand: 'Toffee Coffee Brand',
+        cat: 'Graphic Design',
+        desc: 'Product social media branding carousel showcasing premium instant coffee jars, warm lighting, and luxury aesthetic details.',
+        tags: ['Midjourney v6', 'Figma', 'Composition', 'Carousel'],
+        image: '/public/Images/workimage/Post 7.png',
+        images: [
+          '/public/Images/workimage/Post 7.png',
+          '/public/Images/workimage/Post 7_2.jpg',
+          '/public/Images/workimage/Post 7_4.jpg',
+          '/public/Images/workimage/Post 7_6.jpg'
+        ],
+        carousel: true,
+        studentName: 'Rithvik Roy',
+        studentImg: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop'
       },
       {
         title: 'Grandma\'s Sweet',
@@ -1282,9 +1336,26 @@
         studentImg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop'
       },
       {
+        title: 'Commercial Advertising Concepts',
+        brand: 'AI Advertising Campaigns',
+        cat: 'Graphic Design',
+        desc: 'A premium collection of commercial posters designed using advanced generative AI prompt workflows for brands like Pepsi, luxury cosmetics, and next-gen smartphones.',
+        tags: ['Stable Diffusion', 'Figma', 'Prompting', 'Carousel'],
+        image: '/public/Images/workimage/Post 6.jpg',
+        images: [
+          '/public/Images/workimage/Post 6.jpg',
+          '/public/Images/workimage/Post 6_2.jpg',
+          '/public/Images/workimage/Post 6_3.jpg',
+          '/public/Images/workimage/Post 6_4.jpg'
+        ],
+        carousel: true,
+        studentName: 'Sneha Paul',
+        studentImg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop'
+      },
+      {
         title: 'Amera Gold & Diamonds',
         brand: 'Aura Jewellers',
-        cat: 'Graphic Design',
+        cat: 'Film Making',
         desc: 'Luxury product presentation capturing light refraction and detail on diamond rings and gold necklaces.',
         tags: ['Midjourney v6', 'Kling AI', 'CapCut'],
         video: '/public/Images/videos/Jewllery ads.mp4',
@@ -1314,7 +1385,7 @@
       {
         title: 'Optic Expo Promo Reel',
         brand: 'Optic Expo',
-        cat: 'Content Creation',
+        cat: 'Film Making',
         desc: 'Futuristic advertising trailer for an international tech exhibition, styled with tech UI and holographic grids.',
         tags: ['After Effects', 'AI Prompting', 'Veed.io'],
         video: '/public/Images/videos/OPTIC EXPO 2025,.mp4',
@@ -1324,7 +1395,7 @@
       {
         title: 'Regalia Convection Center',
         brand: 'Regalia Marine',
-        cat: 'Content Creation',
+        cat: 'Film Making',
         desc: 'Premium travel and luxury lifestyle advertisement showcasing sea travel, generated using cinematic prompts.',
         tags: ['Luma LGM', 'Kling', 'Color grading'],
         video: '/public/Images/videos/Regalia reel 1.mp4',
@@ -1334,7 +1405,7 @@
       {
         title: 'WebQ Ad Reel',
         brand: 'WebQ Tech',
-        cat: 'Vibe Coding',
+        cat: 'Content Creation',
         desc: 'SaaS landing page and UI dashboard animation walkthrough, styled using interactive clean CSS components.',
         tags: ['Vibe Coding', 'Tailwind', 'Figma AI'],
         video: '/public/Images/videos/Reshma Website WebQ Reel 1.mp4',
@@ -1342,7 +1413,7 @@
         studentImg: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?q=80&w=150&auto=format&fit=crop'
       },
       {
-        title: 'Arike Romatic Album',
+        title: 'Arike Romantic Album',
         brand: 'Lover\'s Lane',
         cat: 'Film Making',
         desc: 'Short romance-genre cinema short detailing character interaction, showcasing expressions and body movements.',
@@ -1354,7 +1425,7 @@
       {
         title: 'Velox Technology',
         brand: 'Velox Timepieces',
-        cat: 'Content Creation',
+        cat: 'Film Making',
         desc: 'Sleek sports watch advertisement featuring liquid metal styling, water splashes, and high speed CGI.',
         tags: ['Runway Gen-3', 'C4D AI', 'Premiere Pro'],
         video: '/public/Images/videos/Velox Reel 1.mp4',
@@ -1364,7 +1435,7 @@
       {
         title: 'Sky Bound Travals',
         brand: 'Chronicle Cinema',
-        cat: 'Film Making',
+        cat: 'Content Creation',
         desc: 'Atmospheric sci-fi video mapping out deep space travel and nebula views, fully generated from prompt scripts.',
         tags: ['Pika v2', 'Sora v2', 'Logic Pro'],
         video: '/public/Images/videos/Sky Bound Traval Agency.mp4',
@@ -1386,7 +1457,7 @@
         name: 'Sarah Jenkins',
         role: 'Creative Director',
         rating: 5,
-        review: 'AI Mastery Academy transformed my design agency completely. We now produce high-end branding vectors and campaigns in hours instead of days. The liquid glass template systems are beautiful.',
+        review: 'Dxign.learn transformed my design agency completely. We now produce high-end branding vectors and campaigns in hours instead of days. The liquid glass template systems are beautiful.',
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop',
         project: '95% faster agency turnarounds'
       },
@@ -1436,31 +1507,59 @@
           onClick={onOpenTheater}
           className="masonry-item liquid-glass rounded-3xl overflow-hidden flex flex-col justify-between h-full group cursor-pointer"
         >
-          {/* Video visual cover */}
+          {/* Visual cover */}
           <div className="h-48 md:h-52 w-full overflow-hidden relative border-b border-white/5 bg-slate-950 flex items-center justify-center">
-            <video 
-              ref={videoRef}
-              src={proj.video} 
-              loop
-              muted
-              playsInline
-              controlsList="nodownload"
-              onContextMenu={(e) => e.preventDefault()}
-              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
-            />
+            {proj.video ? (
+              <video 
+                ref={videoRef}
+                src={proj.video} 
+                loop
+                muted
+                playsInline
+                controlsList="nodownload"
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
+              />
+            ) : (
+              <img 
+                src={proj.image} 
+                alt={proj.title}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500" 
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             
-            {/* Play hover prompt */}
-            {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none transition-all duration-300">
+            {/* Play or Zoom hover prompt */}
+            {proj.video ? (
+              !isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none transition-all duration-300">
+                  <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform duration-300">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="currentColor" 
+                      className="w-4 h-4 ml-0.5 fill-white text-white"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300">
                 <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform duration-300">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
-                    fill="currentColor" 
-                    className="w-4 h-4 ml-0.5 fill-white text-white"
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="w-4 h-4 text-white"
                   >
-                    <path d="M8 5v14l11-7z" />
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                 </div>
               </div>
@@ -1516,6 +1615,7 @@
       const [enrollModal, setEnrollModal] = useState(null); // holds selected course object
       const [showAllProjects, setShowAllProjects] = useState(false);
       const [theaterVideo, setTheaterVideo] = useState(null);
+      const [carouselIndex, setCarouselIndex] = useState(0);
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
 
@@ -1567,7 +1667,7 @@
           amount: 500, // ₹5 in paise
           currency: 'INR',
           name: 'Dxign Learn',
-          description: 'AI Mastery Lifetime Access — All 5 Courses',
+          description: 'Dxign.learn Lifetime Access — All 5 Courses',
           image: '/public/Images/logo/Dxign logo.png',
           handler: function(response) {
             alert('🎉 Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nWelcome to Dxign Learn! You now have lifetime access to all 5 AI courses. Check your email for access details.');
@@ -1611,6 +1711,40 @@
           bgIcon: 'bg-amber-500/5 border-amber-500/10 text-amber-500',
         }
       };
+
+      // Initialize Lenis smooth scroll
+      useEffect(() => {
+        if (!window.Lenis) return;
+
+        const lenis = new window.Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: 'vertical',
+          gestureOrientation: 'vertical',
+          smoothWheel: true,
+          smoothTouch: false,
+        });
+
+        window.lenis = lenis;
+
+        // Synchronize GSAP ScrollTrigger with Lenis scroll updates
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+          lenis.raf(time * 1000);
+        });
+
+        gsap.ticker.lagSmoothing(0);
+
+        // Keep scroll stopped initially since we start in hero pinned scene
+        lenis.stop();
+
+        return () => {
+          lenis.destroy();
+          gsap.ticker.remove(lenis.raf);
+          delete window.lenis;
+        };
+      }, []);
 
       // Scroll trigger registration on items
       useEffect(() => {
@@ -1834,7 +1968,7 @@
                   Mission Objective
                 </span>
                 <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                  About AI Mastery Academy
+                  About Dxign.learn
                 </h2>
                 
                 <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
@@ -1881,7 +2015,7 @@
                     Educational Curriculum
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                    Explore AI Mastery Programs
+                    Explore Dxign.learn Programs
                   </h2>
                 </div>
 
@@ -2163,7 +2297,7 @@
 
                 {/* Filter buttons switcher */}
                 <div className="flex flex-wrap gap-2.5">
-                  {['All', 'Graphic Design', 'Film Making', 'Content Creation', 'Vibe Coding'].map((cat) => (
+                  {['All', 'Graphic Design', 'Film Making', 'Content Creation'].map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setShowcaseFilter(cat)}
@@ -2185,7 +2319,10 @@
                   <StudentProjectCard 
                     key={idx} 
                     proj={proj} 
-                    onOpenTheater={() => setTheaterVideo(proj)} 
+                    onOpenTheater={() => {
+                      setTheaterVideo(proj);
+                      setCarouselIndex(0);
+                    }} 
                   />
                 ))}
               </div>
@@ -2369,7 +2506,7 @@
               {/* Price Tag Details panel */}
               <div className="liquid-glass p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 max-w-xl w-full mb-12 border border-brand-cyan/20">
                 <div className="text-left">
-                  <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight">AI Mastery Lifetime Access</h3>
+                  <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight">Dxign.learn Lifetime Access</h3>
                   <p className="text-xs text-gray-500 mt-1">One-time payment. All updates included.</p>
                 </div>
                 <div className="flex items-baseline space-x-3.5">
@@ -2414,7 +2551,7 @@
                   />
                 </div>
                 <p className="text-xs text-gray-600 max-w-sm leading-relaxed mb-4">
-                  AI Mastery Academy is an independent education portal. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
+                  Dxign.learn is an independent education portal. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
                 </p>
               </div>
 
@@ -2436,11 +2573,52 @@
 
               {/* Col 3 Contacts info */}
               <div className="flex flex-col text-left">
-                <span className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4 font-bold">Connect</span>
-                <div className="flex flex-col space-y-2 text-xs text-gray-600">
-                  <a href="#" className="hover:text-white transition-colors duration-300">Instagram</a>
-                  <a href="#" className="hover:text-white transition-colors duration-300">YouTube</a>
-                  <a href="#" className="hover:text-white transition-colors duration-300">LinkedIn</a>
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4 font-bold">Contact</span>
+                <div className="flex flex-col space-y-2.5 text-xs text-gray-600">
+                  {/* Phone */}
+                  <a href="tel:+917356413558" className="hover:text-white transition-colors duration-300">
+                    +91 73564 13558
+                  </a>
+                  {/* Email */}
+                  <a href="mailto:dxignlearn@gmail.com" className="hover:text-white transition-colors duration-300">
+                    dxignlearn@gmail.com
+                  </a>
+                </div>
+
+                {/* Social media icons */}
+                <div className="flex items-center gap-3 mt-5">
+                  {/* Instagram */}
+                  <a href="https://www.instagram.com/dxign.learn?igsh=cGk3YjAzaDZ2M3Rw&utm_source=qr" target="_blank" rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:border-brand-cyan/40 hover:bg-brand-cyan/10 transition-all duration-300"
+                    aria-label="Instagram">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                    </svg>
+                  </a>
+                  {/* Facebook */}
+                  <a href="https://www.facebook.com/profile.php?id=61582077689946" target="_blank" rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:border-brand-cyan/40 hover:bg-brand-cyan/10 transition-all duration-300"
+                    aria-label="Facebook">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </a>
+                  {/* WhatsApp */}
+                  <a href="https://wa.me/7356413558" target="_blank" rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:border-brand-cyan/40 hover:bg-brand-cyan/10 transition-all duration-300"
+                    aria-label="WhatsApp">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                  </a>
+                  {/* LinkedIn */}
+                  <a href="https://www.linkedin.com/in/dxign-learn-41906738a/?skipRedirect=true" target="_blank" rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:border-brand-cyan/40 hover:bg-brand-cyan/10 transition-all duration-300"
+                    aria-label="LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </a>
                 </div>
               </div>
 
@@ -2448,7 +2626,7 @@
 
             {/* Copyright notes */}
             <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
-              <span>&copy; 2026 AI Mastery Academy. All Rights Reserved.</span>
+              <span>&copy; 2026 Dxign.learn. All Rights Reserved.</span>
               <span className="text-gray-600">Site inspired by Apple. Engineered using React, CSS, and Tailwind CSS.</span>
             </div>
           </footer>
@@ -2584,18 +2762,87 @@
                 className="relative w-full max-w-5xl rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-black shadow-[0_30px_100px_rgba(0,0,0,0.9)]"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Left side: Video Player */}
-                <div className="lg:col-span-8 bg-zinc-950 flex items-center justify-center relative aspect-video w-full">
-                  <video
-                    src={theaterVideo.video}
-                    controls
-                    autoPlay
-                    playsInline
-                    controlsList="nodownload"
-                    disablePictureInPicture
-                    onContextMenu={(e) => e.preventDefault()}
-                    className="w-full h-full object-contain"
-                  />
+                {/* Left side: Video/Image/Carousel Player */}
+                <div className="lg:col-span-8 bg-zinc-950 flex items-center justify-center relative aspect-video w-full select-none">
+                  {theaterVideo.video ? (
+                    <video
+                      src={theaterVideo.video}
+                      controls
+                      autoPlay
+                      playsInline
+                      controlsList="nodownload"
+                      disablePictureInPicture
+                      onContextMenu={(e) => e.preventDefault()}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : theaterVideo.carousel ? (
+                    <div className="relative w-full h-full flex items-center justify-center group/carousel">
+                      {/* Image container */}
+                      <img
+                        src={theaterVideo.images[carouselIndex]}
+                        alt={`${theaterVideo.title} slide ${carouselIndex + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+
+                      {/* Navigation Prev Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCarouselIndex(prev => (prev === 0 ? theaterVideo.images.length - 1 : prev - 1));
+                        }}
+                        className="absolute left-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all duration-300 hover:scale-105 active:scale-95"
+                        aria-label="Previous Slide"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                      </button>
+
+                      {/* Navigation Next Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCarouselIndex(prev => (prev === theaterVideo.images.length - 1 ? 0 : prev + 1));
+                        }}
+                        className="absolute right-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all duration-300 hover:scale-105 active:scale-95"
+                        aria-label="Next Slide"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </button>
+
+                      {/* Bottom slide dots indicators */}
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                        {theaterVideo.images.map((_, sidx) => (
+                          <button
+                            key={sidx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCarouselIndex(sidx);
+                            }}
+                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                              carouselIndex === sidx 
+                                ? 'bg-brand-cyan w-3 shadow-[0_0_8px_#00f0ff]' 
+                                : 'bg-white/30 hover:bg-white/60'
+                            }`}
+                            aria-label={`Go to slide ${sidx + 1}`}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Slide Counter Badge */}
+                      <span className="absolute top-4 right-4 px-2.5 py-1 rounded bg-black/50 border border-white/10 text-[9px] font-mono text-gray-400">
+                        {carouselIndex + 1} / {theaterVideo.images.length}
+                      </span>
+                    </div>
+                  ) : (
+                    <img
+                      src={theaterVideo.image}
+                      alt={theaterVideo.title}
+                      className="w-full h-full object-contain"
+                    />
+                  )}
                 </div>
 
                 {/* Right side: Details */}
