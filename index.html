@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DXIGN AI Mastery Course | Master Generative AI for Creation</title>
-  <meta name="description" content="Empower your design, film, avatar, and business workflows with the next generation of generative AI tools. Inspired by Apple design.">
+  <title>AI Mastery Academy | Master Generative AI for Creation & Business</title>
+  <meta name="description" content="Unlock the future of design, film, content, and code with the next generation of AI tools. Luxury Apple-inspired UI with immersive 3D WebGL visuals.">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,17 +15,20 @@
   <!-- Custom Design System Stylesheet -->
   <link rel="stylesheet" href="/index.css">
   
-  <!-- Tailwind Configuration for Custom Accent Colors & Fonts -->
+  <!-- Tailwind Configuration for custom colors & fonts -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
             brand: {
-              bg: '#0A0F14',
-              bgDarker: '#05080B',
-              cyan: '#00B6E6',
-              cyanGlow: 'rgba(0, 182, 230, 0.15)',
+              bg: '#050505',
+              bgDarker: '#010101',
+              cyan: '#00f0ff',
+              violet: '#a855f7',
+              blue: '#2563eb',
+              rose: '#ec4899',
+              emerald: '#10b981',
             }
           },
           fontFamily: {
@@ -37,1479 +40,1783 @@
     }
   </script>
 
-  <!-- React and ReactDOM UMD builds -->
+  <!-- React & ReactDOM -->
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
   
-  <!-- Lucide Icon core library UMD build -->
+  <!-- Lucide Icon core library -->
   <script src="https://unpkg.com/lucide@latest" crossorigin></script>
 
-  <!-- Babel Standalone compiler for in-browser JSX transpilation -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+  <!-- Three.js (3D WebGL Library) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <style>
-    @keyframes draw-path {
-      from { stroke-dashoffset: 1000; }
-      to { stroke-dashoffset: 0; }
-    }
-    .animated-path {
-      stroke-dasharray: 1000;
-      stroke-dashoffset: 1000;
-      animation: draw-path 8s linear infinite alternate;
-    }
-    @keyframes helper-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
-    }
-    .helper-bounce {
-      animation: helper-bounce 1.8s ease-in-out infinite;
-    }
-  </style>
+  <!-- GSAP & ScrollTrigger for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Lenis (Smooth scroll library) -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Babel Standalone for transpilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
 </head>
 <body class="bg-brand-bg text-gray-200 selection:bg-brand-cyan/20 selection:text-brand-cyan">
-  
-  <!-- React App Root Container -->
+
   <div id="root"></div>
 
   <!-- React & JSX Application Source Code -->
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // Navigation configuration - 8 sections in the required order
-    const navItems = [
-      { id: 'hero', label: 'Home' },
-      { id: 'graphic-design', label: 'Graphic Design' },
-      { id: 'film-making', label: 'Film Making' },
-      { id: 'content-creation', label: 'Content Creation' },
-      { id: 'avatar', label: 'AI Avatar' },
-      { id: 'business', label: 'Business' },
-      { id: 'vibe-coding', label: 'Vibe Coding' },
-      { id: 'showcase', label: 'Showcase' }
-    ];
+    // --- 3D CANVAS COMPONENTS ---
 
-    // Horizontal Showcase content
-    const showcaseItems = [
-      {
-        type: 'Cinematic AI Film',
-        title: 'Chronicles of Nebula',
-        tag: 'Cinematic Video',
-        img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
-        metric: '4K Cinema Gen',
-        color: 'from-blue-600/20 to-purple-600/20'
-      },
-      {
-        type: 'Surreal Vector Art',
-        title: 'Iridescent Synthesis',
-        tag: 'Graphic Design',
-        img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop',
-        metric: 'Vector SVG Output',
-        color: 'from-cyan-600/20 to-teal-600/20'
-      },
-      {
-        type: 'AI Synthetic Human',
-        title: 'Synthetix Host Evelyn',
-        tag: 'AI Avatar',
-        img: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=800&auto=format&fit=crop',
-        metric: 'Natural Audio Sync',
-        color: 'from-violet-600/20 to-pink-600/20'
-      },
-      {
-        type: 'Autonomous Agent Grid',
-        title: 'Operations Orchestrator',
-        tag: 'AI in Business',
-        img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
-        metric: '99.8% Automation',
-        color: 'from-emerald-600/20 to-sky-600/20'
-      }
-    ];
+    // 1. Hero Holographic Brain Canvas
+    const Hero3DCanvas = () => {
+      const mountRef = useRef(null);
 
-    // Section 0: Apple-style Scroll-Driven Canvas Image Sequence Hero
-    const HeroSection = ({ scrollY }) => {
-      const heroRef = useRef(null);
-      const canvasRef = useRef(null);
-      const [images, setImages] = useState([]);
-      const [isPreloaded, setIsPreloaded] = useState(false);
-      const totalFrames = 240;
-
-      // Progressive Image Preloading
       useEffect(() => {
-        const loadedImages = [];
-        let loadedCount = 0;
-        
-        // Helper to format frame file name
-        const getFrameUrl = (index) => {
-          const paddedIndex = String(index).padStart(3, '0');
-          return `/public/Images/heropage/ezgif-frame-${paddedIndex}.png`;
-        };
+        const container = mountRef.current;
+        if (!container) return;
 
-        // Preload all frames progressively
-        const initialPreloadCount = 40;
-        for (let i = 6; i <= totalFrames; i++) {
-          const img = new Image();
-          img.src = getFrameUrl(i);
-          img.onload = () => {
-            loadedCount++;
-            if (loadedCount >= initialPreloadCount) {
-              setIsPreloaded(true);
-            }
-          };
-          img.onerror = () => {
-            loadedCount++;
-            if (loadedCount >= initialPreloadCount) {
-              setIsPreloaded(true);
-            }
-          };
-          loadedImages[i] = img;
+        const width = container.clientWidth;
+        const height = container.clientHeight || 550;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.z = 6.5;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        container.appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Holographic brain representation: Point cluster sphere
+        const particleCount = 140;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const radius = 1.9;
+
+        for (let i = 0; i < particleCount; i++) {
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * 2.0 * Math.PI;
+          const phi = Math.acos(2.0 * v - 1.0);
+
+          positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+          positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+          positions[i * 3 + 2] = radius * Math.cos(phi);
         }
-        setImages(loadedImages);
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const material = new THREE.PointsMaterial({
+          color: 0x00f0ff,
+          size: 0.055,
+          transparent: true,
+          opacity: 0.85,
+        });
+        const points = new THREE.Points(geometry, material);
+        group.add(points);
+
+        // Connections (Lines)
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: 0xa855f7,
+          transparent: true,
+          opacity: 0.22,
+        });
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = [];
+
+        for (let i = 0; i < particleCount; i++) {
+          const x1 = positions[i * 3];
+          const y1 = positions[i * 3 + 1];
+          const z1 = positions[i * 3 + 2];
+
+          for (let j = i + 1; j < particleCount; j++) {
+            const x2 = positions[j * 3];
+            const y2 = positions[j * 3 + 1];
+            const z2 = positions[j * 3 + 2];
+
+            const dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2);
+            if (dist < 1.1) {
+              linePositions.push(x1, y1, z1, x2, y2, z2);
+            }
+          }
+        }
+        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        group.add(lines);
+
+        // Outer rotating ring pathways
+        const ringGeom = new THREE.RingGeometry(2.3, 2.34, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ 
+          color: 0x00f0ff, 
+          side: THREE.DoubleSide, 
+          transparent: true, 
+          opacity: 0.35 
+        });
+        const ring = new THREE.Mesh(ringGeom, ringMat);
+        ring.rotation.x = Math.PI / 2.3;
+        ring.rotation.y = Math.PI / 8;
+        group.add(ring);
+
+        // Floating ambient dust in background
+        const bgCount = 200;
+        const bgGeom = new THREE.BufferGeometry();
+        const bgPositions = new Float32Array(bgCount * 3);
+
+        for (let i = 0; i < bgCount; i++) {
+          bgPositions[i * 3] = (Math.random() - 0.5) * 15;
+          bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 15;
+          bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 8 - 4;
+        }
+        bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+        const bgMat = new THREE.PointsMaterial({
+          color: 0xffffff,
+          size: 0.025,
+          transparent: true,
+          opacity: 0.3,
+        });
+        const bgPoints = new THREE.Points(bgGeom, bgMat);
+        scene.add(bgPoints);
+
+        // Mouse responsive tilt properties
+        let mouseX = 0, mouseY = 0;
+        const onMouseMove = (e) => {
+          mouseX = (e.clientX / window.innerWidth) - 0.5;
+          mouseY = (e.clientY / window.innerHeight) - 0.5;
+        };
+        window.addEventListener('mousemove', onMouseMove);
+
+        let isVisible = true;
+        const observer = new IntersectionObserver(([entry]) => {
+          isVisible = entry.isIntersecting;
+        }, { threshold: 0.01 });
+        observer.observe(container);
+
+        let reqId;
+        const animate = () => {
+          reqId = requestAnimationFrame(animate);
+          if (!isVisible) return;
+
+          // Smooth mouse physics easing
+          group.rotation.y += (mouseX * 1.5 - group.rotation.y) * 0.05;
+          group.rotation.x += (mouseY * 1.5 - group.rotation.x) * 0.05;
+
+          // Ambient idle rotation
+          group.rotation.y += 0.003;
+          points.rotation.y -= 0.001;
+          ring.rotation.z += 0.006;
+          bgPoints.rotation.y += 0.0005;
+
+          // Scroll depth parallax shifting
+          const scroll = window.scrollY;
+          group.position.y = -scroll * 0.0008;
+          bgPoints.position.y = scroll * 0.0015;
+
+          renderer.render(scene, camera);
+        };
+        animate();
+
+        const onResize = () => {
+          if (!container) return;
+          const w = container.clientWidth;
+          const h = container.clientHeight || 550;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        };
+        window.addEventListener('resize', onResize);
+
+        return () => {
+          observer.disconnect();
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('resize', onResize);
+          cancelAnimationFrame(reqId);
+          renderer.dispose();
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+          }
+        };
       }, []);
 
-      // Canvas drawing logic on scroll and screen resize
+      return (
+        <div ref={mountRef} className="w-full h-[380px] md:h-[550px] relative z-10" />
+      );
+    };
+
+    // 2. About Glass AI Globe Canvas
+    const About3DCanvas = () => {
+      const mountRef = useRef(null);
+
       useEffect(() => {
-        if (images.length === 0 || !canvasRef.current || !heroRef.current) return;
+        const container = mountRef.current;
+        if (!container) return;
 
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const container = heroRef.current;
+        const width = container.clientWidth;
+        const height = container.clientHeight || 450;
 
-        // Calculate progress in Hero section
-        const rect = container.getBoundingClientRect();
-        const scrollTop = window.scrollY;
-        const containerHeight = rect.height;
-        const windowHeight = window.innerHeight;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.z = 5.5;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        container.appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Core globe mesh wireframe
+        const sphereGeo = new THREE.SphereGeometry(1.6, 20, 20);
+        const sphereMat = new THREE.MeshBasicMaterial({
+          color: 0xa855f7,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.14
+        });
+        const globe = new THREE.Mesh(sphereGeo, sphereMat);
+        group.add(globe);
+
+        // Globe vertices glowing connection points
+        const pointsMat = new THREE.PointsMaterial({
+          color: 0x00f0ff,
+          size: 0.05,
+          transparent: true,
+          opacity: 0.8
+        });
+        const globePoints = new THREE.Points(sphereGeo, pointsMat);
+        group.add(globePoints);
+
+        // Neural network connections orbiting
+        const orbitalLinesMat = new THREE.LineBasicMaterial({
+          color: 0x00f0ff,
+          transparent: true,
+          opacity: 0.2
+        });
         
-        const progress = Math.max(0, Math.min(1, scrollTop / (containerHeight - windowHeight)));
-        
-        // Map progress to frame index (1 to 240)
-        const frameIndex = Math.max(1, Math.min(totalFrames, Math.floor(progress * (totalFrames - 1)) + 1));
-        
-        // Fallback helper to find the nearest loaded and valid frame
-        const getBestFrame = (index) => {
-          if (images[index] && images[index].complete && images[index].naturalWidth > 0) {
-            return images[index];
+        const orbitCount = 3;
+        const orbits = [];
+        for (let i = 0; i < orbitCount; i++) {
+          const orbitGeom = new THREE.BufferGeometry();
+          const orbitPos = [];
+          const r = 1.8 + i * 0.12;
+          const segments = 40;
+          for (let j = 0; j <= segments; j++) {
+            const theta = (j / segments) * Math.PI * 2;
+            orbitPos.push(r * Math.cos(theta), r * Math.sin(theta), 0);
           }
-          // Search backwards
-          for (let i = index - 1; i >= 1; i--) {
-            if (images[i] && images[i].complete && images[i].naturalWidth > 0) {
-              return images[i];
-            }
-          }
-          // Search forwards
-          for (let i = index + 1; i <= totalFrames; i++) {
-            if (images[i] && images[i].complete && images[i].naturalWidth > 0) {
-              return images[i];
-            }
-          }
-          return null;
+          orbitGeom.setAttribute('position', new THREE.Float32BufferAttribute(orbitPos, 3));
+          const line = new THREE.Line(orbitGeom, orbitalLinesMat);
+          line.rotation.x = Math.random() * Math.PI;
+          line.rotation.y = Math.random() * Math.PI;
+          group.add(line);
+          orbits.push(line);
+        }
+
+        let mouseX = 0, mouseY = 0;
+        const onMouseMove = (e) => {
+          const rect = container.getBoundingClientRect();
+          mouseX = ((e.clientX - rect.left) / rect.width) - 0.5;
+          mouseY = ((e.clientY - rect.top) / rect.height) - 0.5;
         };
+        container.addEventListener('mousemove', onMouseMove);
 
-        const img = getBestFrame(frameIndex);
+        let isVisible = true;
+        const observer = new IntersectionObserver(([entry]) => {
+          isVisible = entry.isIntersecting;
+        }, { threshold: 0.01 });
+        observer.observe(container);
 
-        if (img) {
-          // Adjust canvas size to match viewport
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
+        let reqId;
+        const animate = () => {
+          reqId = requestAnimationFrame(animate);
+          if (!isVisible) return;
 
-          // Object-fit: cover implementation on canvas
-          const imgWidth = img.naturalWidth || img.width;
-          const imgHeight = img.naturalHeight || img.height;
+          // Tilts based on mouse position inside about container
+          group.rotation.y += (mouseX * 1.2 - group.rotation.y) * 0.05;
+          group.rotation.x += (mouseY * 1.2 - group.rotation.x) * 0.05;
 
-          const canvasAspect = canvas.width / canvas.height;
-          const imgAspect = imgWidth / imgHeight;
+          // Orbit slow rotation
+          group.rotation.y += 0.002;
+          orbits.forEach((orb, index) => {
+            orb.rotation.z += 0.004 * (index + 1);
+          });
 
-          let drawWidth, drawHeight, drawX, drawY;
+          renderer.render(scene, camera);
+        };
+        animate();
 
-          if (canvasAspect > imgAspect) {
-            drawWidth = canvas.width;
-            drawHeight = canvas.width / imgAspect;
-            drawX = 0;
-            drawY = (canvas.height - drawHeight) / 2;
-          } else {
-            drawWidth = canvas.height * imgAspect;
-            drawHeight = canvas.height;
-            drawX = (canvas.width - drawWidth) / 2;
-            drawY = 0;
+        const onResize = () => {
+          if (!container) return;
+          const w = container.clientWidth;
+          const h = container.clientHeight || 450;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        };
+        window.addEventListener('resize', onResize);
+
+        return () => {
+          observer.disconnect();
+          container.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('resize', onResize);
+          cancelAnimationFrame(reqId);
+          renderer.dispose();
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
           }
+        };
+      }, []);
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+      return (
+        <div ref={mountRef} className="w-full h-[320px] md:h-[450px] relative z-10" />
+      );
+    };
+
+    // 3. CTA Glowing pulsing sphere Canvas
+    const Cta3DCanvas = () => {
+      const mountRef = useRef(null);
+
+      useEffect(() => {
+        const container = mountRef.current;
+        if (!container) return;
+
+        const width = container.clientWidth;
+        const height = container.clientHeight || 400;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.z = 5.5;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        container.appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Icosahedron glowing mesh
+        const geom = new THREE.IcosahedronGeometry(1.6, 2);
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0x00f0ff,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.18
+        });
+        const sphere = new THREE.Mesh(geom, mat);
+        group.add(sphere);
+
+        // Core central glowing point points
+        const glowPointsMat = new THREE.PointsMaterial({
+          color: 0xa855f7,
+          size: 0.08,
+          transparent: true,
+          opacity: 0.7
+        });
+        const points = new THREE.Points(geom, glowPointsMat);
+        group.add(points);
+
+        // Fast warping particles in background
+        const particleCount = 150;
+        const bgGeom = new THREE.BufferGeometry();
+        const bgPositions = new Float32Array(particleCount * 3);
+        const speeds = [];
+
+        for (let i = 0; i < particleCount; i++) {
+          bgPositions[i * 3] = (Math.random() - 0.5) * 10;
+          bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+          bgPositions[i * 3 + 2] = Math.random() * -10;
+          speeds.push(0.02 + Math.random() * 0.03);
         }
-      }, [images, scrollY, isPreloaded]);
+        bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+        const bgMat = new THREE.PointsMaterial({
+          color: 0xffffff,
+          size: 0.03,
+          transparent: true,
+          opacity: 0.4
+        });
+        const warpingDust = new THREE.Points(bgGeom, bgMat);
+        scene.add(warpingDust);
 
-      // Calculate container-local scroll progress ratio
-      let currentProgress = 0;
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        const scrollTop = window.scrollY;
-        const containerHeight = rect.height;
-        const windowHeight = window.innerHeight;
-        currentProgress = Math.max(0, Math.min(1, scrollTop / (containerHeight - windowHeight)));
+        let isVisible = true;
+        const observer = new IntersectionObserver(([entry]) => {
+          isVisible = entry.isIntersecting;
+        }, { threshold: 0.01 });
+        observer.observe(container);
+
+        let reqId;
+        let count = 0;
+        const animate = () => {
+          reqId = requestAnimationFrame(animate);
+          if (!isVisible) return;
+
+          count += 0.01;
+          const pulse = Math.sin(count) * 0.1 + 1.0;
+          group.scale.set(pulse, pulse, pulse);
+
+          group.rotation.x += 0.003;
+          group.rotation.y += 0.004;
+
+          // Wrap particles coordinates to create continuous warp path
+          const pos = warpingDust.geometry.attributes.position.array;
+          for (let i = 0; i < particleCount; i++) {
+            pos[i * 3 + 2] += speeds[i]; // Move closer in Z
+            if (pos[i * 3 + 2] > 2) {
+              pos[i * 3 + 2] = -10; // reset depth far away
+            }
+          }
+          warpingDust.geometry.attributes.position.needsUpdate = true;
+
+          renderer.render(scene, camera);
+        };
+        animate();
+
+        const onResize = () => {
+          if (!container) return;
+          const w = container.clientWidth;
+          const h = container.clientHeight || 400;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        };
+        window.addEventListener('resize', onResize);
+
+        return () => {
+          observer.disconnect();
+          window.removeEventListener('resize', onResize);
+          cancelAnimationFrame(reqId);
+          renderer.dispose();
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+          }
+        };
+      }, []);
+
+      return (
+        <div ref={mountRef} className="w-full h-full absolute inset-0 z-0 pointer-events-none opacity-50" />
+      );
+    };
+
+
+    // --- DATA CONFIGS ---
+
+    const courseList = [
+      {
+        id: 'graphic-design',
+        title: 'AI in Graphic Design',
+        description: 'Learn AI-powered branding, social media design, advertising creatives, product visualization, image generation, and professional design workflows using the latest AI tools.',
+        icon: 'palette',
+        colorName: 'emerald',
+        colorCode: '#10b981',
+        badge: 'Top Seller',
+        category: 'creative',
+        tools: ['Midjourney', 'Photoshop AI', 'Photoroom'],
+        duration: '6 Weeks',
+        price: '₹4,999',
+        originalPrice: '₹9,999',
+        discount: '50% OFF',
+        priceAmount: 499900
+      },
+      {
+        id: 'film-making',
+        title: 'AI Film Making',
+        description: 'Create cinematic videos, AI advertisements, reels, storytelling content, virtual presenters, and professional productions using modern AI filmmaking tools.',
+        icon: 'film',
+        colorName: 'rose',
+        colorCode: '#ec4899',
+        badge: 'Premium',
+        category: 'creative',
+        tools: ['Runway Gen-2', 'Sora', 'HeyGen'],
+        duration: '8 Weeks',
+        price: '₹7,999',
+        originalPrice: '₹14,999',
+        discount: '47% OFF',
+        priceAmount: 799900
+      },
+      {
+        id: 'content-creation',
+        title: 'AI Content Creation',
+        description: 'Generate high-quality content for social media, blogs, YouTube, digital marketing, and personal brands using AI-powered workflows.',
+        icon: 'sparkles',
+        colorName: 'violet',
+        colorCode: '#a855f7',
+        badge: 'Popular',
+        category: 'creative',
+        tools: ['ChatGPT', 'Veed.io', 'ElevenLabs'],
+        duration: '4 Weeks',
+        price: '₹3,499',
+        originalPrice: '₹6,999',
+        discount: '50% OFF',
+        priceAmount: 349900
+      },
+      {
+        id: 'vibe-coding',
+        title: 'Vibe Coding',
+        subtitle: 'Build Websites Without Coding',
+        description: 'Learn how to create beautiful websites, landing pages, portfolios, and business platforms using AI and no-code tools.',
+        icon: 'terminal',
+        colorName: 'cyan',
+        colorCode: '#00f0ff',
+        badge: 'Revolutionary',
+        category: 'business-tech',
+        tools: ['Claude 3.5', 'Cursor AI', 'Tailwind'],
+        duration: '5 Weeks',
+        price: '₹5,499',
+        originalPrice: '₹10,999',
+        discount: '50% OFF',
+        priceAmount: 549900
+      },
+      {
+        id: 'business',
+        title: 'AI for Business Owners',
+        description: 'Automate operations, marketing, sales, customer communication, content creation, and business growth using AI systems.',
+        icon: 'briefcase',
+        colorName: 'amber',
+        colorCode: '#f59e0b',
+        badge: 'Enterprise',
+        category: 'business-tech',
+        tools: ['Make.com', 'Zapier', 'AI Agents'],
+        duration: '6 Weeks',
+        price: '₹8,999',
+        originalPrice: '₹17,999',
+        discount: '50% OFF',
+        priceAmount: 899900
       }
+    ];
 
-      // Transition calculations for sequential phases
-      const getOpacityAndY = (progress, start, end) => {
-        const fadeInZone = 0.06;
-        const fadeOutZone = 0.06;
-        
-        if (progress < start || progress > end) {
-          return { opacity: 0, translateY: 30 };
-        }
-        
-        let opacity = 1;
-        let translateY = 0;
-        
-        if (progress < start + fadeInZone) {
-          const ratio = (progress - start) / fadeInZone;
-          opacity = ratio;
-          translateY = (1 - ratio) * 30; // Move up from 30px
-        } else if (progress > end - fadeOutZone) {
-          const ratio = (end - progress) / fadeOutZone;
-          opacity = ratio;
-          translateY = (1 - ratio) * -30; // Move up to -30px
-        }
-        
-        return { opacity, translateY };
-      };
+    const whyChooseUsData = [
+      { title: 'Learn by Building', desc: 'Work on real-world projects and practical implementations.' },
+      { title: 'Industry-Focused Curriculum', desc: 'Master the tools professionals actually use.' },
+      { title: 'Future-Proof Skills', desc: 'Stay ahead in the AI-driven economy.' },
+      { title: 'Expert Mentorship', desc: 'Learn from experienced AI practitioners.' },
+      { title: 'Portfolio Development', desc: 'Create projects that attract employers and clients.' },
+      { title: 'Business Growth', desc: 'Apply AI directly to increase productivity and revenue.' }
+    ];
 
-      const heroContents = [
-        {
-          title: "Master Generative AI.",
-          subtitle: "Empower your creative workflows with the next generation of generative AI tools. Inspired by Apple design.",
-          range: [0.0, 0.25]
-        },
-        {
-          title: "Design Vector Systems.",
-          subtitle: "Translate prompts into clean, mathematical paths. Master prompt templates and layout design rules.",
-          range: [0.25, 0.50]
-        },
-        {
-          title: "Direct Cinematic Films.",
-          subtitle: "Explore advanced camera prompts, character consistency, and custom temporal rendering timelines.",
-          range: [0.50, 0.75]
-        },
-        {
-          title: "Scale Autonomous Swarms.",
-          subtitle: "Deploy grids of autonomous agents, qualify active leads, and automate backend operations 24/7.",
-          range: [0.75, 1.0]
-        }
-      ];
+    const showcaseProjects = [
+      // Graphic Design Projects
+      { title: 'Cyberpunk Branding Identity', cat: 'Graphic Design', desc: 'Full corporate design with AI vector elements.', tags: ['Midjourney', 'Vectorizer'], img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop' },
+      { title: 'Dynamic Product Visual Ad', cat: 'Graphic Design', desc: 'Photo-realistic product mockups using generation tools.', tags: ['Generative Fill', 'Photoroom'], img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop' },
+      // Film Making Projects
+      { title: 'The Chronos Sentinel Film', cat: 'Film Making', desc: 'Award-winning fully generated AI sci-fi movie trailer.', tags: ['Runway Gen-2', 'Midjourney'], img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop' },
+      { title: 'Virtual Host News anchor', cat: 'Film Making', desc: 'Real-time high-fidelity synthesized presenting host.', tags: ['HeyGen', 'ElevenLabs'], img: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=600&auto=format&fit=crop' },
+      // Content Creation Projects
+      { title: 'Automated SaaS YouTube Channel', cat: 'Content Creation', desc: 'Complete channel management pipeline driven by agent templates.', tags: ['ChatGPT', 'Veed.io'], img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop' },
+      // Vibe Coding Projects
+      { title: 'Glassmorphic Crypto Dashboard', cat: 'Vibe Coding', desc: 'Web app UI designed, styled, and completed with AI tools.', tags: ['Vibe Code', 'Tailwind'], img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop' },
+      { title: 'Luxury Portfolio Landing Page', cat: 'Vibe Coding', desc: 'High-converting portfolio layout built entirely with prompts.', tags: ['PromptEngine', 'HTML5'], img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop' }
+    ];
 
-      // Hide scroll helper quickly after starting to scroll
-      const helperOpacity = Math.max(0, 1 - currentProgress * 8);
+    const journeyTimeline = [
+      { step: 'Step 1', title: 'Enroll', desc: 'Secure lifetime access and launch curriculum access key.' },
+      { step: 'Step 2', title: 'Learn AI Tools', desc: 'Master prompt setups, assets workflows, and generative systems.' },
+      { step: 'Step 3', title: 'Build Real Projects', desc: 'Compile professional mockups, films, and code templates.' },
+      { step: 'Step 4', title: 'Create Portfolio', desc: 'Polish a high-end showcase folder to attract employers and clients.' },
+      { step: 'Step 5', title: 'Launch & Scale', desc: 'Apply knowledge directly to increase productivity and launch scaling setups.' }
+    ];
 
-      return (
-        <section 
-          id="hero" 
-          ref={heroRef} 
-          className="relative h-[350vh] w-full bg-brand-bg z-10 select-none"
-        >
-          {/* Sticky inner container */}
-          <div className="sticky top-0 h-screen w-full overflow-hidden flex justify-center items-center">
-            
-            {/* Canvas layer */}
-            <canvas 
-              ref={canvasRef} 
-              className="absolute inset-0 w-full h-full object-cover z-0" 
-            />
+    const studentTestimonials = [
+      {
+        name: 'Sarah Jenkins',
+        role: 'Creative Director',
+        rating: 5,
+        review: 'AI Mastery Academy transformed my design agency completely. We now produce high-end branding vectors and campaigns in hours instead of days. The liquid glass template systems are beautiful.',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop',
+        project: '95% faster agency turnarounds'
+      },
+      {
+        name: 'Alex Rivera',
+        role: 'Indie Film Maker',
+        rating: 5,
+        review: 'The filmmaking modules are worth every penny. Learning temporal rendering and audio lip-sync pipelines helped me land my first commercial visual contract fully rendered with GenAI tools.',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop',
+        project: 'Award-winning trailer showcase'
+      },
+      {
+        name: 'Derrick Vance',
+        role: 'Founder, Synthetix',
+        rating: 5,
+        review: 'We automated our outbound leads pipeline, proposal layouts, and email copies using the Business Swarms framework. Highly practical templates that directly translate to revenue.',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop',
+        project: '$12k/mo automation margin'
+      }
+    ];
 
-            {/* Stark Bottom-Left Alignment Wrapper */}
-            <div className="absolute bottom-24 left-6 md:left-12 lg:left-24 right-6 md:right-auto max-w-2xl text-left flex flex-col justify-end z-20 pointer-events-none min-h-[220px]">
-              {heroContents.map((content, idx) => {
-                const { opacity, translateY } = getOpacityAndY(currentProgress, content.range[0], content.range[1]);
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      opacity: opacity,
-                      transform: `translateY(${translateY}px)`,
-                      pointerEvents: opacity > 0.1 ? 'auto' : 'none',
-                      position: idx === 0 ? 'relative' : 'absolute',
-                      top: idx === 0 ? 'auto' : 0,
-                      left: idx === 0 ? 'auto' : 0,
-                      width: '100%',
-                      transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
-                    }}
-                    className="flex flex-col select-none"
-                  >
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight text-white leading-tight font-heading mb-4">
-                      {content.title.split(" ").map((word, wIdx) => {
-                        // Apply gradient text to last couple of words to make it premium
-                        const isLastWords = wIdx >= content.title.split(" ").length - 2;
-                        return (
-                          <span key={wIdx} className={isLastWords ? "text-cyan-gradient font-black" : "text-white"}>
-                            {word}{" "}
-                          </span>
-                        );
-                      })}
-                    </h1>
-                    <p className="text-sm md:text-base lg:text-lg text-gray-400 font-light leading-relaxed max-w-xl">
-                      {content.subtitle}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
 
-            {/* Scroll Indicator positioned at bottom-right */}
-            <div 
-              style={{ opacity: helperOpacity, transition: 'opacity 0.2s ease-out' }}
-              className="absolute bottom-8 right-6 md:right-12 lg:right-24 z-20 pointer-events-auto"
-            >
-              <div
-                onClick={() => {
-                  const nextSec = document.getElementById('graphic-design');
-                  if (nextSec) {
-                    const offset = nextSec.offsetTop - 80;
-                    window.scrollTo({ top: offset, behavior: 'smooth' });
-                  }
-                }}
-                className="flex flex-col items-center text-[10px] font-mono text-brand-cyan/60 uppercase tracking-widest cursor-pointer group hover:text-brand-cyan transition-colors duration-300"
-              >
-                <span className="font-semibold">Explore System</span>
-                <div 
-                  className="w-5 h-8 border border-brand-cyan/30 rounded-full mt-2 flex justify-center p-1 group-hover:border-brand-cyan transition-colors helper-bounce"
-                >
-                  <span className="w-1.5 h-2.5 bg-brand-cyan rounded-full" />
-                </div>
-              </div>
-            </div>
+    // --- MAIN REACT APPLICATION APP ---
 
-            {/* Bottom Glow Ambient Filter */}
-            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-brand-bg to-transparent z-15 pointer-events-none" />
-          </div>
-        </section>
-      );
-    };
-
-    // Section 1: Graphic Design — AI Vector Canvas Mockup
-    const GraphicDesignSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      return (
-        <section 
-          id="graphic-design"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 01 / Graphic Design
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                AI IN DESIGN.<br/>
-                <span className="text-cyan-gradient">VECTOR SYSTEMS.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Translate prompts into mathematical paths. Master AI-driven prompt design tools, automated layout engines, and real-time generation pipelines that output clean SVG coordinates.
-              </p>
-              
-              <ul className="space-y-4 mb-8 text-sm text-gray-300">
-                {[
-                  'Generate high-resolution vector paths from raw text descriptions',
-                  'Automate typography hierarchy and layout rules using generative templates',
-                  'Optimize assets for standard resolution scaling without quality loss',
-                  '10x mockup creation speed for agency presentations'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Right: High-Fidelity Canvas Mockup */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Interface Header */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  <span className="text-xs font-mono text-gray-500 ml-4">vector-generator-engine.svg</span>
-                </div>
-                <div className="px-3 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">
-                  Live Canvas
-                </div>
-              </div>
-
-              {/* Central Drawing space */}
-              <div className="relative z-10 flex-grow my-6 border border-white/5 bg-slate-950/40 rounded-xl overflow-hidden dots-grid flex justify-center items-center">
-                
-                {/* SVG glowing graphic being constructed */}
-                <svg width="240" height="240" viewBox="0 0 200 200" className="relative z-10 drop-shadow-[0_0_20px_rgba(0,182,230,0.3)]">
-                  <path 
-                    d="M 50 150 C 50 50, 150 50, 150 150 Z" 
-                    stroke="#00B6E6" 
-                    strokeWidth="3" 
-                    fill="url(#canvas-grad)" 
-                    strokeLinecap="round"
-                    className="animated-path"
-                  />
-                  <defs>
-                    <linearGradient id="canvas-grad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#00B6E6" stopOpacity="0.1" />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Bounding box lines */}
-                  <line x1="50" y1="150" x2="50" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
-                  <line x1="150" y1="150" x2="150" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
-                  <line x1="50" y1="50" x2="150" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3" />
-                </svg>
-
-                {/* Vector handles */}
-                <div className="absolute top-[50px] left-[50px] vector-handle rounded" />
-                <div className="absolute top-[50px] left-[150px] vector-handle rounded" />
-                <div className="absolute top-[150px] left-[50px] vector-handle rounded" />
-                <div className="absolute top-[150px] left-[150px] vector-handle rounded" />
-                
-                {/* Overlay Prompt */}
-                <div className="absolute bottom-4 left-4 right-4 py-2.5 px-4 bg-slate-950/80 border border-white/10 rounded-lg text-left text-xs flex justify-between items-center backdrop-blur-md">
-                  <div className="flex items-center space-x-2.5">
-                    <i data-lucide="sparkles" className="text-brand-cyan w-3.5 h-3.5"></i>
-                    <span className="text-gray-300 truncate font-mono">/generate curve flow organic sky-blue...</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">OK</span>
-                </div>
-              </div>
-
-              {/* Interface Footer status */}
-              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="database" className="text-brand-cyan w-3 h-3"></i>
-                  <span>Nodes: 42</span>
-                </div>
-                <span>Coords: X=150, Y=50 | Zoom: 100%</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Section 2: Film Making — Cinematic Timeline Editor Mockup
-    const FilmMakingSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      return (
-        <section 
-          id="film-making"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Timeline Preview */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between order-last lg:order-first"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Editor screen header */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="video" className="text-brand-cyan w-3.5 h-3.5"></i>
-                  <span className="text-xs font-mono text-gray-400">Cinematic Editor Timeline v2</span>
-                </div>
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  <span className="text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider">Rendering</span>
-                </div>
-              </div>
-
-              {/* Video Monitor frame */}
-              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/50 rounded-xl overflow-hidden flex justify-center items-center group">
-                <img 
-                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=700&auto=format&fit=crop" 
-                  alt="Film rendering target" 
-                  className="absolute inset-0 w-full h-full object-cover opacity-60" 
-                />
-                
-                {/* Scanning gradient laser line overlay */}
-                <div className="pulse-line" />
-                
-                <div className="absolute inset-0 bg-slate-950/20 flex flex-col justify-center items-center z-10">
-                  <div className="w-14 h-14 rounded-full bg-slate-900/80 border border-white/20 flex justify-center items-center text-brand-cyan backdrop-blur-md group-hover:scale-105 transition-transform duration-300 cursor-pointer shadow-[0_0_20px_rgba(0,182,230,0.15)]">
-                    <i data-lucide="play" className="ml-1 w-[22px] h-[22px] text-brand-cyan"></i>
-                  </div>
-                </div>
-
-                {/* Aspect ratio frame marks */}
-                <div className="absolute top-2 left-2 text-[10px] font-mono text-white/40">2.39:1 CINEMASCOPE</div>
-                <div className="absolute bottom-2 right-2 text-[10px] font-mono text-white/40">4K 24FPS</div>
-              </div>
-
-              {/* Timeline Editor Tracks */}
-              <div className="relative z-10 border border-white/5 bg-slate-950/60 p-4 rounded-xl flex flex-col space-y-3 overflow-hidden">
-                {/* Timeline Head indicator */}
-                <div className="absolute inset-y-0 w-[2px] bg-brand-cyan left-[45%] z-20 playhead-glow">
-                  <div className="absolute top-0 -translate-x-[50%] w-2.5 h-2.5 bg-brand-cyan rounded-full" />
-                </div>
-                
-                {/* Track 1 */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-gray-400 w-28 text-left truncate">Track 1: Camera Track</span>
-                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
-                    <div className="absolute top-0 bottom-0 left-[20%] right-[30%] bg-brand-cyan/25 border-l border-r border-brand-cyan/40 rounded flex items-center px-2 text-[9px] text-brand-cyan font-bold truncate">Orbit zoom center</div>
-                  </div>
-                  <span className="text-gray-500">00:14:24</span>
-                </div>
-
-                {/* Track 2 */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-gray-400 w-28 text-left truncate">Track 2: Prompt Node</span>
-                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
-                    <div className="absolute top-0 bottom-0 left-[10%] right-[50%] bg-purple-500/20 border-l border-r border-purple-500/40 rounded flex items-center px-2 text-[9px] text-purple-400 font-bold truncate">Generate cinematic nebula</div>
-                  </div>
-                  <span className="text-gray-500">00:08:12</span>
-                </div>
-
-                {/* Track 3 */}
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-gray-400 w-28 text-left truncate">Track 3: SFX Generation</span>
-                  <div className="flex-grow mx-4 h-5 bg-white/5 border border-white/5 rounded relative overflow-hidden">
-                    <div className="absolute top-0 bottom-0 left-[40%] right-[10%] bg-emerald-500/20 border-l border-r border-emerald-500/40 rounded flex items-center px-2 text-[9px] text-emerald-400 font-bold truncate">Ambient drone synth</div>
-                  </div>
-                  <span className="text-gray-500">00:18:00</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 02 / Film Making
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                AI FILM PRODUCTION.<br/>
-                <span className="text-cyan-gradient">DIRECT CINEMATICS.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Explore cutting-edge camera movements, cinematic light control, and generate industry-grade film logic. Build scripts directly into temporal consistent frames without artifacts.
-              </p>
-              
-              <ul className="space-y-4 text-sm text-gray-300">
-                {[
-                  'Master camera prompts: pans, orbits, tilts, and zoom ratios',
-                  'Maintain character and object consistency across generative scenes',
-                  'Orchestrate lighting, color gradings, and environment assets via text config',
-                  'Synchronize synthetic audio score generation with film clips'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Section 3: Content Creation — Storytelling Loops Mockup
-    const ContentCreationSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      return (
-        <section 
-          id="content-creation"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 03 / Content Creation
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                AI STORYTELLING.<br/>
-                <span className="text-cyan-gradient">ENGAGEMENT LOOPS.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Automate scripts, visual assets, hook variations, and scheduling. Deploy AI pipelines that auto-adjust tone, duration, and pacing to maximize viewer retention across platforms.
-              </p>
-              
-              <ul className="space-y-4 mb-8 text-sm text-gray-300">
-                {[
-                  'Generate high-hook short scripts tailored to algorithmic feeds',
-                  'Synthesize script templates instantly into layered visual presentations',
-                  'Auto-split longer films into optimized cross-platform micro-clips',
-                  'Create automated scheduling patterns based on active traffic cycles'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Right: Funnel Flow Mockup */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Funnel header */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="sliders" className="text-brand-cyan w-3.5 h-3.5"></i>
-                  <span className="text-xs font-mono text-gray-400">Algorithmic Distribution Funnel</span>
-                </div>
-                <div className="px-3 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-[10px] font-mono text-purple-400 font-bold uppercase">
-                  ACTIVE PIPELINE
-                </div>
-              </div>
-
-              {/* Central flow illustration */}
-              <div className="relative z-10 flex-grow my-6 flex flex-col justify-center items-center border border-white/5 rounded-xl bg-slate-950/40 p-4">
-                
-                {/* Engine core */}
-                <div className="w-20 h-20 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex flex-col justify-center items-center relative z-10 mb-8 shadow-[0_0_30px_rgba(0,182,230,0.15)] group hover:scale-105 transition-transform duration-300">
-                  <i data-lucide="cpu" className="text-brand-cyan animate-pulse w-7 h-7"></i>
-                  <span className="text-[8px] font-mono text-brand-cyan/60 uppercase tracking-widest mt-1">ENGINE</span>
-                </div>
-
-                {/* Social grid node tracks */}
-                <div className="grid grid-cols-3 gap-6 w-full relative z-10">
-                  {/* YouTube shorts node */}
-                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
-                    <span className="text-[10px] font-mono text-red-500 font-bold uppercase tracking-wider mb-2">YT Shorts</span>
-                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
-                      <div className="bg-red-500 h-full w-[85%]" />
-                    </div>
-                    <span className="text-[9px] font-mono text-gray-500">Retention: 85%</span>
-                  </div>
-
-                  {/* Tiktok node */}
-                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
-                    <span className="text-[10px] font-mono text-white font-bold uppercase tracking-wider mb-2">TikTok Feed</span>
-                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
-                      <div className="bg-brand-cyan h-full w-[92%]" />
-                    </div>
-                    <span className="text-[9px] font-mono text-gray-500">Retention: 92%</span>
-                  </div>
-
-                  {/* Instagram reels node */}
-                  <div className="bg-slate-950/80 border border-white/10 p-3 rounded-lg flex flex-col items-center">
-                    <span className="text-[10px] font-mono text-pink-500 font-bold uppercase tracking-wider mb-2">IG Reels</span>
-                    <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-2">
-                      <div className="bg-pink-500 h-full w-[78%]" />
-                    </div>
-                    <span className="text-[9px] font-mono text-gray-500">Retention: 78%</span>
-                  </div>
-                </div>
-
-                {/* Flow lines utilizing SVG */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-                  <path d="M 170 120 L 80 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
-                  <path d="M 180 120 L 180 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
-                  <path d="M 190 120 L 280 180" stroke="rgba(0,182,230,0.15)" strokeWidth="1.5" strokeDasharray="4" />
-                </svg>
-
-              </div>
-
-              {/* Interface footer */}
-              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="bar-chart-2" className="text-brand-cyan w-3 h-3"></i>
-                  <span>Pipeline Flow: 2.8k items/hr</span>
-                </div>
-                <span>Sync status: Active</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Section 4: AI Avatar — Presenter Mesh Control Deck Mockup
-    const AvatarSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      return (
-        <section 
-          id="avatar"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Control Deck Mockup */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between order-last lg:order-first"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Header controls */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="bot" className="text-brand-cyan w-3.5 h-3.5"></i>
-                  <span className="text-xs font-mono text-gray-400">AI Avatar Speech & Facial Mesh Deck</span>
-                </div>
-                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-0.5 rounded">
-                  ONLINE
-                </span>
-              </div>
-
-              {/* Facial Mesh and Wavelength overlay */}
-              <div className="relative z-10 flex-grow my-6 border border-white/5 bg-slate-950/40 rounded-xl overflow-hidden flex flex-col justify-center items-center p-6">
-                
-                {/* Silhouette avatar layout mock */}
-                <div className="w-24 h-24 rounded-full border-2 border-brand-cyan/20 flex justify-center items-center relative mb-6 bg-slate-900/60 shadow-[0_0_20px_rgba(0,182,230,0.08)]">
-                  <i data-lucide="bot" className="text-brand-cyan/40 w-10.5 h-10.5"></i>
-                  
-                  {/* Overlay dots representing tracking nodes */}
-                  <div className="absolute top-[20%] left-[50%] -translate-x-[50%] w-1.5 h-1.5 bg-brand-cyan rounded-full animate-ping" />
-                  <div className="absolute top-[50%] left-[30%] w-1 h-1 bg-brand-cyan rounded-full" />
-                  <div className="absolute top-[50%] left-[70%] w-1 h-1 bg-brand-cyan rounded-full" />
-                  <div className="absolute bottom-[20%] left-[50%] -translate-x-[50%] w-1.5 h-1 bg-brand-cyan rounded-full" />
-                </div>
-
-                {/* Animated Voice bars */}
-                <div className="h-16 flex items-center justify-center space-x-1 mb-2">
-                  {[12, 36, 48, 24, 30, 42, 18, 38, 26, 12].map((val, idx) => (
-                    <div 
-                      key={idx} 
-                      className="voice-bar" 
-                      style={{ 
-                        animationDelay: `${idx * 0.1}s`,
-                        height: `${val}px`
-                      }} 
-                    />
-                  ))}
-                </div>
-                <span className="text-[10px] font-mono text-gray-500">Audio Wavelength: Speech Synthesizer synced</span>
-              </div>
-
-              {/* Control Deck values */}
-              <div className="relative z-10 grid grid-cols-2 gap-4 text-xs font-mono">
-                <div className="p-3 border border-white/5 bg-slate-950/60 rounded-lg flex flex-col text-left">
-                  <span className="text-gray-500 text-[10px] uppercase">Vocal Tone</span>
-                  <span className="text-white font-bold mt-1">Professional / Crisp</span>
-                </div>
-                <div className="p-3 border border-white/5 bg-slate-950/60 rounded-lg flex flex-col text-left">
-                  <span className="text-gray-500 text-[10px] uppercase">Lipsync Sync</span>
-                  <span className="text-brand-cyan font-bold mt-1">99.8% Calibrated</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 04 / AI Avatar
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                CREATE AI AVATARS.<br/>
-                <span className="text-cyan-gradient">VIRTUAL HOSTS.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Explore virtual presenter loops with cloned audio voices and custom head poses. Reach global markets dynamically without setting up physical stages.
-              </p>
-              
-              <ul className="space-y-4 text-sm text-gray-300">
-                {[
-                  'Clone customized vocal characteristics from 30-second audio files',
-                  'Synthesize realistic head pose and hand motions linked to scripts',
-                  'Translate voice presentations into 12+ international languages instantly',
-                  'Eliminate editing pipeline delays by generating presenters directly from text'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Section 5: AI in Business — Agent Logs Terminal Mockup
-    const BusinessSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      return (
-        <section 
-          id="business"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 05 / Business AI
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                SCALE YOUR BUSINESS.<br/>
-                <span className="text-cyan-gradient">AUTONOMOUS SWARMS.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Orchestrate swarms of autonomous agents. Connect webhooks to scrapers, automatically qualify leads, draft responses, and link operational grids to run businesses 24/7 without overhead.
-              </p>
-              
-              <ul className="space-y-4 mb-8 text-sm text-gray-300">
-                {[
-                  'Deploy automated scrapers that qualify incoming buyer leads',
-                  'Trigger autonomous agents to customize proposals and outreach emails',
-                  'Integrate APIs to bridge graphic, video, and text generation pipelines',
-                  'Monitor operational health logs through centralized console grids'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Right: Code Console Terminal Mockup */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[450px] md:h-[500px] flex flex-col justify-between"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Terminal header */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="database" className="text-brand-cyan w-3.5 h-3.5"></i>
-                  <span className="text-xs font-mono text-gray-400">root@dxign-agent-swarm:~$</span>
-                </div>
-                <div className="flex space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse" />
-                  <span className="text-[10px] font-mono text-brand-cyan uppercase font-bold tracking-wider">SWARM ONLINE</span>
-                </div>
-              </div>
-
-              {/* Terminal code logs container */}
-              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/80 p-5 rounded-xl text-left overflow-hidden flex flex-col justify-between">
-                
-                {/* Stats cards overlaid inside terminal */}
-                <div className="grid grid-cols-3 gap-3 mb-6 relative z-10">
-                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
-                    <span className="text-[8px] font-mono text-gray-500 uppercase">Active Swarm</span>
-                    <span className="text-sm font-extrabold text-white block">14 Agents</span>
-                  </div>
-                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
-                    <span className="text-[8px] font-mono text-gray-500 uppercase">Daily Calls</span>
-                    <span className="text-sm font-extrabold text-brand-cyan block">12,850 API</span>
-                  </div>
-                  <div className="p-2.5 border border-white/5 bg-slate-950/90 rounded-md">
-                    <span className="text-[8px] font-mono text-gray-500 uppercase">Automation Margin</span>
-                    <span className="text-sm font-extrabold text-white block">99.8% Match</span>
-                  </div>
-                </div>
-
-                {/* Live print output */}
-                <div className="flex-grow space-y-2.5 overflow-hidden text-[11px] font-mono select-text selection:bg-brand-cyan/20 selection:text-brand-cyan">
-                  <div className="text-gray-500">[INFO] Launching Email Capture Swarm v1.4</div>
-                  <div className="text-emerald-400 font-semibold">[SUCCESS] Scraped 142 qualified leads from active pipelines</div>
-                  <div className="text-purple-400">[TRIGGER] Prompting Auto-Agent: 'Draft customized proposal'</div>
-                  <div className="text-brand-cyan font-bold">[LOG] Asset render completed and attached - Success (240ms)</div>
-                  <div className="text-yellow-400 font-semibold">[METRIC] Conversion predicted: 84.6% margin matching</div>
-                  <div className="text-brand-cyan flex items-center">
-                    <span>root@dxign-agent-swarm:~$ listening_for_webhooks...</span>
-                    <span className="w-1.5 h-3 bg-brand-cyan ml-1.5 animate-pulse" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Interface footer status */}
-              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="sliders" className="text-brand-cyan w-3 h-3"></i>
-                  <span>Agent Core: API-Bridge active</span>
-                </div>
-                <span>Latency: 48ms</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Section 6: Vibe Coding — Interactive Code Editor Mockup
-    const VibeCodingSection = () => {
-      const containerRef = useRef(null);
-      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-      const [isGenerating, setIsGenerating] = useState(false);
-      const [generationProgress, setGenerationProgress] = useState(0);
-      const [editorCode, setEditorCode] = useState(
-`// Vibe Code your UI layout
-vibe("a futuristic premium dark-mode dashboard") {
-  theme: "iridescent-glass",
-  components: [
-    "GridMatrixBackground",
-    "GlowingPillTabs",
-    "AppleStyleParallaxHero",
-    "InteractiveTimeline"
-  ],
-  effects: ["blur-24px", "cyan-glow", "smooth-easing"]
-}`
-      );
-      const [statusText, setStatusText] = useState("Idle - waiting for prompt");
-
-      const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      };
-
-      const handleGenerate = () => {
-        if (isGenerating) return;
-        setIsGenerating(true);
-        setGenerationProgress(0);
-        setStatusText("Analyzing prompt and layout structure...");
-        
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 5;
-          setGenerationProgress(progress);
-          if (progress === 25) {
-            setStatusText("Synthesizing tailwind system classes...");
-          } else if (progress === 55) {
-            setStatusText("Structuring React components tree...");
-          } else if (progress === 80) {
-            setStatusText("Polishing micro-interactions and transitions...");
-          } else if (progress >= 100) {
-            clearInterval(interval);
-            setIsGenerating(false);
-            setStatusText("Generation successful! 100% compiled.");
-          }
-        }, 150);
-      };
-
-      return (
-        <section 
-          id="vibe-coding"
-          className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bgDarker border-t border-white/5 flex flex-col justify-center select-none"
-        >
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-5 flex flex-col text-left">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                Module 06 / Vibe Coding
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase text-white font-heading tracking-tight leading-none mb-6">
-                VIBE CODING.<br/>
-                <span className="text-cyan-gradient">PROMPT TO LAYOUT.</span>
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg">
-                Build full production layouts by simply describing your aesthetic vibes. Leverage advanced LLMs to write styling, build structure, and connect components dynamically.
-              </p>
-              
-              <ul className="space-y-4 mb-8 text-sm text-gray-300">
-                {[
-                  'Convert abstract design themes directly into responsive tailwind structures',
-                  'Synthesize interactive states and transitions automatically',
-                  'Vibe code full landing pages without writing single HTML elements manually',
-                  'Iterate components through interactive real-time updates'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Right: Code Editor Mockup */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-              }}
-              className="lg:col-span-7 glow-card glass-panel rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden p-6 md:p-8 h-[480px] md:h-[530px] flex flex-col justify-between"
-            >
-              <div className="glow-card-bg" />
-              
-              {/* Editor Header */}
-              <div className="relative z-10 flex justify-between items-center border-b border-white/5 pb-4">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="sliders" className="text-brand-cyan w-3.5 h-3.5"></i>
-                  <span className="text-xs font-mono text-gray-400">interactive-vibe-editor.js</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <button 
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="px-4 py-1.5 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-xs font-mono text-brand-cyan font-bold uppercase tracking-wider hover:bg-brand-cyan/20 active:scale-95 transition-all disabled:opacity-50 flex items-center space-x-1.5"
-                  >
-                    <i data-lucide="zap" className="w-3.5 h-3.5 text-brand-cyan"></i>
-                    <span>{isGenerating ? "Generating..." : "Generate UI"}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Central Editor Area */}
-              <div className="relative z-10 flex-grow my-4 border border-white/5 bg-slate-950/70 p-4 rounded-xl overflow-hidden flex flex-col font-mono text-xs text-left">
-                {/* Line numbers and code editor container */}
-                <div className="flex-grow flex space-x-3 select-text overflow-y-auto">
-                  <div className="text-gray-600 border-r border-white/5 pr-3 text-right select-none space-y-1">
-                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
-                  </div>
-                  <textarea
-                    value={editorCode}
-                    onChange={(e) => setEditorCode(e.target.value)}
-                    className="flex-grow bg-transparent text-gray-300 focus:outline-none resize-none h-full font-mono text-xs leading-relaxed"
-                    spellCheck="false"
-                    disabled={isGenerating}
-                  />
-                </div>
-
-                {/* Progress bar overlay during generation */}
-                {isGenerating && (
-                  <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col justify-center items-center p-6 z-20">
-                    <span className="text-xs font-mono text-brand-cyan mb-2">{statusText}</span>
-                    <div className="w-full max-w-xs bg-white/5 h-2 rounded-full overflow-hidden border border-white/10">
-                      <div 
-                        className="bg-brand-cyan/80 h-full transition-all duration-150" 
-                        style={{ width: `${generationProgress}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-500 mt-1">{generationProgress}% compiled</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Status bar */}
-              <div className="relative z-10 flex justify-between items-center border-t border-white/5 pt-4 text-xs font-mono text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <i data-lucide="shield-alert" className="text-brand-cyan w-3 h-3"></i>
-                  <span>Status: <span className={isGenerating ? "text-yellow-400" : "text-emerald-400"}>{statusText}</span></span>
-                </div>
-                <span>Lines: {editorCode.split("\n").length} | Focus: OK</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Main App Component
     const App = () => {
-      const [activeTab, setActiveTab] = useState('hero');
-      const [scrollY, setScrollY] = useState(0);
-      const [showcaseProgress, setShowcaseProgress] = useState(0);
 
-      const showcaseParentRef = useRef(null);
+      const [showcaseFilter, setShowcaseFilter] = useState('All');
+      const [activeTestimonial, setActiveTestimonial] = useState(0);
+      const [courseCategory, setCourseCategory] = useState('all');
+      const [courseView, setCourseView] = useState('grid');
+      const [enrollModal, setEnrollModal] = useState(null); // holds selected course object
 
-      // Section auto-tracking & custom transforms calculation
-      useEffect(() => {
-        const handleScroll = () => {
-          const scrollTop = window.scrollY;
-          setScrollY(scrollTop);
+      const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
 
-          // Calculate showcase progress
-          if (showcaseParentRef.current) {
-            const rect = showcaseParentRef.current.getBoundingClientRect();
-            const elementTop = rect.top + scrollTop;
-            const elementHeight = rect.height;
-            const windowHeight = window.innerHeight;
-            
-            const start = elementTop;
-            const end = elementTop + elementHeight - windowHeight;
-            const progress = Math.max(0, Math.min(1, (scrollTop - start) / (end - start)));
-            setShowcaseProgress(progress);
-          }
+      const openEnrollModal = (course) => setEnrollModal(course);
+      const closeEnrollModal = () => setEnrollModal(null);
 
-          // Active tab tracking
-          const scrollPos = scrollTop + 180; // nav buffer offset
-          if (scrollTop < 200) {
-            setActiveTab('hero');
-            return;
-          }
-          for (const item of navItems) {
-            if (item.id === 'hero') continue;
-            const el = document.getElementById(item.id);
-            if (el) {
-              const top = el.offsetTop;
-              const height = el.offsetHeight;
-              if (scrollPos >= top && scrollPos < top + height) {
-                setActiveTab(item.id);
-                break;
-              }
+      const handleRazorpayPay = () => {
+        if (!enrollModal) return;
+        const options = {
+          key: RAZORPAY_KEY,
+          amount: enrollModal.priceAmount,
+          currency: 'INR',
+          name: 'Dxign Learn',
+          description: enrollModal.title,
+          image: '/public/Images/logo/Dxign logo.png',
+          handler: function(response) {
+            closeEnrollModal();
+            alert('🎉 Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nWelcome to ' + enrollModal.title + '! Check your email for course access.');
+          },
+          prefill: {
+            name: '',
+            email: '',
+            contact: ''
+          },
+          notes: {
+            course_id: enrollModal.id,
+            course_name: enrollModal.title
+          },
+          theme: {
+            color: enrollModal.colorCode
+          },
+          modal: {
+            ondismiss: function() {
+              console.log('Razorpay checkout closed');
             }
           }
         };
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function(response) {
+          alert('Payment failed. Reason: ' + response.error.description);
+        });
+        rzp.open();
+      };
 
-        window.addEventListener('scroll', handleScroll);
-        // Initialize once
-        handleScroll();
-        return () => window.removeEventListener('scroll', handleScroll);
+      // General Enroll Now — All Courses Lifetime Access ₹5
+      const handleGeneralEnroll = () => {
+        const options = {
+          key: RAZORPAY_KEY,
+          amount: 500, // ₹5 in paise
+          currency: 'INR',
+          name: 'Dxign Learn',
+          description: 'AI Mastery Lifetime Access — All 5 Courses',
+          image: '/public/Images/logo/Dxign logo.png',
+          handler: function(response) {
+            alert('🎉 Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nWelcome to Dxign Learn! You now have lifetime access to all 5 AI courses. Check your email for access details.');
+          },
+          prefill: { name: '', email: '', contact: '' },
+          notes: { package: 'All Courses Lifetime Access' },
+          theme: { color: '#00f0ff' },
+          modal: { ondismiss: function() {} }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function(response) {
+          alert('Payment failed. Reason: ' + response.error.description);
+        });
+        rzp.open();
+      };
+
+      const colorThemes = {
+        emerald: {
+          grad: 'linear-gradient(135deg, #10b981, #00f0ff)',
+          glow: 'rgba(16, 185, 129, 0.08)',
+          bgIcon: 'bg-brand-emerald/5 border-brand-emerald/10 text-brand-emerald',
+        },
+        rose: {
+          grad: 'linear-gradient(135deg, #ec4899, #a855f7)',
+          glow: 'rgba(236, 72, 153, 0.08)',
+          bgIcon: 'bg-brand-rose/5 border-brand-rose/10 text-brand-rose',
+        },
+        violet: {
+          grad: 'linear-gradient(135deg, #a855f7, #6366f1)',
+          glow: 'rgba(168, 85, 247, 0.08)',
+          bgIcon: 'bg-brand-violet/5 border-brand-violet/10 text-brand-violet',
+        },
+        cyan: {
+          grad: 'linear-gradient(135deg, #00f0ff, #2563eb)',
+          glow: 'rgba(0, 240, 255, 0.08)',
+          bgIcon: 'bg-brand-cyan/5 border-brand-cyan/10 text-brand-cyan',
+        },
+        amber: {
+          grad: 'linear-gradient(135deg, #f59e0b, #ec4899)',
+          glow: 'rgba(245, 158, 11, 0.08)',
+          bgIcon: 'bg-amber-500/5 border-amber-500/10 text-amber-500',
+        }
+      };
+
+      // Scroll trigger registration on items
+      useEffect(() => {
+        // GSAP Scroll Trigger Entrance Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Content reveals
+        gsap.from('.hero-reveal-text', {
+          y: 50,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.15,
+          ease: 'power4.out',
+        });
+
+
+
+        // About Us section elements
+        gsap.from('.reveal-about-item', {
+          scrollTrigger: {
+            trigger: '#about-us',
+            start: 'top 75%',
+          },
+          x: 40,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+        });
+
+        // Timeline reveals
+        gsap.from('.reveal-timeline-node', {
+          scrollTrigger: {
+            trigger: '#timeline',
+            start: 'top 80%',
+          },
+          scale: 0.8,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.12,
+          ease: 'back.out(1.7)',
+        });
+
+        // Icons initialize
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+
+        return () => {
+          // Cleanup if needed
+        };
       }, []);
 
-      // Trigger Lucide SVG replacements on every render state change
+      // Trigger icons re-creation on DOM changes
       useEffect(() => {
         if (window.lucide) {
           window.lucide.createIcons();
         }
       });
 
+      // Navigate function with smooth scroll target focus
+      const navigateToSection = (id, targetToFocusId = null) => {
+
+        const el = document.getElementById(id);
+        if (el) {
+          const offset = el.offsetTop - 85;
+          window.scrollTo({ top: offset, behavior: 'smooth' });
+
+          if (targetToFocusId) {
+            setTimeout(() => {
+              let target = document.getElementById(targetToFocusId);
+              if (!target) {
+                if (targetToFocusId.startsWith('card-')) {
+                  target = document.getElementById(targetToFocusId.replace('card-', 'row-'));
+                } else if (targetToFocusId.startsWith('row-')) {
+                  target = document.getElementById(targetToFocusId.replace('row-', 'card-'));
+                }
+              }
+
+              if (target) {
+                const isRow = target.id.startsWith('row-');
+                target.classList.add(isRow ? 'translate-x-2' : '-translate-y-1', 'border-white/25');
+                target.style.setProperty('--card-glow-color-soft', 'rgba(255,255,255,0.15)');
+                setTimeout(() => {
+                  target.classList.remove(isRow ? 'translate-x-2' : '-translate-y-1', 'border-white/25');
+                  target.style.removeProperty('--card-glow-color-soft');
+                }, 1800);
+              }
+            }, 600);
+          }
+        }
+      };
+
+      const filteredShowcase = showcaseFilter === 'All' 
+        ? showcaseProjects 
+        : showcaseProjects.filter(p => p.cat === showcaseFilter);
+
       return (
-        <div className="min-h-screen flex flex-col relative bg-brand-bg select-none">
+        <div className="relative min-h-screen bg-brand-bg text-gray-200 select-none overflow-hidden pb-1">
           
-          {/* Section 1: The Glassmorphic Fixed Top Navigation */}
-          <header className="fixed top-0 left-0 right-0 h-20 glass-nav z-50 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
-            {/* Left Brand Area */}
-            <div className="flex items-center cursor-pointer" onClick={() => { setActiveTab('hero'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          {/* Ambient background glows */}
+          <div className="glow-blur-cyan w-[400px] h-[400px] top-[10%] left-[-10%]" />
+          <div className="glow-blur-violet w-[500px] h-[500px] top-[30%] right-[-10%]" />
+          <div className="glow-blur-cyan w-[400px] h-[400px] bottom-[20%] left-[10%]" />
+
+          {/* Cybernetic overlay mesh grid */}
+          <div className="absolute inset-0 cyber-grid pointer-events-none z-0" />
+
+          {/* Floating Sticky Glass Navbar */}
+          <header className="fixed top-0 left-0 right-0 h-20 glass-nav z-50 px-6 md:px-12 lg:px-24 flex items-center transition-all duration-300">
+            <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
+            {/* Logo */}
+            <div 
+              className="flex items-center self-center cursor-pointer"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
               <img
                 src="/public/Images/logo/Dxign logo.png"
-                alt="DXIGN Learn Logo"
-                className="h-10 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
-                style={{ mixBlendMode: 'screen' }}
+                alt="Dxign Logo"
+                className="h-16 w-auto object-contain"
+                style={{ display: 'block' }}
               />
             </div>
 
-            {/* Navigation tabs */}
-            <nav className="hidden lg:flex items-center space-x-1 relative">
-              {navItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveTab(item.id);
-                      const target = document.getElementById(item.id);
-                      if (target) {
-                        const offset = target.offsetTop - 80;
-                        window.scrollTo({ top: offset, behavior: 'smooth' });
-                      }
-                    }}
-                    className={`relative px-4 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider transition-colors duration-300 rounded-full ${
-                      isActive ? 'text-white' : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {isActive && (
-                      <div
-                        className="absolute inset-0 bg-brand-cyan/10 border border-brand-cyan/20 rounded-full -z-10 shadow-[0_0_15px_rgba(0,182,230,0.15)] transition-all duration-300"
-                      />
-                    )}
-                    {item.label}
-                  </a>
-                );
-              })}
-            </nav>
+            {/* Right Side Navigation + CTA */}
+            <div className="flex items-center space-x-4 lg:space-x-8 z-50">
+              {/* Menu Links */}
+              <nav className="hidden lg:flex items-center space-x-1">
+                <button 
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
+                >
+                  Home
+                </button>
 
-            {/* Right Action tab indicator/glow */}
-            <div className="flex items-center space-x-4">
-              <a 
-                href="#pricing"
-                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-brand-cyan border border-brand-cyan/30 hover:border-brand-cyan hover:bg-brand-cyan/5 transition-all duration-300 shadow-[0_0_15px_rgba(0,182,230,0.05)] hover:shadow-[0_0_20px_rgba(0,182,230,0.15)]"
-              >
-                Access Portal
-              </a>
+                {/* Dropdown Menu */}
+                <div className="relative group">
+                  <button 
+                    className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300 flex items-center space-x-1"
+                  >
+                    <span>Courses</span>
+                    <i data-lucide="chevron-down" className="w-3.5 h-3.5 mt-0.5 group-hover:rotate-180 transition-transform duration-300"></i>
+                  </button>
+
+                  {/* The Dropdown Box */}
+                  <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.001)' }} className="absolute top-7 left-1/2 -translate-x-1/2 w-64 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 transform translate-y-1 group-hover:translate-y-0 z-50">
+                    <div className="dark-glass rounded-2xl p-3 flex flex-col space-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/10">
+                      {courseList.map((course) => (
+                        <button
+                          key={course.id}
+                          onClick={() => navigateToSection('courses', `card-${course.id}`)}
+                          className="w-full px-4 py-2.5 rounded-xl text-left text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all duration-300 flex items-center space-x-2 group/item"
+                        >
+                          <i 
+                            data-lucide={course.icon} 
+                            className="w-3.5 h-3.5 group-hover/item:scale-110 transition-transform duration-300"
+                            style={{ color: course.colorCode }}
+                          ></i>
+                          <span className="truncate group-hover/item:text-white transition-colors duration-300">{course.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => navigateToSection('about-us')}
+                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
+                >
+                  About Us
+                </button>
+                <button 
+                  onClick={() => navigateToSection('showcase')}
+                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
+                >
+                  Showcase
+                </button>
+                <button 
+                  onClick={() => navigateToSection('pricing-cta')}
+                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
+                >
+                  Contact
+                </button>
+              </nav>
+
+              {/* Navbar CTA button */}
+              <div className="flex items-center">
+                <button 
+                  onClick={() => navigateToSection('pricing-cta')}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-brand-cyan border border-brand-cyan/20 bg-brand-cyan/5 hover:bg-brand-cyan hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.05)] hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
+                >
+                  Enroll Now
+                </button>
+              </div>
+            </div>
             </div>
           </header>
 
-          {/* Section 2: The Immersive Parallax Hero using Canvas Sequence */}
-          <HeroSection scrollY={scrollY} />
-
-          {/* Dedicated Full-Screen Focus Pillar Pages */}
-          <GraphicDesignSection />
-          <FilmMakingSection />
-          <ContentCreationSection />
-          <AvatarSection />
-          <BusinessSection />
-          <VibeCodingSection />
-
-          {/* Section 8: The Production Showcase (Horizontal Scroll Viewport Pinned) */}
-          <section id="showcase" ref={showcaseParentRef} className="relative h-[250vh] bg-brand-bg z-20 select-none border-t border-white/5">
-            <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center bg-brand-bg">
+          {/* Full Screen Immersive Hero Section */}
+          <section id="hero" className="min-h-screen relative w-full flex items-center pt-28 md:pt-20 px-6 md:px-12 lg:px-24 select-none z-10">
+            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
               
-              {/* Lateral background cybernetic lines */}
-              <div className="absolute inset-0 pointer-events-none z-0 opacity-20">
-                <div className="absolute top-[30%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-cyan/40 to-transparent" />
-                <div className="absolute top-[70%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-cyan/40 to-transparent" />
-              </div>
+              {/* Left Side Hero Content */}
+              <div className="lg:col-span-6 flex flex-col text-left">
+                
+                {/* Glass Badge */}
+                <div className="self-start mb-6 py-2 px-4 rounded-full liquid-glass text-xs font-mono font-bold text-brand-cyan uppercase tracking-widest flex items-center space-x-2 border border-brand-cyan/25">
+                  <span className="w-2 h-2 bg-brand-cyan rounded-full text-glow-accent animate-pulse" />
+                  <span>🚀 Future-Ready AI Education</span>
+                </div>
 
-              {/* Title & Info */}
-              <div className="px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full mb-12 relative z-10">
-                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent" />
-                  Interactive Showcase
-                </span>
-                <h2 className="text-3xl md:text-5xl font-extrabold uppercase text-white tracking-tight leading-none font-heading text-left">
-                  PRODUCTION SHOWCASE.
-                </h2>
-                <p className="text-gray-400 mt-3 text-xs md:text-sm text-left">
-                  Vertical scroll translates directly to a smooth horizontal gallery reveal.
+                {/* Animated Reveal Headline */}
+                <h1 className="hero-reveal-text text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-white leading-none font-heading mb-6">
+                  MASTER AI.<br />
+                  <span className="text-cyan-glow">CREATE FASTER.</span><br />
+                  <span className="text-violet-glow">BUILD SMARTER.</span>
+                </h1>
+
+                {/* Subheadline */}
+                <p className="hero-reveal-text text-gray-400 text-sm md:text-base lg:text-lg font-light leading-relaxed max-w-xl mb-10">
+                  Learn practical AI skills for design, filmmaking, content creation, business growth, and no-code website development through industry-focused training programs designed for the future.
                 </p>
+
+                {/* CTA Buttons */}
+                <div className="hero-reveal-text flex flex-col sm:flex-row gap-4 mb-12">
+                  <button 
+                    onClick={handleGeneralEnroll}
+                    className="px-8 py-4 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02]"
+                  >
+                    Enroll Now
+                  </button>
+                  <button 
+                    onClick={() => navigateToSection('courses')}
+                    className="px-8 py-4 rounded-xl liquid-glass text-white font-bold uppercase tracking-wider text-xs hover:border-white/20 transition-all duration-300"
+                  >
+                    Explore Courses
+                  </button>
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="hero-reveal-text grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-white/5">
+                  {[
+                    { val: '1000+', label: 'Students' },
+                    { val: 'Project-Based', label: 'Learning' },
+                    { val: 'Industry-Relevant', label: 'Skills' },
+                    { val: 'Future-Ready', label: 'Curriculum' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col text-left">
+                      <span className="text-sm font-heading font-black text-white tracking-tight uppercase">{item.val}</span>
+                      <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-1">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+
               </div>
 
-              {/* Horizontal track container */}
-              <div className="w-full relative z-10">
-                <div 
-                  style={{ transform: `translateX(${-showcaseProgress * 55}%)` }} 
-                  className="flex gap-8 px-6 md:px-12 lg:px-24 w-[240%] md:w-[190%] lg:w-[150%] transition-transform duration-100 ease-out"
-                >
-                  {showcaseItems.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="w-[280px] sm:w-[360px] md:w-[440px] h-[320px] sm:h-[380px] md:h-[420px] flex-shrink-0 glass-panel rounded-2xl border border-white/10 bg-slate-950/20 backdrop-blur-md overflow-hidden relative group cursor-grab active:cursor-grabbing"
-                    >
-                      {/* Gradient overlay tint */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${item.color} mix-blend-multiply opacity-40 z-10 transition-opacity duration-500 group-hover:opacity-60`} />
-                      
-                      {/* Interactive background image */}
-                      <img 
-                        src={item.img} 
-                        alt={item.title} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 scale-100 group-hover:scale-105 transition-transform duration-700 pointer-events-none" 
-                      />
+              {/* Right Side: Interactive 3D holographic brain */}
+              <div className="lg:col-span-6 flex justify-center items-center relative z-10 w-full">
+                
+                {/* Ambient glow mesh sphere */}
+                <div className="absolute w-[280px] md:w-[420px] h-[280px] md:h-[420px] bg-brand-cyan/5 filter blur-[90px] rounded-full pointer-events-none z-0" />
+                
+                <div className="w-full relative flex flex-col items-center">
+                  <Hero3DCanvas />
+                  
+                  {/* Glass Float UI Card 1 (Holographic Stats) */}
+                  <div className="absolute top-[10%] left-[-2%] md:left-[5%] p-3.5 liquid-glass rounded-2xl flex items-center space-x-3.5 animate-float-slow max-w-xs">
+                    <div className="w-9 h-9 rounded-lg bg-brand-cyan/15 flex justify-center items-center text-brand-cyan">
+                      <i data-lucide="activity" className="w-4 h-4"></i>
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[9px] font-mono text-gray-400 uppercase">Neural Processing</span>
+                      <span className="text-xs font-black text-white uppercase mt-0.5">Dynamic Grid Connected</span>
+                    </div>
+                  </div>
 
-                      {/* Content panel */}
-                      <div className="absolute inset-0 p-8 flex flex-col justify-between z-20 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent">
-                        <div className="flex justify-between items-start">
-                          <span className="px-3 py-1 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 text-[10px] uppercase font-mono font-bold tracking-wider text-brand-cyan">
-                            {item.tag}
-                          </span>
-                          <span className="text-xs font-mono text-gray-500">0{idx + 1}</span>
-                        </div>
-                        
-                        <div className="text-left">
-                          <p className="text-xs font-mono text-brand-cyan font-semibold uppercase tracking-wider mb-1">
-                            {item.type}
-                          </p>
-                          <h3 className="text-xl md:text-2xl font-bold text-white font-heading tracking-tight leading-tight group-hover:text-brand-cyan transition-colors duration-300">
-                            {item.title}
-                          </h3>
-                          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-xs text-gray-400 font-mono">
-                            <span>Standard Output:</span>
-                            <span className="text-white font-semibold">{item.metric}</span>
+                  {/* Glass Float UI Card 2 (Courses Active) */}
+                  <div className="absolute bottom-[10%] right-[-2%] md:right-[5%] p-3.5 liquid-glass rounded-2xl flex items-center space-x-3.5 animate-float-medium max-w-xs">
+                    <div className="w-9 h-9 rounded-lg bg-brand-violet/15 flex justify-center items-center text-brand-violet">
+                      <i data-lucide="check-circle" className="w-4 h-4"></i>
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[9px] font-mono text-gray-400 uppercase">Modules Rendered</span>
+                      <span className="text-xs font-black text-white uppercase mt-0.5">5 High-Tier Programs</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* Courses grid section */}
+          <section id="courses" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+            <div className="max-w-7xl mx-auto w-full">
+              
+              {/* Header and Controls layout */}
+              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+                
+                {/* Title */}
+                <div className="max-w-xl text-left">
+                  <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                    Educational Curriculum
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                    Explore AI Mastery Programs
+                  </h2>
+                </div>
+
+                {/* Filters & View Switchers */}
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Category Filter Pills */}
+                  <div className="flex bg-white/[0.02] border border-white/5 rounded-full p-1">
+                    {[
+                      { id: 'all', label: 'All Programs' },
+                      { id: 'creative', label: 'Creative AI' },
+                      { id: 'business-tech', label: 'Business & Tech' }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setCourseCategory(tab.id)}
+                        className={`px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all duration-300 ${
+                          courseCategory === tab.id
+                            ? 'bg-white/10 text-white border border-white/10 shadow-[0_0_12px_rgba(255,255,255,0.05)]'
+                            : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-300'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Layout View Toggles */}
+                  <div className="flex bg-white/[0.02] border border-white/5 rounded-xl p-1">
+                    <button
+                      onClick={() => setCourseView('grid')}
+                      className={`p-2 rounded-lg transition-all duration-300 ${
+                        courseView === 'grid'
+                          ? 'bg-white/10 text-white border border-white/10'
+                          : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-300'
+                      }`}
+                      title="Grid View"
+                    >
+                      <i data-lucide="layout-grid" className="w-4 h-4"></i>
+                    </button>
+                    <button
+                      onClick={() => setCourseView('list')}
+                      className={`p-2 rounded-lg transition-all duration-300 ${
+                        courseView === 'list'
+                          ? 'bg-white/10 text-white border border-white/10'
+                          : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-300'
+                      }`}
+                      title="List View"
+                    >
+                      <i data-lucide="list" className="w-4 h-4"></i>
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Conditionally render views based on state */}
+              {courseView === 'grid' ? (
+                /* Grid Layout */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+                  {courseList
+                    .filter((c) => courseCategory === 'all' || c.category === courseCategory)
+                    .map((course) => {
+                      const theme = colorThemes[course.colorName] || colorThemes.cyan;
+                      return (
+                        <div
+                          key={'grid-' + course.id}
+                          id={`card-${course.id}`}
+                          style={{
+                            '--card-accent-gradient': theme.grad,
+                            '--card-glow-color-soft': theme.glow,
+                          }}
+                          className="minimal-card rounded-3xl p-8 flex flex-col justify-between cursor-pointer group hover:-translate-y-1 h-full"
+                          onClick={() => openEnrollModal(course)}
+                        >
+                          <div>
+                            {/* Top row: Icon and badge/details */}
+                            <div className="flex justify-between items-start mb-8">
+                              <div className={`w-12 h-12 rounded-2xl border flex justify-center items-center ${theme.bgIcon} transition-all duration-500`}>
+                                <i data-lucide={course.icon} className="w-5.5 h-5.5"></i>
+                              </div>
+                              <div className="flex flex-col items-end space-y-1">
+                                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[9px] font-mono text-gray-400 uppercase tracking-wider">
+                                  {course.badge}
+                                </span>
+                                <span className="text-[9px] font-mono text-gray-500 flex items-center">
+                                  <i data-lucide="clock" className="w-2.5 h-2.5 mr-1" />
+                                  {course.duration}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Content Details */}
+                            <div className="text-left">
+                              <h3 className="course-title-minimal text-xl font-heading font-black text-white uppercase tracking-tight mb-1">
+                                {course.title}
+                              </h3>
+                              {course.subtitle && (
+                                <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest mb-3">
+                                  {course.subtitle}
+                                </p>
+                              )}
+                              <p className="course-desc-minimal text-gray-400 text-xs md:text-sm leading-relaxed mt-4 font-light">
+                                {course.description}
+                              </p>
+                            </div>
+
+                            {/* Tool tags list */}
+                            <div className="flex flex-wrap gap-1.5 mt-6">
+                              {course.tools.map((tool, idx) => (
+                                <span key={idx} className="tool-badge px-2 py-0.5 rounded text-[9px] font-mono text-gray-400">
+                                  {tool}
+                                </span>
+                              ))}
+                            </div>
+
+                          </div>
+
+                          {/* Bottom CTA action link */}
+                          <div className="mt-8 pt-5 border-t border-white/5 flex justify-between items-center">
+                            {/* Price display */}
+                            <div className="flex flex-col">
+                              <div className="flex items-baseline space-x-2">
+                                <span className="text-lg font-black text-white font-heading" style={{ color: course.colorCode }}>{course.price}</span>
+                                <span className="text-[10px] font-mono text-gray-600 line-through">{course.originalPrice}</span>
+                              </div>
+                              <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: course.colorCode, opacity: 0.75 }}>{course.discount}</span>
+                            </div>
+                            {/* Enroll arrow */}
+                            <div className="flex items-center space-x-1.5 text-xs font-mono text-gray-500 group-hover:text-white transition-colors duration-300">
+                              <span>Enroll</span>
+                              <i data-lucide="arrow-up-right" className="w-4 h-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300"></i>
+                            </div>
                           </div>
                         </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                /* List Layout */
+                <div className="flex flex-col space-y-4">
+                  {courseList
+                    .filter((c) => courseCategory === 'all' || c.category === courseCategory)
+                    .map((course) => {
+                      const theme = colorThemes[course.colorName] || colorThemes.cyan;
+                      return (
+                        <div
+                          key={'list-' + course.id}
+                          id={`row-${course.id}`}
+                          style={{
+                            '--card-accent-gradient': theme.grad,
+                            '--card-glow-color-soft': theme.glow,
+                          }}
+                          className="minimal-row rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between cursor-pointer group w-full"
+                          onClick={() => openEnrollModal(course)}
+                        >
+                          {/* Title & Icon Column */}
+                          <div className="flex items-center space-x-6 w-full md:w-5/12 text-left">
+                            <div className={`w-12 h-12 rounded-2xl border flex justify-center items-center flex-shrink-0 ${theme.bgIcon} transition-all duration-500`}>
+                              <i data-lucide={course.icon} className="w-5.5 h-5.5"></i>
+                            </div>
+                            <div className="min-w-0 pr-4">
+                              <h3 className="course-title-minimal text-lg font-heading font-black text-white uppercase tracking-tight">
+                                {course.title}
+                              </h3>
+                              {course.subtitle ? (
+                                <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest mt-0.5">
+                                  {course.subtitle}
+                                </p>
+                              ) : (
+                                <p className="text-[9px] font-mono text-gray-500 uppercase tracking-wider mt-0.5">
+                                  {course.category === 'creative' ? 'Creative AI Track' : 'Business & Automation Track'}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Description & Tools Column */}
+                          <div className="w-full md:w-4/12 text-left my-4 md:my-0 pr-6">
+                            <p className="course-desc-minimal text-gray-400 text-xs md:text-sm leading-relaxed font-light">
+                              {course.description}
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                              {course.tools.map((tool, idx) => (
+                                <span key={idx} className="tool-badge px-1.5 py-0.5 rounded text-[8px] font-mono text-gray-400">
+                                  {tool}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Stat/Action Column */}
+                          <div className="flex items-center justify-between md:justify-end space-x-6 w-full md:w-3/12 border-t border-white/5 md:border-t-0 pt-4 md:pt-0">
+                            {/* Price */}
+                            <div className="flex flex-col items-start md:items-end">
+                              <div className="flex items-baseline space-x-1.5">
+                                <span className="text-base font-black font-heading" style={{ color: course.colorCode }}>{course.price}</span>
+                                <span className="text-[10px] font-mono text-gray-600 line-through">{course.originalPrice}</span>
+                              </div>
+                              <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: course.colorCode, opacity: 0.7 }}>{course.discount}</span>
+                            </div>
+                            {/* Badge + Duration */}
+                            <div className="flex flex-col items-start md:items-end space-y-1">
+                              <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[9px] font-mono text-gray-400 uppercase tracking-wider">
+                                {course.badge}
+                              </span>
+                              <span className="text-[9px] font-mono text-gray-500 flex items-center">
+                                <i data-lucide="clock" className="w-2.5 h-2.5 mr-1" />
+                                {course.duration}
+                              </span>
+                            </div>
+                            <div className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex justify-center items-center text-gray-500 group-hover:text-white group-hover:bg-white/10 transition-all duration-300 flex-shrink-0">
+                              <i data-lucide="arrow-right" className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform duration-300"></i>
+                            </div>
+                          </div>
+
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+            </div>
+          </section>
+
+          {/* About us split screen */}
+          <section id="about-us" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
+            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+              
+              {/* Left Side: 3D rotating network globe */}
+              <div className="lg:col-span-5 flex justify-center items-center relative z-10">
+                <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
+                <div className="w-full relative flex justify-center items-center">
+                  <About3DCanvas />
+                </div>
+              </div>
+
+              {/* Right Side: Content description */}
+              <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Mission Objective
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                  About AI Mastery Academy
+                </h2>
+                
+                <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
+                  <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
+                    We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
+                  </p>
+
+                  {/* Highlights Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
+                    {[
+                      'Practical Learning',
+                      'Industry Experts',
+                      'Real Projects',
+                      'Latest AI Tools',
+                      'Career-Oriented Training',
+                      'Business Growth Strategies'
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
+                        <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
+                          <i data-lucide="check" className="w-3.5 h-3.5"></i>
+                        </div>
+                        <span>{item}</span>
                       </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* Why Choose Us */}
+          <section id="why-choose" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+            <div className="max-w-7xl mx-auto w-full">
+              
+              {/* Title */}
+              <div className="max-w-xl text-left mb-16">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Elite Advantages
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Why Learn With Us
+                </h2>
+              </div>
+
+              {/* Grid structure */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {whyChooseUsData.map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className="liquid-glass rounded-3xl p-8 text-left hover:border-white/15 transition-all duration-300"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex justify-center items-center text-brand-cyan mb-6">
+                      <i data-lucide="shield-check" className="w-5 h-5"></i>
                     </div>
+                    <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          </section>
+
+          {/* Student projects showcase */}
+          <section id="showcase" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
+            <div className="max-w-7xl mx-auto w-full">
+              
+              {/* Header Info */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+                <div className="text-left max-w-xl">
+                  <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                    Student Success showcase
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                    Student Projects & Success Stories
+                  </h2>
+                </div>
+
+                {/* Filter buttons switcher */}
+                <div className="flex flex-wrap gap-2.5">
+                  {['All', 'Graphic Design', 'Film Making', 'Content Creation', 'Vibe Coding'].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setShowcaseFilter(cat)}
+                      className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+                        showcaseFilter === cat 
+                          ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                          : 'bg-white/5 text-gray-400 border-white/5 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
                 </div>
               </div>
 
-            </div>
-          </section>
-
-          {/* Section 9: The Transaction Value Proposition */}
-          <section id="pricing" className="relative min-h-screen py-32 px-6 md:px-12 lg:px-24 bg-brand-bg z-20 border-t border-white/5 flex flex-col justify-center select-none">
-            
-            {/* Glow ambient background sphere */}
-            <div className="absolute top-[40%] left-[50%] -translate-x-[50%] -translate-y-[50%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-brand-cyan/5 filter blur-[100px] rounded-full pointer-events-none z-0" />
-            
-            <div className="max-w-6xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-              
-              {/* Left Side: Stats and Value */}
-              <div className="lg:col-span-7 flex flex-col text-left">
-                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent" />
-                  Value Proposition
-                </span>
-                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                  ACCELERATE YOUR CREATIVITY TODAY.
-                </h2>
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-12 max-w-xl">
-                  By joining DXIGN AI Mastery, you skip thousands of hours of trial and error. Master Midjourney, Runway, Stable Diffusion, ElevenLabs, and autonomous AI agents in one cohesive curriculum.
-                </p>
-
-                {/* Grid stats */}
-                <div className="grid grid-cols-3 gap-6 md:gap-8 text-left">
-                  <div className="flex flex-col">
-                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">98%</span>
-                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">Completion Rate</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">10K+</span>
-                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">Active Creators</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-3xl md:text-5xl font-extrabold text-white font-heading tracking-tight text-glow-accent text-brand-cyan">12+</span>
-                    <span className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">AI Tools Mastered</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side: Pricing glassmorphic container */}
-              <div className="lg:col-span-5">
-                <div className="glass-panel p-8 md:p-10 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-lg flex flex-col justify-between">
-                  <div className="text-left">
-                    <span className="px-3.5 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-xs font-bold font-mono tracking-wider text-brand-cyan self-start mb-6 inline-block">
-                      LAUNCH INTRO OFFER
-                    </span>
-                    
-                    <h3 className="text-2xl font-bold text-white font-heading mb-2">Lifetime Access</h3>
-                    <p className="text-gray-400 text-xs mb-8">One-time payment. All future updates included.</p>
-                    
-                    {/* Price structure */}
-                    <div className="flex items-baseline mb-8">
-                      <span className="text-5xl font-black text-white font-heading tracking-tight">$249</span>
-                      <span className="text-xl text-gray-500 line-through font-medium ml-3">$899</span>
-                      <span className="text-xs font-mono text-brand-cyan uppercase ml-4 bg-brand-cyan/10 border border-brand-cyan/20 px-2.5 py-0.5 rounded-md font-bold">
-                        Save 72%
+              {/* Projects List cards grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch transition-all duration-500">
+                {filteredShowcase.map((proj, idx) => (
+                  <div
+                    key={idx}
+                    className="masonry-item liquid-glass rounded-3xl overflow-hidden flex flex-col justify-between h-full group"
+                  >
+                    {/* Image visual cover */}
+                    <div className="h-48 md:h-52 w-full overflow-hidden relative border-b border-white/5">
+                      <img 
+                        src={proj.img} 
+                        alt={proj.title} 
+                        className="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-700 pointer-events-none opacity-85" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                      <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-brand-cyan/25 border border-brand-cyan/35 text-[9px] font-mono font-bold uppercase tracking-wider text-brand-cyan">
+                        {proj.cat}
                       </span>
                     </div>
 
-                    {/* Features checklist */}
-                    <ul className="space-y-4 text-sm text-gray-300 mb-10 text-left border-t border-white/5 pt-8">
-                      {[
-                        'Over 40+ high-fidelity video modules',
-                        'Private community workspace on Discord',
-                        'All vector presets, prompt databases, and pipelines',
-                        'Lifetime access to update cycles',
-                        'Verifiable digital course certificate'
-                      ].map((item, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <i data-lucide="check-circle" className="text-brand-cyan mr-3 mt-0.5 flex-shrink-0 w-4 h-4"></i>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    {/* Content details */}
+                    <div className="p-6 md:p-8 text-left flex-grow flex flex-col justify-between">
+                      <div className="mb-6">
+                        <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight group-hover:text-brand-cyan transition-colors duration-300 mb-2 leading-snug">
+                          {proj.title}
+                        </h3>
+                        <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed">
+                          {proj.desc}
+                        </p>
+                      </div>
 
-                  {/* Pricing Action triggers */}
-                  <div className="flex flex-col gap-4">
-                    <button className="w-full py-4 rounded-xl bg-brand-cyan/10 border-2 border-brand-cyan text-brand-cyan hover:bg-brand-cyan hover:text-black font-bold uppercase tracking-wider text-xs transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,182,230,0.4)]">
-                      Enroll Now
-                    </button>
-                    <button className="w-full py-4 rounded-xl border border-white/10 hover:border-white hover:bg-white/5 text-white font-semibold transition-all duration-300 text-xs uppercase tracking-wider">
-                      Explore Curriculum
-                    </button>
+                      {/* Tag indicators */}
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                        {proj.tags.map((tg, tIdx) => (
+                          <span key={tIdx} className="text-[9px] font-mono text-gray-500 uppercase">
+                            #{tg}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
 
             </div>
           </section>
 
-          {/* Premium Footer */}
+          {/* Timeline steps */}
+          <section id="timeline" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+            <div className="max-w-7xl mx-auto w-full">
+              
+              {/* Header Title */}
+              <div className="max-w-xl text-left mb-20">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Path to Mastery
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Learning Journey
+                </h2>
+              </div>
+
+              {/* Timeline Horizontal Line Track (Desktop) or Vertical (Mobile) */}
+              <div className="relative">
+                
+                {/* Connector Path line */}
+                <div className="absolute top-1/2 left-0 right-0 h-[2px] glowing-timeline-line -translate-y-1/2 z-0 hidden lg:block" />
+                <div className="absolute left-6 top-0 bottom-0 w-[2px] glowing-timeline-line z-0 lg:hidden" />
+
+                {/* Nodes container */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-8 relative z-10">
+                  {journeyTimeline.map((item, idx) => (
+                    <div 
+                      key={idx}
+                      className="reveal-timeline-node flex flex-row lg:flex-col items-start lg:items-center text-left lg:text-center group"
+                    >
+                      {/* Round Node circle indicator */}
+                      <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-brand-cyan flex justify-center items-center text-brand-cyan font-mono font-bold text-sm shadow-[0_0_15px_rgba(0,240,255,0.4)] group-hover:scale-110 group-hover:border-brand-violet group-hover:text-brand-violet transition-all duration-300 flex-shrink-0 mr-6 lg:mr-0 lg:mb-6 z-10">
+                        0{idx + 1}
+                      </div>
+
+                      {/* Content block */}
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-brand-cyan group-hover:text-brand-violet transition-colors duration-300 uppercase tracking-widest mb-1.5 font-bold">
+                          {item.step}
+                        </span>
+                        <h3 className="text-base font-heading font-black text-white uppercase tracking-tight mb-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-400 text-xs leading-relaxed font-light max-w-[200px]">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* Testimonial slider carousel */}
+          <section id="testimonials" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
+            <div className="max-w-5xl mx-auto w-full">
+              
+              {/* Header Title */}
+              <div className="text-center mb-16 flex flex-col items-center">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Verified Reviews
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Student Success Stories
+                </h2>
+              </div>
+
+              {/* Slider panel box */}
+              <div className="liquid-glass p-8 md:p-12 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[300px]">
+                
+                {/* Quote sign icon background */}
+                <i data-lucide="quote" className="absolute top-6 right-8 w-24 h-24 text-white/[0.02] pointer-events-none" />
+
+                {/* Rating & quote content details */}
+                <div className="text-left relative z-10 flex-grow flex flex-col justify-center">
+                  
+                  {/* Stars indicators */}
+                  <div className="flex space-x-1.5 mb-6">
+                    {[...Array(studentTestimonials[activeTestimonial].rating)].map((_, sIdx) => (
+                      <i key={sIdx} data-lucide="star" className="w-4 h-4 fill-brand-cyan text-brand-cyan"></i>
+                    ))}
+                  </div>
+
+                  <p className="text-gray-200 text-sm md:text-lg lg:text-xl font-light italic leading-relaxed mb-8">
+                    "{studentTestimonials[activeTestimonial].review}"
+                  </p>
+                </div>
+
+                {/* Switcher details footer bar */}
+                <div className="relative z-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  {/* Student details */}
+                  <div className="flex items-center space-x-4">
+                    <img 
+                      src={studentTestimonials[activeTestimonial].avatar} 
+                      alt={studentTestimonials[activeTestimonial].name} 
+                      className="w-11 h-11 rounded-full object-cover border border-white/15"
+                    />
+                    <div className="text-left">
+                      <span className="font-heading font-black text-white text-sm block uppercase tracking-tight">
+                        {studentTestimonials[activeTestimonial].name}
+                      </span>
+                      <span className="text-[10px] font-mono text-gray-500 uppercase mt-0.5 block">
+                        {studentTestimonials[activeTestimonial].role} &middot; <span className="text-brand-cyan font-bold">{studentTestimonials[activeTestimonial].project}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Navigation Switch controls */}
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => setActiveTestimonial((prev) => (prev === 0 ? studentTestimonials.length - 1 : prev - 1))}
+                      className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex justify-center items-center text-white border border-white/5 transition-all duration-300"
+                    >
+                      <i data-lucide="chevron-left" className="w-4 h-4"></i>
+                    </button>
+                    <button 
+                      onClick={() => setActiveTestimonial((prev) => (prev === studentTestimonials.length - 1 ? 0 : prev + 1))}
+                      className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex justify-center items-center text-white border border-white/5 transition-all duration-300"
+                    >
+                      <i data-lucide="chevron-right" className="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* Immersive CTA with warp particle canvas */}
+          <section id="pricing-cta" className="relative py-36 px-6 md:px-12 lg:px-24 border-t border-white/5 select-none bg-brand-bg flex items-center justify-center">
+            
+            {/* Warp particles Canvas */}
+            <Cta3DCanvas />
+
+            {/* Glowing atmosphere ambient blur */}
+            <div className="absolute w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-brand-cyan/10 filter blur-[100px] rounded-full pointer-events-none z-0" />
+
+            {/* Container details */}
+            <div className="max-w-4xl mx-auto w-full relative z-10 flex flex-col items-center justify-center text-center">
+              
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-4 bg-brand-cyan/10 border border-brand-cyan/20 px-3.5 py-1.5 rounded-full">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                Launch Offer &middot; Lifetime Access
+              </span>
+
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-none font-heading mb-6 max-w-2xl text-white-glow">
+                Ready to Master AI and Build Your Future?
+              </h2>
+
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mb-12 font-light">
+                Join the next generation of creators, entrepreneurs, and professionals using AI to achieve extraordinary results. Get complete lifetime access to all future course modules.
+              </p>
+
+              {/* Price Tag Details panel */}
+              <div className="liquid-glass p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 max-w-xl w-full mb-12 border border-brand-cyan/20">
+                <div className="text-left">
+                  <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight">AI Mastery Lifetime Access</h3>
+                  <p className="text-xs text-gray-500 mt-1">One-time payment. All updates included.</p>
+                </div>
+                <div className="flex items-baseline space-x-3.5">
+                  <span className="text-4xl font-black text-white font-heading tracking-tight">₹5</span>
+                  <span className="text-base text-gray-500 line-through font-medium">₹999</span>
+                  <span className="text-[10px] font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-2 py-0.5 rounded uppercase font-bold">
+                    Save 99%
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions buttons triggers */}
+              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md">
+                <button
+                  onClick={handleGeneralEnroll}
+                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02] flex-grow"
+                >
+                  Enroll Now
+                </button>
+                <a
+                  href="mailto:contact@aimastery.academy?subject=General%20Inquiry"
+                  className="px-8 py-4 rounded-xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300 flex-grow"
+                >
+                  Contact Us
+                </a>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Premium Glass Footer */}
           <footer className="bg-brand-bgDarker text-gray-500 py-16 px-6 md:px-12 lg:px-24 border-t border-white/5 z-20 select-none relative">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
-              <div>
-                <div className="flex items-center justify-center md:justify-start mb-4">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-left mb-12">
+              
+              {/* Col 1 Brand details */}
+              <div className="flex flex-col text-left col-span-1 md:col-span-2">
+                <div className="flex items-center mb-4">
                   <img
                     src="/public/Images/logo/Dxign logo.png"
-                    alt="DXIGN Learn Logo"
+                    alt="Dxign Logo"
                     className="h-9 w-auto object-contain"
-                    style={{ mixBlendMode: 'screen' }}
                   />
                 </div>
-                <p className="text-xs text-gray-600 max-w-sm">
-                  DXIGN AI Course is an independent organization. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
+                <p className="text-xs text-gray-600 max-w-sm leading-relaxed mb-4">
+                  AI Mastery Academy is an independent education portal. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
                 </p>
               </div>
-              <div className="flex flex-col md:flex-row gap-6 md:gap-12 text-xs">
-                <a href="#" className="hover:text-white transition-colors duration-300">Privacy Policy</a>
-                <a href="#" className="hover:text-white transition-colors duration-300">Terms of Service</a>
-                <a href="#" className="hover:text-white transition-colors duration-300">Student Portal</a>
+
+              {/* Col 2 Sitemaps Courses */}
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4 font-bold">Programs</span>
+                <div className="flex flex-col space-y-2 text-xs">
+                  {courseList.map(c => (
+                    <button 
+                      key={c.id} 
+                      onClick={() => navigateToSection('courses', `card-${c.id}`)}
+                      className="text-left text-gray-600 hover:text-white transition-colors duration-300"
+                    >
+                      {c.title}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Col 3 Contacts info */}
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-widest mb-4 font-bold">Connect</span>
+                <div className="flex flex-col space-y-2 text-xs text-gray-600">
+                  <a href="#" className="hover:text-white transition-colors duration-300">Instagram</a>
+                  <a href="#" className="hover:text-white transition-colors duration-300">YouTube</a>
+                  <a href="#" className="hover:text-white transition-colors duration-300">LinkedIn</a>
+                </div>
+              </div>
+
             </div>
-            <div className="max-w-7xl mx-auto border-t border-white/5 mt-10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
-              <span>&copy; 2026 DXIGN AI Academy. All rights reserved.</span>
+
+            {/* Copyright notes */}
+            <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
+              <span>&copy; 2026 AI Mastery Academy. All Rights Reserved.</span>
               <span className="text-gray-600">Site inspired by Apple. Engineered using React, CSS, and Tailwind CSS.</span>
             </div>
           </footer>
+
+          {/* ===== ENROLL MODAL / RAZORPAY POPUP ===== */}
+          {enrollModal && (() => {
+            const theme = colorThemes[enrollModal.colorName] || colorThemes.cyan;
+            return (
+              <div
+                className="fixed inset-0 z-[9999] flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
+                onClick={closeEnrollModal}
+              >
+                <div
+                  className="relative w-full max-w-md mx-4 rounded-3xl border border-white/10 overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
+                    boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Gradient top accent bar */}
+                  <div className="h-1 w-full" style={{ background: theme.grad }} />
+
+                  {/* Close button */}
+                  <button
+                    onClick={closeEnrollModal}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 z-10"
+                  >
+                    <i data-lucide="x" className="w-4 h-4"></i>
+                  </button>
+
+                  <div className="p-8">
+
+                    {/* Course Icon + Badge Row */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className={`w-14 h-14 rounded-2xl border flex justify-center items-center ${theme.bgIcon}`}>
+                        <i data-lucide={enrollModal.icon} className="w-6 h-6"></i>
+                      </div>
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border border-white/10 text-gray-400" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                        {enrollModal.badge}
+                      </span>
+                    </div>
+
+                    {/* Course Title */}
+                    <h2 className="text-2xl font-black uppercase tracking-tight text-white font-heading mb-1">
+                      {enrollModal.title}
+                    </h2>
+                    {enrollModal.subtitle && (
+                      <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3">{enrollModal.subtitle}</p>
+                    )}
+                    <p className="text-gray-500 text-xs leading-relaxed mb-6">{enrollModal.description}</p>
+
+                    {/* Meta row */}
+                    <div className="flex items-center space-x-4 mb-6">
+                      <span className="flex items-center text-[10px] font-mono text-gray-500">
+                        <i data-lucide="clock" className="w-3 h-3 mr-1.5"></i>
+                        {enrollModal.duration}
+                      </span>
+                      <span className="w-px h-4 bg-white/5"></span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {enrollModal.tools.map((t, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded text-[9px] font-mono text-gray-500 bg-white/[0.03] border border-white/5">{t}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-white/5 mb-6" />
+
+                    {/* Pricing */}
+                    <div className="flex items-end justify-between mb-6">
+                      <div>
+                        <div className="flex items-baseline space-x-2">
+                          <span className="text-3xl font-black font-heading" style={{ color: enrollModal.colorCode }}>{enrollModal.price}</span>
+                          <span className="text-sm font-mono text-gray-600 line-through">{enrollModal.originalPrice}</span>
+                        </div>
+                        <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: enrollModal.colorCode, opacity: 0.7 }}>
+                          {enrollModal.discount} · One-time payment
+                        </span>
+                      </div>
+                      <span className="px-3 py-1.5 rounded-full text-[10px] font-mono text-white border border-white/10 bg-white/5">
+                        Lifetime Access
+                      </span>
+                    </div>
+
+                    {/* Razorpay Pay Button */}
+                    <button
+                      onClick={handleRazorpayPay}
+                      className="w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-wider text-white transition-all duration-300 flex items-center justify-center space-x-3 hover:scale-[1.02] active:scale-[0.99]"
+                      style={{
+                        background: 'linear-gradient(135deg, #528FF0 0%, #3a73d8 100%)',
+                        boxShadow: '0 0 30px rgba(82,143,240,0.3)',
+                      }}
+                    >
+                      {/* Razorpay logo SVG */}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.5 4.5L14.25 19.5L10.5 12L4.5 9.75L19.5 4.5Z" fill="white" />
+                        <path d="M10.5 12L14.25 19.5L12 15.75L10.5 12Z" fill="rgba(255,255,255,0.5)" />
+                      </svg>
+                      <span>Pay with Razorpay</span>
+                    </button>
+
+                    {/* Trust note */}
+                    <p className="text-center text-[10px] font-mono text-gray-600 mt-4 flex items-center justify-center space-x-1.5">
+                      <i data-lucide="shield-check" className="w-3 h-3 text-green-500"></i>
+                      <span>Secured by Razorpay · 256-bit SSL encryption</span>
+                    </p>
+
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
       );
     };
 
-    // Render the React application inside the DOM
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
