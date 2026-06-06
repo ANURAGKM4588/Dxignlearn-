@@ -904,7 +904,7 @@
                       {courseList.map((course) => (
                         <button
                           key={course.id}
-                          onClick={() => navigateToSection('courses', `card-${course.id}`)}
+                          onClick={() => openEnrollModal(course)}
                           className="w-full px-4 py-2.5 rounded-xl text-left text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all duration-300 flex items-center space-x-2 group/item"
                         >
                           <i 
