@@ -275,20 +275,10 @@
           // Unlock body scroll immediately
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
+          isAnimatingRef.current = false;
 
-          // Animate native window scroll down to window.innerHeight
-          const scrollObj = { y: window.scrollY };
-          frameTweenRef.current = gsap.to(scrollObj, {
-            y: window.innerHeight,
-            duration: 1.2,
-            ease: 'power2.inOut',
-            onUpdate: () => {
-              window.scrollTo(0, scrollObj.y);
-            },
-            onComplete: () => {
-              isAnimatingRef.current = false;
-            }
-          });
+          // Perform a small scroll offset to trigger native scroll handoff
+          window.scrollTo(0, 10);
         };
 
         return () => {
@@ -403,19 +393,27 @@
       useEffect(() => {
         if (activeScene < 4) return;
 
+        let ticking = false;
+
         const handleScroll = () => {
-          const sy = window.scrollY;
-          const vh = window.innerHeight;
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              const sy = window.scrollY;
+              const vh = window.innerHeight;
 
-          // Map scroll progress to the final image sequence frames (137 to 183)
-          const progress = Math.min(1, Math.max(0, sy / vh));
-          const frameIdx = SCENE_FRAMES[3] + progress * (SCENE_FRAMES[4] - SCENE_FRAMES[3]);
-          currentFrameRef.current = frameIdx;
-          drawFrame(Math.round(frameIdx));
+              // Map scroll progress to the final image sequence frames (137 to 183)
+              const progress = Math.min(1, Math.max(0, sy / vh));
+              const frameIdx = SCENE_FRAMES[3] + progress * (SCENE_FRAMES[4] - SCENE_FRAMES[3]);
+              currentFrameRef.current = frameIdx;
+              drawFrame(Math.round(frameIdx));
 
-          // If scrolled back to top, trigger re-pinning
-          if (sy <= 3 && !isAnimatingRef.current) {
-            goToScene(3);
+              // If scrolled back to top, trigger re-pinning
+              if (sy <= 3 && !isAnimatingRef.current) {
+                goToScene(3);
+              }
+              ticking = false;
+            });
+            ticking = true;
           }
         };
 
@@ -467,23 +465,13 @@
             duration: 0.4,
           });
 
-          // Unlock body scroll immediately to allow window scroll animation
+          // Unlock body scroll immediately
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
+          isAnimatingRef.current = false;
 
-          // Animate native window scroll down to window.innerHeight
-          const scrollObj = { y: window.scrollY };
-          frameTweenRef.current = gsap.to(scrollObj, {
-            y: window.innerHeight,
-            duration: 1.2,
-            ease: 'power2.inOut',
-            onUpdate: () => {
-              window.scrollTo(0, scrollObj.y);
-            },
-            onComplete: () => {
-              isAnimatingRef.current = false;
-            }
-          });
+          // Perform a small scroll offset to trigger native scroll handoff
+          window.scrollTo(0, 10);
         }
 
         // Re-pinning from Scene 4 (scroll back up to scene 3)
