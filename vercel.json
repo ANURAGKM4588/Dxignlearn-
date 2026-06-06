@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/favicon.ico",
+      "destination": "/public/Images/logo/Faveicon.png"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
