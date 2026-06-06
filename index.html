@@ -813,7 +813,14 @@
             {!isPlaying && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none transition-all duration-300">
                 <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform duration-300">
-                  <i data-lucide="play" className="w-4 h-4 ml-0.5 fill-white"></i>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="currentColor" 
+                    className="w-4 h-4 ml-0.5 fill-white text-white"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
                 </div>
               </div>
             )}
