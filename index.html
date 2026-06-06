@@ -73,286 +73,445 @@
 
     // --- 3D CANVAS COMPONENTS ---
 
-    // ── HERO SCENES DEFINITION (Scroll-Driven Apple Style) ──────────────────
-    const HERO_SCENES = [
+    // --- 3D CANVAS COMPONENTS ---
+
+    // ── SCROLL-DRIVEN SEQUENCE CONSTANTS ────────────────────────────────────
+    const TOTAL_FRAMES = 184;
+    const frameUrl = (n) => `/public/Images/heropage/ezgif-frame-${String(n).padStart(3, '0')}.png`;
+    const SCENE_FRAMES = [0, 45, 91, 137, 183]; // 0-indexed corresponding to frame 1, 46, 92, 138, 184
+    const CRITICAL_FRAMES = [1, 46, 92, 138]; // 1-indexed critical frames for initial load
+
+    // ── HERO SCENES DATA ────────────────────────────────────────────────────
+    const HERO_SCENES_DATA = [
       {
-        badge: '🚀  Future-Ready AI Education',
+        badge: '🚀 Future-Ready AI Education',
         line1: 'MASTER',
         line2: 'AI.',
         sub: 'Learn practical AI skills for design, filmmaking, content creation, and business growth — built for the future.',
-        colorClass: 'text-white',
-        type: 'intro',
       },
       {
-        badge: '✦  AI Design & Creation',
-        line1: 'CREATE',
-        line2: 'FASTER.',
-        sub: 'Master Midjourney, Adobe Firefly, and Photoroom. Create stunning visuals, product renders, ad creatives, and brand identities in minutes.',
-        colorClass: 'text-cyan-glow',
-        type: 'feature',
-        tags: ['Midjourney', 'Adobe Firefly', 'Photoroom', 'Ideogram'],
+        badge: '🎨 AI Design & Creation',
+        line1: 'CREATE WITH',
+        line2: 'AI.',
+        sub: 'Generate stunning visuals, videos, graphics, and content using the latest AI tools and workflows.',
+        tags: ['Midjourney', 'Adobe Firefly', 'Runway Gen-2', 'Sora AI'],
+        courseName: 'AI Design & Creation',
+        duration: '6 Weeks',
+        price: '₹4,999',
+        themeColor: '#10b981',
+        themeGrad: 'linear-gradient(90deg, #10b981, #a855f7)'
       },
       {
-        badge: '🎬  AI Film Making',
-        line1: 'DIRECT.',
-        line2: 'PRODUCE.',
-        sub: 'Create cinematic reels, AI commercials, and storytelling videos using Runway Gen-2, Sora, HeyGen, and CapCut AI — zero film crew needed.',
-        colorClass: 'text-violet-glow',
-        type: 'feature',
-        tags: ['Runway Gen-2', 'Sora AI', 'HeyGen', 'CapCut AI'],
-      },
-      {
-        badge: '💼  AI Business Automation',
-        line1: 'BUILD',
-        line2: 'SMARTER.',
-        sub: 'Automate your operations, scale revenue, and dominate your market with Make.com, Zapier, and intelligent AI agents.',
-        colorClass: 'text-cyan-glow',
-        type: 'feature',
+        badge: '💼 AI Business Automation',
+        line1: 'AUTOMATE',
+        line2: 'BUSINESS.',
+        sub: 'Learn automation systems, AI agents, marketing workflows, and productivity tools that save time and scale growth.',
         tags: ['Make.com', 'Zapier AI', 'ChatGPT', 'AI Agents'],
+        courseName: 'AI Business Automation',
+        duration: '8 Weeks',
+        price: '₹8,999',
+        themeColor: '#f59e0b',
+        themeGrad: 'linear-gradient(90deg, #f59e0b, #00f0ff)'
       },
       {
-        badge: '🎯  Join 1000+ Students',
-        line1: 'START',
-        line2: 'TODAY.',
-        sub: '5 industry-focused programs. Real projects. Real skills. Real career impact. Join the next generation of AI-powered creators and builders.',
-        colorClass: 'text-violet-glow',
-        type: 'cta',
+        badge: '🎯 Join 1000+ Students',
+        line1: 'BUILD THE',
+        line2: 'FUTURE.',
+        sub: 'Master the skills, tools, and strategies needed to lead the next generation of AI-powered businesses and careers.',
+        status: 'ENROLLMENT OPEN',
+        seats: 'Limited seats remaining'
       }
     ];
 
-    // ── HERO SECTION (Scroll-driven frame sequence & overlays) ───────────────
     const HeroSection = ({ handleGeneralEnroll, navigateToSection }) => {
       const containerRef = useRef(null);
       const canvasRef = useRef(null);
+      const textRefs = useRef([]);
       const imagesRef = useRef([]);
-      const frameRef = useRef(0);
-      
-      const [progress, setProgress] = useState(0);
+      const currentFrameRef = useRef(0);
+      const frameTweenRef = useRef(null);
+      const isAnimatingRef = useRef(false);
+      const touchStartY = useRef(0);
+
+      const [activeScene, setActiveScene] = useState(0);
       const [isLoading, setIsLoading] = useState(true);
+      const [progress, setProgress] = useState(0);
 
-      const scene0Ref = useRef(null);
-      const scene1Ref = useRef(null);
-      const scene2Ref = useRef(null);
-      const scene3Ref = useRef(null);
-      const scene4Ref = useRef(null);
-
-      const sceneRefs = [scene0Ref, scene1Ref, scene2Ref, scene3Ref, scene4Ref];
-      const TOTAL_FRAMES = 184;
-
-      // ── PRELOAD IMAGES ──────────────────────────────────────────────────
-      useEffect(() => {
-        let loaded = 0;
-        const imgs = [];
-
-        const checkComplete = () => {
-          loaded++;
-          const pct = Math.min(100, Math.round((loaded / TOTAL_FRAMES) * 100));
-          setProgress(pct);
-          if (loaded >= TOTAL_FRAMES) {
-            setTimeout(() => {
-              setIsLoading(false);
-            }, 300);
-          }
-        };
-
-        for (let i = 1; i <= TOTAL_FRAMES; i++) {
-          const img = new Image();
-          img.src = `/public/Images/heropage/ezgif-frame-${String(i).padStart(3, '0')}.png`;
-          img.onload = checkComplete;
-          img.onerror = checkComplete;
-          imgs.push(img);
-        }
-        imagesRef.current = imgs;
-      }, []);
-
-      // ── DRAW FRAME ───────────────────────────────────────────────────────
-      const drawFrame = (frameIdx) => {
+      // Draw a frame — cover-fit centered on canvas
+      const drawFrame = (index) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        // Robust fallback: search closest loaded image
-        let img = imagesRef.current[frameIdx];
-        if (!img || !img.complete) {
-          for (let i = frameIdx; i >= 0; i--) {
-            if (imagesRef.current[i] && imagesRef.current[i].complete) {
-              img = imagesRef.current[i];
-              break;
-            }
-          }
-        }
-        if (!img || !img.complete) {
-          for (let i = frameIdx; i < TOTAL_FRAMES; i++) {
-            if (imagesRef.current[i] && imagesRef.current[i].complete) {
-              img = imagesRef.current[i];
-              break;
+        // Find the closest loaded image in the array
+        let img = null;
+        let closestDist = Infinity;
+        const images = imagesRef.current;
+
+        for (let i = 0; i < TOTAL_FRAMES; i++) {
+          const tempImg = images[i];
+          if (tempImg && tempImg.complete && tempImg.naturalWidth > 0) {
+            const dist = Math.abs(i - index);
+            if (dist < closestDist) {
+              closestDist = dist;
+              img = tempImg;
             }
           }
         }
 
-        if (!img || !img.complete || !img.naturalWidth) return;
+        if (!img) return; // No image loaded yet
 
         const cw = canvas.width;
         const ch = canvas.height;
-        const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-        const dw = img.naturalWidth * s;
-        const dh = img.naturalHeight * s;
+        const iw = img.naturalWidth;
+        const ih = img.naturalHeight;
+
+        // Cover-fit calculation
+        const scale = Math.max(cw / iw, ch / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+        const dx = (cw - dw) / 2;
+        const dy = (ch - dh) / 2;
 
         ctx.clearRect(0, 0, cw, ch);
-        ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+        ctx.drawImage(img, dx, dy, dw, dh);
       };
 
-      // ── RESIZE CANVAS ────────────────────────────────────────────────────
+      // Preload images
       useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        const images = [];
+        for (let i = 1; i <= TOTAL_FRAMES; i++) {
+          images.push(null);
+        }
+        imagesRef.current = images;
 
-        const resize = () => {
+        let criticalLoadedCount = 0;
+        const totalCritical = CRITICAL_FRAMES.length;
+
+        const onCriticalFrameLoad = () => {
+          criticalLoadedCount++;
+          setProgress(Math.min(100, Math.round((criticalLoadedCount / totalCritical) * 100)));
+          if (criticalLoadedCount >= totalCritical) {
+            // Draw initial frame
+            drawFrame(0);
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 600);
+            loadBackgroundFrames();
+          }
+        };
+
+        // Load critical frames first
+        CRITICAL_FRAMES.forEach((frameNum) => {
+          const img = new Image();
+          img.src = frameUrl(frameNum);
+          img.onload = onCriticalFrameLoad;
+          img.onerror = onCriticalFrameLoad;
+          images[frameNum - 1] = img;
+        });
+
+        // Load remaining frames in background
+        const loadBackgroundFrames = () => {
+          for (let i = 1; i <= TOTAL_FRAMES; i++) {
+            if (CRITICAL_FRAMES.includes(i)) continue;
+            const img = new Image();
+            img.src = frameUrl(i);
+            img.onload = ((index) => {
+              return () => {
+                images[index] = img;
+                if (Math.abs(index - currentFrameRef.current) < 2) {
+                  drawFrame(Math.round(currentFrameRef.current));
+                }
+              };
+            })(i - 1);
+          }
+        };
+      }, []);
+
+      // Handle canvas resizing for crispness
+      useEffect(() => {
+        const handleResize = () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
           canvas.width = window.innerWidth;
           canvas.height = window.innerHeight;
-          drawFrame(frameRef.current);
+          drawFrame(Math.round(currentFrameRef.current));
         };
 
-        window.addEventListener('resize', resize);
-        resize();
-
-        return () => window.removeEventListener('resize', resize);
+        window.addEventListener('resize', handleResize);
+        if (!isLoading) {
+          handleResize();
+        }
+        return () => window.removeEventListener('resize', handleResize);
       }, [isLoading]);
 
-      // ── GSAP TIMELINE SETUP ──────────────────────────────────────────────
+      // Initialize canvas size when loading completes
       useEffect(() => {
-        if (isLoading) return;
+        if (!isLoading && canvasRef.current) {
+          const canvas = canvasRef.current;
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          drawFrame(0);
+        }
+      }, [isLoading]);
 
-        gsap.registerPlugin(ScrollTrigger);
+      // Register global unpin function
+      useEffect(() => {
+        window.unpinHero = () => {
+          if (activeScene >= 4) return;
+          setActiveScene(4);
+          isAnimatingRef.current = true;
 
-        const frameObj = { frame: 0 };
+          gsap.killTweensOf([canvasRef.current, textRefs.current, containerRef.current]);
+          if (frameTweenRef.current) frameTweenRef.current.kill();
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 0.5,
-          }
-        });
+          // Dissolve Glass UI elements
+          gsap.to(['.hero-controls', '.hero-scroll-cue'], {
+            opacity: 0,
+            duration: 0.5,
+            ease: 'power2.out',
+          });
 
-        // 1. Scrub background frames
-        tl.to(frameObj, {
-          frame: TOTAL_FRAMES - 1,
-          snap: 'frame',
-          ease: 'none',
-          duration: 10,
-          onUpdate: () => {
-            const f = Math.round(frameObj.frame);
-            frameRef.current = f;
-            drawFrame(f);
-          }
-        }, 0);
+          // Scrub frames to end
+          const frameObj = { val: currentFrameRef.current };
+          frameTweenRef.current = gsap.to(frameObj, {
+            val: SCENE_FRAMES[4],
+            duration: 1.0,
+            ease: 'power2.inOut',
+            onUpdate: () => {
+              currentFrameRef.current = frameObj.val;
+              drawFrame(Math.round(frameObj.val));
+            }
+          });
 
-        // 2. Hide other scenes initially
-        sceneRefs.forEach((ref, idx) => {
-          if (ref.current && idx > 0) {
-            gsap.set(ref.current, { opacity: 0, y: 30, display: 'none' });
-          }
-        });
-
-        // Scene 0: Out
-        tl.to(sceneRefs[0].current, {
-          opacity: 0,
-          y: -35,
-          duration: 0.5,
-          ease: 'power1.inOut',
-          onComplete: () => { if (sceneRefs[0].current) sceneRefs[0].current.style.display = 'none'; },
-          onReverseComplete: () => { if (sceneRefs[0].current) sceneRefs[0].current.style.display = 'flex'; }
-        }, 1.5);
-
-        // Scene 1: In & Out
-        tl.to(sceneRefs[1].current, {
-          display: 'flex',
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'power1.inOut',
-        }, 2.0);
-        tl.to(sceneRefs[1].current, {
-          opacity: 0,
-          y: -35,
-          duration: 0.5,
-          ease: 'power1.inOut',
-          onComplete: () => { if (sceneRefs[1].current) sceneRefs[1].current.style.display = 'none'; },
-          onReverseComplete: () => { if (sceneRefs[1].current) sceneRefs[1].current.style.display = 'flex'; }
-        }, 4.0);
-
-        // Scene 2: In & Out
-        tl.to(sceneRefs[2].current, {
-          display: 'flex',
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'power1.inOut',
-        }, 4.5);
-        tl.to(sceneRefs[2].current, {
-          opacity: 0,
-          y: -35,
-          duration: 0.5,
-          ease: 'power1.inOut',
-          onComplete: () => { if (sceneRefs[2].current) sceneRefs[2].current.style.display = 'none'; },
-          onReverseComplete: () => { if (sceneRefs[2].current) sceneRefs[2].current.style.display = 'flex'; }
-        }, 6.5);
-
-        // Scene 3: In & Out
-        tl.to(sceneRefs[3].current, {
-          display: 'flex',
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'power1.inOut',
-        }, 7.0);
-        tl.to(sceneRefs[3].current, {
-          opacity: 0,
-          y: -35,
-          duration: 0.5,
-          ease: 'power1.inOut',
-          onComplete: () => { if (sceneRefs[3].current) sceneRefs[3].current.style.display = 'none'; },
-          onReverseComplete: () => { if (sceneRefs[3].current) sceneRefs[3].current.style.display = 'flex'; }
-        }, 8.5);
-
-        // Scene 4: In
-        tl.to(sceneRefs[4].current, {
-          display: 'flex',
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'power1.inOut',
-        }, 9.0);
-
-        // 3. Side Dots scrubbing
-        // Dot 0 is active by default.
-        tl.to('.hero-dot-0', { height: '7px', backgroundColor: 'rgba(255,255,255,0.22)', boxShadow: 'none', duration: 0.3 }, 1.5)
-          .to('.hero-dot-1', { height: '28px', backgroundColor: '#00f0ff', boxShadow: '0 0 10px #00f0ff', duration: 0.3 }, 2.0);
-
-        tl.to('.hero-dot-1', { height: '7px', backgroundColor: 'rgba(255,255,255,0.22)', boxShadow: 'none', duration: 0.3 }, 4.0)
-          .to('.hero-dot-2', { height: '28px', backgroundColor: '#00f0ff', boxShadow: '0 0 10px #00f0ff', duration: 0.3 }, 4.5);
-
-        tl.to('.hero-dot-2', { height: '7px', backgroundColor: 'rgba(255,255,255,0.22)', boxShadow: 'none', duration: 0.3 }, 6.5)
-          .to('.hero-dot-3', { height: '28px', backgroundColor: '#00f0ff', boxShadow: '0 0 10px #00f0ff', duration: 0.3 }, 7.0);
-
-        tl.to('.hero-dot-3', { height: '7px', backgroundColor: 'rgba(255,255,255,0.22)', boxShadow: 'none', duration: 0.3 }, 8.5)
-          .to('.hero-dot-4', { height: '28px', backgroundColor: '#00f0ff', boxShadow: '0 0 10px #00f0ff', duration: 0.3 }, 9.0);
-
-        // Force initial frame render
-        drawFrame(0);
-        ScrollTrigger.refresh();
-
-        return () => {
-          tl.kill();
-          ScrollTrigger.getAll().forEach(st => {
-            if (st.trigger === containerRef.current) st.kill();
+          // Slide hero up
+          gsap.to(containerRef.current, {
+            yPercent: -100,
+            duration: 1.0,
+            ease: 'power2.inOut',
+            onComplete: () => {
+              document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
+              isAnimatingRef.current = false;
+            }
           });
         };
-      }, [isLoading]);
 
-      // Loading screen
+        return () => {
+          delete window.unpinHero;
+        };
+      }, [activeScene]);
+
+      // Wheel and touch lock handlers
+      useEffect(() => {
+        // Handle scroll locking
+        if (activeScene < 4) {
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+        }
+
+        const handleGlobalWheel = (e) => {
+          if (activeScene < 4) {
+            e.preventDefault();
+            if (isAnimatingRef.current) return;
+ 
+            if (e.deltaY > 0) {
+              goToScene(activeScene + 1);
+            } else if (e.deltaY < 0 && activeScene > 0) {
+              goToScene(activeScene - 1);
+            }
+          } else {
+            // Re-pin if we scroll up at the top
+            if (window.scrollY <= 5 && e.deltaY < 0) {
+              e.preventDefault();
+              if (isAnimatingRef.current) return;
+              goToScene(3);
+            }
+          }
+        };
+
+        const handleTouchMove = (e) => {
+          if (activeScene < 4) {
+            e.preventDefault();
+          }
+        };
+
+        window.addEventListener('wheel', handleGlobalWheel, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => {
+          window.removeEventListener('wheel', handleGlobalWheel);
+          window.removeEventListener('touchmove', handleTouchMove);
+        };
+      }, [activeScene]);
+
+      // Touch swipe detection handlers
+      useEffect(() => {
+        const handleTouchStart = (e) => {
+          touchStartY.current = e.touches[0].clientY;
+        };
+
+        const handleTouchEnd = (e) => {
+          const touchEndY = e.changedTouches[0].clientY;
+          const diffY = touchStartY.current - touchEndY;
+
+          if (Math.abs(diffY) > 50) {
+            if (activeScene < 4) {
+              if (isAnimatingRef.current) return;
+              if (diffY > 0) {
+                goToScene(activeScene + 1);
+              } else if (activeScene > 0) {
+                goToScene(activeScene - 1);
+              }
+            } else {
+              // Re-pin on mobile
+              if (window.scrollY <= 5 && diffY < -50) {
+                if (isAnimatingRef.current) return;
+                goToScene(3);
+              }
+            }
+          }
+        };
+
+        window.addEventListener('touchstart', handleTouchStart);
+        window.addEventListener('touchend', handleTouchEnd);
+
+        return () => {
+          window.removeEventListener('touchstart', handleTouchStart);
+          window.removeEventListener('touchend', handleTouchEnd);
+        };
+      }, [activeScene]);
+
+      // Background drift Ken Burns effect
+      useEffect(() => {
+        if (isLoading || activeScene >= 4 || !canvasRef.current) return;
+
+        // Animate a subtle Ken Burns pan & zoom drift on the canvas element itself
+        const drift = gsap.to(canvasRef.current, {
+          scale: 1.05,
+          x: 12,
+          y: 6,
+          duration: 20,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+        });
+
+        return () => {
+          drift.kill();
+        };
+      }, [activeScene, isLoading]);
+
+      const goToScene = (nextIdx) => {
+        if (nextIdx < 0 || nextIdx > 4) return;
+        if (nextIdx === activeScene) return;
+
+        const currentIdx = activeScene;
+        setActiveScene(nextIdx);
+        isAnimatingRef.current = true;
+
+        transitionToScene(currentIdx, nextIdx);
+      };
+
+      const transitionToScene = (fromIdx, toIdx) => {
+        // Kill active tweens
+        gsap.killTweensOf([canvasRef.current, textRefs.current, containerRef.current]);
+        if (frameTweenRef.current) frameTweenRef.current.kill();
+
+        // Background transition: scrub frames using GSAP
+        if (toIdx < 4) {
+          const frameObj = { val: currentFrameRef.current };
+          frameTweenRef.current = gsap.to(frameObj, {
+            val: SCENE_FRAMES[toIdx],
+            duration: 1.2,
+            ease: 'power2.out',
+            onUpdate: () => {
+              currentFrameRef.current = frameObj.val;
+              drawFrame(Math.round(frameObj.val));
+            }
+          });
+
+          // Sweep glow streak across the screen
+          gsap.fromTo('.hero-glow-streak',
+            { xPercent: -120 },
+            { xPercent: 120, duration: 1.3, ease: 'power2.inOut' }
+          );
+        }
+
+        // Exit state transition (Unpinning)
+        if (toIdx === 4) {
+          // Fade out controls
+          gsap.to(['.hero-controls', '.hero-scroll-cue'], {
+            opacity: 0,
+            duration: 0.4,
+          });
+
+          // Scrub frames to end
+          const frameObj = { val: currentFrameRef.current };
+          frameTweenRef.current = gsap.to(frameObj, {
+            val: SCENE_FRAMES[4],
+            duration: 1.0,
+            ease: 'power2.inOut',
+            onUpdate: () => {
+              currentFrameRef.current = frameObj.val;
+              drawFrame(Math.round(frameObj.val));
+            }
+          });
+
+          // Slide hero container up
+          gsap.to(containerRef.current, {
+            yPercent: -100,
+            duration: 1.0,
+            ease: 'power2.inOut',
+            onComplete: () => {
+              document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
+              isAnimatingRef.current = false;
+            }
+          });
+        }
+
+        // Re-pinning from Scene 5 (scroll back down to scene 4)
+        if (fromIdx === 4 && toIdx === 3) {
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+
+          // Slide hero container back down
+          gsap.to(containerRef.current, {
+            yPercent: 0,
+            duration: 1.0,
+            ease: 'power2.out',
+          });
+
+          // Fade controls back in
+          gsap.to(['.hero-controls', '.hero-scroll-cue'], {
+            opacity: 1,
+            duration: 0.5,
+            delay: 0.4,
+          });
+
+          // Scrub frames back to Scene 3
+          const frameObj = { val: currentFrameRef.current };
+          frameTweenRef.current = gsap.to(frameObj, {
+            val: SCENE_FRAMES[3],
+            duration: 1.0,
+            ease: 'power2.out',
+            onUpdate: () => {
+              currentFrameRef.current = frameObj.val;
+              drawFrame(Math.round(frameObj.val));
+            }
+          });
+        }
+
+        // Cool-down duration matching transition
+        setTimeout(() => {
+          isAnimatingRef.current = false;
+        }, 1000);
+      };
+
       if (isLoading) {
         return (
           <section className="relative w-full h-screen bg-[#050505] flex flex-col items-center justify-center z-50">
@@ -386,303 +545,173 @@
       }
 
       return (
-        <div ref={containerRef} id="hero-container" className="relative bg-[#050505]" style={{ height: '500vh' }}>
-          <div className="sticky top-0 h-screen w-full overflow-hidden">
-            
-            {/* Background Image Canvas */}
-            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+        <div 
+          ref={containerRef} 
+          id="hero-container" 
+          className="fixed inset-0 w-full h-screen bg-[#050505] overflow-hidden select-none"
+          style={{ zIndex: 40 }}
+        >
+          {/* Background Canvas */}
+          <div className="absolute inset-0 z-0 bg-black">
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out"
+              style={{
+                width: '100%',
+                height: '100%',
+                background: '#050505',
+                display: 'block'
+              }}
+            />
+          </div>
 
-            {/* Gradient Overlays */}
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background:'linear-gradient(to right,rgba(3,3,3,0.90) 0%,rgba(3,3,3,0.58) 48%,rgba(3,3,3,0.08) 100%)' }} />
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background:'linear-gradient(to top,rgba(5,5,5,1) 0%,rgba(5,5,5,0.0) 34%)' }} />
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex:1, background:'linear-gradient(to bottom,rgba(5,5,5,0.55) 0%,transparent 16%)' }} />
-            <div className="absolute inset-0 cyber-grid pointer-events-none opacity-[0.12]" style={{ zIndex:1 }} />
+          {/* Cinematic Ambient Overlays */}
+          <div className="absolute inset-0 pointer-events-none z-10" style={{ background: 'linear-gradient(to right, rgba(3,3,3,0.92) 0%, rgba(3,3,3,0.6) 48%, rgba(3,3,3,0.1) 100%)' }} />
+          <div className="absolute inset-0 pointer-events-none z-10" style={{ background: 'linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0) 35%)' }} />
+          <div className="absolute inset-0 pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, rgba(5,5,5,0.6) 0%, transparent 18%)' }} />
+          <div className="absolute inset-0 cyber-grid pointer-events-none opacity-[0.14] z-10" />
 
-            {/* Text Scenes */}
-            <div className="absolute inset-0 z-10 pointer-events-none">
+          {/* Interactive AI glow streaks / float particles */}
+          <div className="hero-glow-streak absolute top-0 -left-1/4 w-1/12 h-full bg-gradient-to-r from-transparent via-brand-cyan/25 to-transparent skew-x-12 blur-md pointer-events-none opacity-45 mix-blend-screen z-10" />
+
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+            <div className="absolute top-1/4 left-1/3 w-1.5 h-1.5 rounded-full bg-brand-cyan/40 blur-[1px] animate-float-slow" />
+            <div className="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-brand-violet/25 blur-[2px] animate-float-medium" style={{ animationDelay: '1.5s' }} />
+            <div className="absolute bottom-1/3 left-1/6 w-1 h-1 rounded-full bg-white/50 blur-[0.5px] animate-float-slow" style={{ animationDelay: '3s' }} />
+            <div className="absolute bottom-1/4 right-1/4 w-2.5 h-2.5 rounded-full bg-brand-cyan/20 blur-[2.5px] animate-float-medium" style={{ animationDelay: '0.5s' }} />
+          </div>
+
+          {/* Content Scenes Container */}
+          <div className="absolute inset-0 z-20 flex items-center px-6 md:px-12 lg:px-24">
+            <div className="max-w-[700px] w-full text-left">
               
-              {/* Scene 0 (Intro) */}
-              <div
-                ref={scene0Ref}
-                className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 lg:px-24"
-              >
-                <div className="max-w-[700px] pointer-events-auto">
-                  <div className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{HERO_SCENES[0].badge}</span>
-                  </div>
-                  <h1 className="font-heading font-black uppercase tracking-tight mb-8" style={{ fontSize:'clamp(3.5rem,8vw,7.5rem)', lineHeight:0.88 }}>
-                    <span className="block text-white">{HERO_SCENES[0].line1}</span>
-                    <span className="block text-cyan-glow">{HERO_SCENES[0].line2}</span>
-                  </h1>
-                  <p className="text-gray-300 font-light leading-relaxed mb-10 text-[clamp(0.88rem,1.35vw,1.08rem)]" style={{ maxWidth:'510px' }}>
-                    {HERO_SCENES[0].sub}
-                  </p>
-                  <div className="flex flex-wrap gap-4 mb-14">
-                    <button onClick={handleGeneralEnroll} className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] active:scale-[0.98] transition-transform duration-300" style={{ background:'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow:'0 0 36px rgba(0,240,255,0.38)' }}>
-                      Enroll Now — Free
-                    </button>
-                    <button onClick={() => navigateToSection('courses')} className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 transition-all duration-300">
-                      Explore Courses
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-8 pt-7" style={{ borderTop:'1px solid rgba(255,255,255,0.08)' }}>
-                    {[{v:'1000+',l:'Students'},{v:'5',l:'AI Programs'},{v:'100%',l:'Project-Based'},{v:'Live',l:'Industry Tools'}].map((s,i)=>(
-                      <div key={i} className="flex flex-col">
-                        <span className="text-white font-black font-heading tracking-tight" style={{ fontSize:'clamp(1.5rem,2.5vw,2.2rem)' }}>{s.v}</span>
-                        <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Float glass badges */}
-                <div className="absolute bottom-16 right-8 hidden lg:flex flex-col gap-3 pointer-events-auto">
-                  <div className="liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-slow">
-                    <div className="w-7 h-7 rounded-lg bg-brand-cyan/20 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    </div>
-                    <div>
-                      <div className="text-[7px] font-mono text-gray-400 uppercase tracking-wider">AI Output</div>
-                      <div className="text-[10px] font-black text-white uppercase">Live Render</div>
-                    </div>
-                  </div>
-                  <div className="liquid-glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float-medium">
-                    <div className="w-7 h-7 rounded-lg bg-brand-violet/20 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-brand-violet" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    </div>
-                    <div>
-                      <div className="text-[7px] font-mono text-gray-400 uppercase tracking-wider">Programs</div>
-                      <div className="text-[10px] font-black text-white uppercase">5 AI Courses</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scene 1 (Graphic Design) */}
-              <div
-                ref={scene1Ref}
-                className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 lg:px-24"
-                style={{ display: 'none' }}
-              >
-                <div className="max-w-[700px] pointer-events-auto">
-                  <div className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{HERO_SCENES[1].badge}</span>
-                  </div>
-                  <h1 className="font-heading font-black uppercase tracking-tight mb-8" style={{ fontSize:'clamp(3.5rem,8vw,7.5rem)', lineHeight:0.88 }}>
-                    <span className="block text-white">{HERO_SCENES[1].line1}</span>
-                    <span className={`block ${HERO_SCENES[1].colorClass}`}>{HERO_SCENES[1].line2}</span>
-                  </h1>
-                  <p className="text-gray-300 font-light leading-relaxed mb-8 text-[clamp(0.88rem,1.35vw,1.08rem)]" style={{ maxWidth:'510px' }}>
-                    {HERO_SCENES[1].sub}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5 mb-10">
-                    {HERO_SCENES[1].tags.map((tag, ti) => (
-                      <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                        {tag}
+              {/* Text Wrapper */}
+              <div className="relative w-full min-h-[280px] md:min-h-[320px]">
+                {HERO_SCENES_DATA.map((scene, idx) => (
+                  <div
+                    key={idx}
+                    ref={el => textRefs.current[idx] = el}
+                    className="absolute inset-x-0 top-0 w-full flex flex-col text-left"
+                    style={{
+                      opacity: idx === activeScene ? 1 : 0,
+                      pointerEvents: idx === activeScene ? 'auto' : 'none',
+                      transform: idx === activeScene 
+                        ? 'translateY(0px)' 
+                        : idx < activeScene 
+                          ? 'translateY(-20px)' 
+                          : 'translateY(20px)',
+                      transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                  >
+                    {/* Badge */}
+                    <div className="mb-4 self-start inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/35 bg-brand-cyan/5 backdrop-blur-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                      <span className="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">
+                        {scene.badge}
                       </span>
-                    ))}
-                  </div>
-                  <button onClick={handleGeneralEnroll} className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2" style={{ background:'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow:'0 0 28px rgba(0,240,255,0.28)' }}>
-                    Join This Program →
-                  </button>
-                </div>
-
-                {/* Course Card */}
-                <div className="absolute bottom-16 right-8 hidden lg:block liquid-glass rounded-2xl overflow-hidden pointer-events-auto" style={{ minWidth: '230px' }}>
-                  <div style={{ height: '3px', background: 'linear-gradient(90deg, #10b981, #a855f7)' }} />
-                  <div className="px-5 py-4">
-                    <div className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Current Program</div>
-                    <div className="text-sm font-black text-emerald-500 uppercase mb-4">AI Graphic Design</div>
-                    <div className="flex items-center justify-between gap-8">
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Duration</div>
-                        <div className="text-xs font-bold text-white">6 Weeks</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Starts at</div>
-                        <div className="text-xs font-bold text-brand-cyan">₹4,999</div>
-                      </div>
                     </div>
+
+                    {/* Heading */}
+                    <h1 className="font-heading font-black uppercase tracking-tight mb-4" style={{ fontSize: 'clamp(1.8rem, 4.2vw, 3rem)', lineHeight: 1.05 }}>
+                      <span className="block text-white text-white-glow">{scene.line1}</span>
+                      <span className="block text-cyan-glow">{scene.line2}</span>
+                    </h1>
+
+                    {/* Description */}
+                    <p className="text-gray-400 font-normal leading-relaxed mb-5 text-xs md:text-sm" style={{ maxWidth: '420px' }}>
+                      {scene.sub}
+                    </p>
+
+                    {/* Scene-specific content badges/tags */}
+                    {scene.tags && (
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {scene.tags.map((tag, ti) => (
+                          <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Scene 1 Stat grid */}
+                    {idx === 0 && (
+                      <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10" style={{ maxWidth: '420px' }}>
+                        {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
+                          <div key={i} className="flex flex-col">
+                            <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
+                            <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
+                ))}
               </div>
 
-              {/* Scene 2 (Film Making) */}
-              <div
-                ref={scene2Ref}
-                className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 lg:px-24"
-                style={{ display: 'none' }}
-              >
-                <div className="max-w-[700px] pointer-events-auto">
-                  <div className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{HERO_SCENES[2].badge}</span>
-                  </div>
-                  <h1 className="font-heading font-black uppercase tracking-tight mb-8" style={{ fontSize:'clamp(3.5rem,8vw,7.5rem)', lineHeight:0.88 }}>
-                    <span className="block text-white">{HERO_SCENES[2].line1}</span>
-                    <span className={`block ${HERO_SCENES[2].colorClass}`}>{HERO_SCENES[2].line2}</span>
-                  </h1>
-                  <p className="text-gray-300 font-light leading-relaxed mb-8 text-[clamp(0.88rem,1.35vw,1.08rem)]" style={{ maxWidth:'510px' }}>
-                    {HERO_SCENES[2].sub}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5 mb-10">
-                    {HERO_SCENES[2].tags.map((tag, ti) => (
-                      <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <button onClick={handleGeneralEnroll} className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2" style={{ background:'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow:'0 0 28px rgba(0,240,255,0.28)' }}>
-                    Join This Program →
-                  </button>
-                </div>
+              {/* Shared Morphing Buttons */}
+              <div className="flex flex-wrap gap-4 mt-6 hero-buttons">
+                <button
+                  onClick={handleGeneralEnroll}
+                  className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] active:scale-[0.98] transition-transform duration-300 relative overflow-hidden group shadow-[0_0_36px_rgba(0,240,255,0.38)]"
+                  style={{
+                    background: 'linear-gradient(135deg, #00f0ff, #2563eb)',
+                  }}
+                >
+                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                  <span className="relative z-10 transition-all duration-300">
+                    {activeScene === 3 ? 'Start Learning Today' : 'Enroll Now — Free'}
+                  </span>
+                </button>
 
-                {/* Course Card */}
-                <div className="absolute bottom-16 right-8 hidden lg:block liquid-glass rounded-2xl overflow-hidden pointer-events-auto" style={{ minWidth: '230px' }}>
-                  <div style={{ height: '3px', background: 'linear-gradient(90deg, #ec4899, #a855f7)' }} />
-                  <div className="px-5 py-4">
-                    <div className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Current Program</div>
-                    <div className="text-sm font-black text-rose-500 uppercase mb-4">AI Film Making</div>
-                    <div className="flex items-center justify-between gap-8">
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Duration</div>
-                        <div className="text-xs font-bold text-white">8 Weeks</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Starts at</div>
-                        <div className="text-xs font-bold text-brand-cyan">₹7,999</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scene 3 (Business Automation) */}
-              <div
-                ref={scene3Ref}
-                className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 lg:px-24"
-                style={{ display: 'none' }}
-              >
-                <div className="max-w-[700px] pointer-events-auto">
-                  <div className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{HERO_SCENES[3].badge}</span>
-                  </div>
-                  <h1 className="font-heading font-black uppercase tracking-tight mb-8" style={{ fontSize:'clamp(3.5rem,8vw,7.5rem)', lineHeight:0.88 }}>
-                    <span className="block text-white">{HERO_SCENES[3].line1}</span>
-                    <span className={`block ${HERO_SCENES[3].colorClass}`}>{HERO_SCENES[3].line2}</span>
-                  </h1>
-                  <p className="text-gray-300 font-light leading-relaxed mb-8 text-[clamp(0.88rem,1.35vw,1.08rem)]" style={{ maxWidth:'510px' }}>
-                    {HERO_SCENES[3].sub}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5 mb-10">
-                    {HERO_SCENES[3].tags.map((tag, ti) => (
-                      <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <button onClick={handleGeneralEnroll} className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2" style={{ background:'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow:'0 0 28px rgba(0,240,255,0.28)' }}>
-                    Join This Program →
-                  </button>
-                </div>
-
-                {/* Course Card */}
-                <div className="absolute bottom-16 right-8 hidden lg:block liquid-glass rounded-2xl overflow-hidden pointer-events-auto" style={{ minWidth: '230px' }}>
-                  <div style={{ height: '3px', background: 'linear-gradient(90deg, #f59e0b, #00f0ff)' }} />
-                  <div className="px-5 py-4">
-                    <div className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Current Program</div>
-                    <div className="text-sm font-black text-amber-500 uppercase mb-4">AI Business</div>
-                    <div className="flex items-center justify-between gap-8">
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Duration</div>
-                        <div className="text-xs font-bold text-white">6 Weeks</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] font-mono text-gray-500 uppercase tracking-wider mb-0.5">Starts at</div>
-                        <div className="text-xs font-bold text-brand-cyan">₹8,999</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scene 4 (CTA) */}
-              <div
-                ref={scene4Ref}
-                className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 lg:px-24"
-                style={{ display: 'none' }}
-              >
-                <div className="max-w-[700px] pointer-events-auto">
-                  <div className="mb-8 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{HERO_SCENES[4].badge}</span>
-                  </div>
-                  <h1 className="font-heading font-black uppercase tracking-tight mb-8" style={{ fontSize:'clamp(3.5rem,8vw,7.5rem)', lineHeight:0.88 }}>
-                    <span className="block text-white">{HERO_SCENES[4].line1}</span>
-                    <span className={`block ${HERO_SCENES[4].colorClass}`}>{HERO_SCENES[4].line2}</span>
-                  </h1>
-                  <p className="text-gray-300 font-light leading-relaxed mb-10 text-[clamp(0.88rem,1.35vw,1.08rem)]" style={{ maxWidth:'510px' }}>
-                    {HERO_SCENES[4].sub}
-                  </p>
-                  <div className="flex flex-wrap gap-4 mb-14">
-                    <button onClick={handleGeneralEnroll} className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] active:scale-[0.98] transition-transform duration-300" style={{ background:'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow:'0 0 36px rgba(0,240,255,0.38)' }}>
-                      Enroll Now — Free
-                    </button>
-                    <button onClick={() => navigateToSection('courses')} className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 transition-all duration-300">
-                      Explore Courses
-                    </button>
-                  </div>
-                </div>
-
-                {/* Batch Status Card */}
-                <div className="absolute bottom-16 right-8 hidden lg:flex flex-col gap-3 pointer-events-auto">
-                  <div className="liquid-glass rounded-2xl px-5 py-4 flex flex-col justify-center shrink-0">
-                    <div className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-1">Batch Status</div>
-                    <div className="text-sm font-black text-brand-cyan uppercase">ENROLLMENT OPEN</div>
-                    <div className="text-[10px] text-gray-400 mt-2 font-mono">Limited seats remaining</div>
-                  </div>
-                </div>
+                <button
+                  onClick={() => navigateToSection('courses')}
+                  className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 hover:scale-[1.02] transition-all duration-300"
+                >
+                  <span>
+                    {activeScene === 3 ? 'View Programs' : 'Explore Courses'}
+                  </span>
+                </button>
               </div>
 
             </div>
+          </div>
 
-            {/* Side dots indicator */}
-            <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3 pointer-events-auto">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    const total = containerRef.current.offsetHeight - window.innerHeight;
-                    const targets = [0, 0.22, 0.5, 0.77, 1.0];
-                    window.scrollTo({
-                      top: containerRef.current.offsetTop + targets[i] * total,
-                      behavior: 'smooth'
-                    });
-                  }}
-                  className={`hero-dot-${i} rounded-full transition-all duration-300`}
+          {/* Dots Indicator (Right Side) */}
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3.5 hero-controls">
+            {[0, 1, 2, 3].map((i) => (
+              <button
+                key={i}
+                onClick={() => goToScene(i)}
+                className="group flex items-center justify-end"
+              >
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] font-mono text-brand-cyan uppercase tracking-widest mr-3 select-none pointer-events-none">
+                  {i === 0 ? 'Intro' : i === 1 ? 'Create' : i === 2 ? 'Automate' : 'Future'}
+                </span>
+                <div
+                  className="rounded-full transition-all duration-500"
                   style={{
                     width: '7px',
-                    height: i === 0 ? '28px' : '7px',
-                    backgroundColor: i === 0 ? '#00f0ff' : 'rgba(255,255,255,0.22)',
-                    boxShadow: i === 0 ? '0 0 10px #00f0ff' : 'none'
+                    height: activeScene === i ? '24px' : '7px',
+                    backgroundColor: activeScene === i ? '#00f0ff' : 'rgba(255,255,255,0.25)',
+                    boxShadow: activeScene === i ? '0 0 12px #00f0ff' : 'none'
                   }}
                 />
-              ))}
-            </div>
-
-            {/* Scroll cue */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
-              <span className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.22em] animate-pulse">Scroll to explore</span>
-              <div className="w-px h-8 bg-gradient-to-b from-brand-cyan/60 to-transparent animate-pulse" />
-            </div>
-
+              </button>
+            ))}
           </div>
+
+          {/* Scroll Cue */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none hero-scroll-cue">
+            <span className="text-[9px] font-mono text-gray-500 uppercase tracking-[0.25em] animate-pulse">
+              Scroll or Swipe to Explore
+            </span>
+            <div className="w-px h-6 bg-gradient-to-b from-brand-cyan/60 to-transparent animate-pulse" />
+          </div>
+
         </div>
       );
     };
+
 
     // 1. Hero Holographic Brain Canvas
     const Hero3DCanvas = () => {
@@ -1644,6 +1673,9 @@
 
       // Navigate function with smooth scroll target focus
       const navigateToSection = (id, targetToFocusId = null) => {
+        if (window.unpinHero) {
+          window.unpinHero();
+        }
 
         const el = document.getElementById(id);
         if (el) {
@@ -1783,6 +1815,58 @@
           {/* ========= HERO SECTION ========= */}
           <HeroSection handleGeneralEnroll={handleGeneralEnroll} navigateToSection={navigateToSection} />
 
+
+          {/* About us split screen */}
+          <section id="about-us" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
+            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+              
+              {/* Left Side: 3D rotating network globe */}
+              <div className="lg:col-span-5 flex justify-center items-center relative z-10">
+                <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
+                <div className="w-full relative flex justify-center items-center">
+                  <About3DCanvas />
+                </div>
+              </div>
+
+              {/* Right Side: Content description */}
+              <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Mission Objective
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                  About AI Mastery Academy
+                </h2>
+                
+                <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
+                  <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
+                    We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
+                  </p>
+
+                  {/* Highlights Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
+                    {[
+                      'Practical Learning',
+                      'Industry Experts',
+                      'Real Projects',
+                      'Latest AI Tools',
+                      'Career-Oriented Training',
+                      'Business Growth Strategies'
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
+                        <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
+                          <i data-lucide="check" className="w-3.5 h-3.5"></i>
+                        </div>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
 
           {/* Courses grid section */}
           <section id="courses" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
@@ -2020,58 +2104,6 @@
                     })}
                 </div>
               )}
-
-            </div>
-          </section>
-
-          {/* About us split screen */}
-          <section id="about-us" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
-            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-              
-              {/* Left Side: 3D rotating network globe */}
-              <div className="lg:col-span-5 flex justify-center items-center relative z-10">
-                <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
-                <div className="w-full relative flex justify-center items-center">
-                  <About3DCanvas />
-                </div>
-              </div>
-
-              {/* Right Side: Content description */}
-              <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
-                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                  Mission Objective
-                </span>
-                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                  About AI Mastery Academy
-                </h2>
-                
-                <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
-                  <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
-                    We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
-                  </p>
-
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
-                    {[
-                      'Practical Learning',
-                      'Industry Experts',
-                      'Real Projects',
-                      'Latest AI Tools',
-                      'Career-Oriented Training',
-                      'Business Growth Strategies'
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
-                        <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
-                          <i data-lucide="check" className="w-3.5 h-3.5"></i>
-                        </div>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
 
             </div>
           </section>
