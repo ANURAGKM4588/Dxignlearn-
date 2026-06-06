@@ -9,8 +9,11 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Favicon to prevent 404 -->
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="/index.css">
   
   <!-- Tailwind Configuration for Custom Accent Colors & Fonts -->
   <script>
@@ -136,12 +139,12 @@
         // Helper to format frame file name
         const getFrameUrl = (index) => {
           const paddedIndex = String(index).padStart(3, '0');
-          return `./public/Images/heropage/ezgif-frame-${paddedIndex}.png`;
+          return `/public/Images/heropage/ezgif-frame-${paddedIndex}.png`;
         };
 
         // Preload all frames progressively
         const initialPreloadCount = 40;
-        for (let i = 1; i <= totalFrames; i++) {
+        for (let i = 6; i <= totalFrames; i++) {
           const img = new Image();
           img.src = getFrameUrl(i);
           img.onload = () => {
@@ -1241,14 +1244,14 @@ vibe("a futuristic premium dark-mode dashboard") {
       });
 
       return (
-        <div className="min-height-screen flex flex-col relative bg-brand-bg select-none">
+        <div className="min-h-screen flex flex-col relative bg-brand-bg select-none">
           
           {/* Section 1: The Glassmorphic Fixed Top Navigation */}
           <header className="fixed top-0 left-0 right-0 h-20 glass-nav z-50 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
             {/* Left Brand Area */}
             <div className="flex items-center cursor-pointer" onClick={() => { setActiveTab('hero'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               <img
-                src="./public/Images/logo/Dxign logo.png"
+                src="/public/Images/logo/Dxign logo.png"
                 alt="DXIGN Learn Logo"
                 className="h-10 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 style={{ mixBlendMode: 'screen' }}
@@ -1480,7 +1483,7 @@ vibe("a futuristic premium dark-mode dashboard") {
               <div>
                 <div className="flex items-center justify-center md:justify-start mb-4">
                   <img
-                    src="./public/Images/logo/Dxign logo.png"
+                    src="/public/Images/logo/Dxign logo.png"
                     alt="DXIGN Learn Logo"
                     className="h-9 w-auto object-contain"
                     style={{ mixBlendMode: 'screen' }}
