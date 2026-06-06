@@ -233,81 +233,83 @@
               ))}
             </div>
 
-            {/* ── Main content overlay ── */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-center px-8 md:px-14 lg:px-24" style={{ paddingTop: '80px' }}>
 
-              {/* Scene text block — all scenes use opacity transition */}
-              {HERO_SCENES.map((scene, i) => (
-                <div key={i} className="absolute" style={{
-                  left: 0, right: 0, top: 0, bottom: 0,
-                  display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                  padding: 'inherit',
-                  paddingLeft: 'clamp(2rem, 5.5vw, 6rem)',
-                  paddingTop: '80px',
-                  opacity: activeScene === i ? 1 : 0,
-                  transform: activeScene === i ? 'translateY(0px)' : (activeScene > i ? 'translateY(-22px)' : 'translateY(22px)'),
-                  transition: 'opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1)',
-                  pointerEvents: activeScene === i ? 'auto' : 'none',
-                }}>
-                  <div style={{ maxWidth: '640px' }}>
+            {/* ── Scene text panels — each absolutely fills the viewport ── */}
+            {HERO_SCENES.map((scene, i) => (
+              <div key={i} style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                paddingTop: '100px',
+                paddingLeft: 'clamp(1.5rem, 5.5vw, 6rem)',
+                paddingRight: 'clamp(1.5rem, 5.5vw, 6rem)',
+                opacity: activeScene === i ? 1 : 0,
+                transform: activeScene === i ? 'translateY(0px)' : (activeScene > i ? 'translateY(-24px)' : 'translateY(24px)'),
+                transition: 'opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1)',
+                pointerEvents: activeScene === i ? 'auto' : 'none',
+              }}>
+                <div style={{ maxWidth: '660px' }}>
 
-                    {/* Badge */}
-                    <div className="mb-7 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                      <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{scene.badge}</span>
-                    </div>
+                  {/* Badge */}
+                  <div className="mb-7 inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/5 backdrop-blur-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                    <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">{scene.badge}</span>
+                  </div>
 
-                    {/* Headline */}
-                    <h1 className="font-heading font-black uppercase tracking-tight leading-[0.9] mb-7" style={{ fontSize: 'clamp(3rem, 8vw, 7.5rem)' }}>
-                      {scene.lines.map((line, li) => (
-                        <span key={li} className={lineClass(scene.colors[li])}>{line}</span>
+                  {/* Headline */}
+                  <h1 className="font-heading font-black uppercase tracking-tight leading-[0.9] mb-7" style={{ fontSize: 'clamp(3rem, 8vw, 7.5rem)' }}>
+                    {scene.lines.map((line, li) => (
+                      <span key={li} className={lineClass(scene.colors[li])}>{line}</span>
+                    ))}
+                  </h1>
+
+                  {/* Sub */}
+                  <p className="text-gray-300 font-light leading-relaxed mb-8" style={{ fontSize: 'clamp(0.85rem, 1.35vw, 1.05rem)', maxWidth: '540px' }}>
+                    {scene.sub}
+                  </p>
+
+                  {/* Feature tags */}
+                  {scene.type === 'feature' && scene.tags && (
+                    <div className="flex flex-wrap gap-2.5 mb-8">
+                      {scene.tags.map((tag, ti) => (
+                        <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                          {tag}
+                        </span>
                       ))}
-                    </h1>
+                    </div>
+                  )}
 
-                    {/* Sub */}
-                    <p className="text-gray-300 font-light leading-relaxed mb-8" style={{ fontSize: 'clamp(0.85rem, 1.35vw, 1.05rem)', maxWidth: '540px' }}>
-                      {scene.sub}
-                    </p>
-
-                    {/* Feature tags */}
-                    {scene.type === 'feature' && scene.tags && (
-                      <div className="flex flex-wrap gap-2.5 mb-8">
-                        {scene.tags.map((tag, ti) => (
-                          <span key={ti} className="px-4 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* CTA for intro & cta scenes */}
-                    {(scene.type === 'intro' || scene.type === 'cta') && (
-                      <div className="flex flex-wrap gap-4 mb-10">
-                        <button onClick={handleGeneralEnroll}
-                          className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300"
-                          style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 36px rgba(0,240,255,0.38)' }}>
-                          Enroll Now — Free
-                        </button>
-                        <button onClick={() => navigateToSection('courses')}
-                          className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 transition-all duration-300">
-                          Explore Courses
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Feature enroll button */}
-                    {scene.type === 'feature' && (
+                  {/* CTA for intro & cta scenes */}
+                  {(scene.type === 'intro' || scene.type === 'cta') && (
+                    <div className="flex flex-wrap gap-4 mb-10">
                       <button onClick={handleGeneralEnroll}
-                        className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2 mb-8"
-                        style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 28px rgba(0,240,255,0.28)' }}>
-                        Join This Program →
+                        className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300"
+                        style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 36px rgba(0,240,255,0.38)' }}>
+                        Enroll Now — Free
                       </button>
-                    )}
+                      <button onClick={() => navigateToSection('courses')}
+                        className="px-9 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs text-white border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/25 transition-all duration-300">
+                        Explore Courses
+                      </button>
+                    </div>
+                  )}
 
-                    {/* Stats strip — intro only */}
-                    {scene.type === 'intro' && (
-                      <div className="flex flex-wrap gap-8 pt-7" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                        {[{v:'1000+',l:'Students'},{v:'5',l:'AI Programs'},{v:'100%',l:'Project-Based'},{v:'Live',l:'Industry Tools'}].map((stat,si) => (
+                  {/* Feature enroll button */}
+                  {scene.type === 'feature' && (
+                    <button onClick={handleGeneralEnroll}
+                      className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs text-black hover:scale-[1.04] transition-transform duration-300 inline-flex items-center gap-2 mb-8"
+                      style={{ background: 'linear-gradient(135deg,#00f0ff,#2563eb)', boxShadow: '0 0 28px rgba(0,240,255,0.28)' }}>
+                      Join This Program →
+                    </button>
+                  )}
+
+                  {/* Stats strip — intro only */}
+                  {scene.type === 'intro' && (
+                    <div className="flex flex-wrap gap-8 pt-7" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                      {[{v:'1000+',l:'Students'},{v:'5',l:'AI Programs'},{v:'100%',l:'Project-Based'},{v:'Live',l:'Industry Tools'}].map((stat,si) => (
                           <div key={si} className="flex flex-col">
                             <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.4rem,2.5vw,2.1rem)' }}>{stat.v}</span>
                             <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{stat.l}</span>
@@ -319,8 +321,6 @@
                   </div>
                 </div>
               ))}
-
-            </div>
 
             {/* ── Course card — feature scenes (bottom-right) ── */}
             {HERO_SCENES.map((scene, i) => (
