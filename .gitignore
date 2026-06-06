@@ -1,0 +1,2 @@
+# Exclude large hero animation frame sequence (180+ PNGs, ~570MB)
+public/Images/heropage/
