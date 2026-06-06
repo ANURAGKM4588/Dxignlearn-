@@ -203,11 +203,18 @@
         let criticalLoadedCount = 0;
         const totalCritical = CRITICAL_FRAMES.length;
 
+        // Safety net: force-dismiss loader after 3s even if frames never load/error
+        const safetyTimer = setTimeout(() => {
+          setProgress(100);
+          setIsLoading(false);
+        }, 3000);
+
         const onCriticalFrameLoad = (imgElement) => {
           const proceed = () => {
             criticalLoadedCount++;
             setProgress(Math.min(100, Math.round((criticalLoadedCount / totalCritical) * 100)));
             if (criticalLoadedCount >= totalCritical) {
+              clearTimeout(safetyTimer);
               // Draw initial frame
               drawFrame(0);
               setTimeout(() => {
@@ -223,6 +230,7 @@
           } else {
             proceed();
           }
+
         };
 
         // Load critical frames first
