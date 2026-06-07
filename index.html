@@ -135,6 +135,30 @@
       const [isLoading, setIsLoading] = useState(true);
       const [progress, setProgress] = useState(0);
 
+      const renderStaggeredText = (text, baseDelay, active, extraClass = '') => {
+        if (!text) return null;
+        const words = text.split(' ');
+        return words.map((word, wordIdx) => {
+          const delay = baseDelay + wordIdx * 0.12;
+          return (
+            <span
+              key={wordIdx}
+              className={`inline-block mr-[0.25em] last:mr-0 ${extraClass}`}
+              style={{
+                transform: active ? 'translateY(0px) skewY(0deg) scale(1)' : 'translateY(16px) skewY(3deg) scale(0.95)',
+                opacity: active ? 1 : 0,
+                transition: active
+                  ? `transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`
+                  : 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s, opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s',
+                display: 'inline-block'
+              }}
+            >
+              {word}
+            </span>
+          );
+        });
+      };
+
       const setScrollLock = (lock) => {
         const header = document.querySelector('header');
         if (lock) {
@@ -659,70 +683,98 @@
               {/* Text Wrapper */}
               <div className="max-w-[700px] w-full text-left pointer-events-auto">
                 <div className="relative w-full min-h-[280px] md:min-h-[320px]">
-                  {HERO_SCENES_DATA.map((scene, idx) => (
-                    <div
-                      key={idx}
-                      ref={el => textRefs.current[idx] = el}
-                      className="absolute inset-x-0 top-0 w-full flex flex-col text-left"
-                      style={{
-                        opacity: idx === activeScene ? 1 : (idx === 3 && activeScene === 4) ? 1 : 0,
-                        pointerEvents: idx === activeScene ? 'auto' : 'none',
-                        transform: (idx === activeScene || (idx === 3 && activeScene === 4))
-                          ? 'translateY(0px)' 
-                          : idx < activeScene 
-                            ? 'translateY(-20px)' 
-                            : 'translateY(20px)',
-                        transition: (idx === 3 && activeScene === 4)
-                          ? 'none'
-                          : idx === activeScene
-                            ? 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s, opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s'
-                            : 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s, opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s'
-                      }}
-                    >
-                      {/* Badge */}
-                      <div className="mb-4 self-start inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/35 bg-brand-cyan/5 backdrop-blur-md">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                        <span className="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">
-                          {scene.badge}
-                        </span>
+                  {HERO_SCENES_DATA.map((scene, idx) => {
+                    const active = idx === activeScene || (idx === 3 && activeScene === 4);
+                    const getChildStyle = (delay) => {
+                      return {
+                        transform: active ? 'translateY(0px)' : 'translateY(15px)',
+                        opacity: active ? 1 : 0,
+                        transition: active
+                          ? `transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`
+                          : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0s, opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0s'
+                      };
+                    };
+
+                    return (
+                      <div
+                        key={idx}
+                        ref={el => textRefs.current[idx] = el}
+                        className="absolute inset-x-0 top-0 w-full flex flex-col text-left"
+                        style={{
+                          opacity: idx === activeScene ? 1 : (idx === 3 && activeScene === 4) ? 1 : 0,
+                          pointerEvents: idx === activeScene ? 'auto' : 'none',
+                          transition: (idx === 3 && activeScene === 4)
+                            ? 'none'
+                            : 'opacity 0.25s linear'
+                        }}
+                      >
+                        {/* Badge */}
+                        <div 
+                          style={getChildStyle(0.25)}
+                          className="mb-4 self-start inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-cyan/35 bg-brand-cyan/5 backdrop-blur-md"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                          <span className="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-[0.2em]">
+                            {scene.badge}
+                          </span>
+                        </div>
+
+                        {/* Heading */}
+                        <h1 
+                          style={{
+                            fontSize: 'clamp(1.8rem, 4.2vw, 3rem)',
+                            lineHeight: 1.05
+                          }}
+                          className="font-heading font-black uppercase tracking-tight mb-4"
+                        >
+                          <span className="block">
+                            {renderStaggeredText(scene.line1, 0.35, active, 'text-white text-white-glow')}
+                          </span>
+                          <span className="block">
+                            {renderStaggeredText(scene.line2, 0.45, active, 'text-cyan-glow')}
+                          </span>
+                        </h1>
+
+                        {/* Description */}
+                        <p 
+                          style={{
+                            ...getChildStyle(0.51),
+                            maxWidth: '420px'
+                          }}
+                          className="text-gray-400 font-normal leading-relaxed mb-5 text-xs md:text-sm"
+                        >
+                          {scene.sub}
+                        </p>
+
+                        {/* Standardized Bottom Container to prevent layout jumps */}
+                        <div 
+                          style={getChildStyle(0.64)}
+                          className="min-h-[90px] w-full flex items-start"
+                        >
+                          {scene.tags && (
+                            <div className="flex flex-wrap gap-2 w-full pt-2">
+                              {scene.tags.map((tag, ti) => (
+                                <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {idx === 0 && (
+                            <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10 w-full animate-fade-in" style={{ maxWidth: '420px' }}>
+                              {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
+                                <div key={i} className="flex flex-col">
+                                  <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
+                                  <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-
-                      {/* Heading */}
-                      <h1 className="font-heading font-black uppercase tracking-tight mb-4" style={{ fontSize: 'clamp(1.8rem, 4.2vw, 3rem)', lineHeight: 1.05 }}>
-                        <span className="block text-white text-white-glow">{scene.line1}</span>
-                        <span className="block text-cyan-glow">{scene.line2}</span>
-                      </h1>
-
-                      {/* Description */}
-                      <p className="text-gray-400 font-normal leading-relaxed mb-5 text-xs md:text-sm" style={{ maxWidth: '420px' }}>
-                        {scene.sub}
-                      </p>
-
-                      {/* Standardized Bottom Container to prevent layout jumps */}
-                      <div className="min-h-[90px] w-full flex items-start">
-                        {scene.tags && (
-                          <div className="flex flex-wrap gap-2 w-full pt-2">
-                            {scene.tags.map((tag, ti) => (
-                              <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {idx === 0 && (
-                          <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10 w-full animate-fade-in" style={{ maxWidth: '420px' }}>
-                            {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
-                              <div key={i} className="flex flex-col">
-                                <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
-                                <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
