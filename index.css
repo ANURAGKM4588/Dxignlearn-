@@ -25,7 +25,6 @@
 
 html {
   background-color: var(--color-bg-dark);
-  scrollbar-gutter: stable;
 }
 
 body {
@@ -34,7 +33,6 @@ body {
   color: #f3f4f6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  scrollbar-gutter: stable;
 }
 
 h1, h2, h3, h4, h5, h6 {

@@ -135,6 +135,28 @@
       const [isLoading, setIsLoading] = useState(true);
       const [progress, setProgress] = useState(0);
 
+      const setScrollLock = (lock) => {
+        const header = document.querySelector('header');
+        if (lock) {
+          const sbWidth = window.innerWidth - document.documentElement.clientWidth;
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+          if (sbWidth > 0) {
+            document.body.style.paddingRight = `${sbWidth}px`;
+            if (header) {
+              header.style.right = `${sbWidth}px`;
+            }
+          }
+        } else {
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          document.body.style.paddingRight = '';
+          if (header) {
+            header.style.right = '';
+          }
+        }
+      };
+
       // Draw a frame — cover-fit centered on canvas
       const drawFrame = (index) => {
         const canvas = canvasRef.current;
@@ -320,8 +342,7 @@
           });
 
           // Unlock body scroll immediately
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
+          setScrollLock(false);
           if (window.lenis) window.lenis.start();
 
           // Perform a small scroll offset to trigger native scroll handoff
@@ -342,12 +363,10 @@
       useEffect(() => {
         // Handle scroll locking
         if (activeScene < 4) {
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
+          setScrollLock(true);
           if (window.lenis) window.lenis.stop();
         } else {
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
+          setScrollLock(false);
           if (window.lenis) window.lenis.start();
         }
 
@@ -520,8 +539,7 @@
           });
 
           // Unlock body scroll immediately
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
+          setScrollLock(false);
           if (window.lenis) window.lenis.start();
 
           // Perform a small scroll offset to trigger native scroll handoff
@@ -531,8 +549,7 @@
         // Re-pinning from Scene 4 (scroll back up to scene 3)
         if (fromIdx === 4 && toIdx === 3) {
           // Lock body scroll
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
+          setScrollLock(true);
           if (window.lenis) window.lenis.stop();
 
           // Reset window scroll to top
