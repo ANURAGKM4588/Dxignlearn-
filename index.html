@@ -650,14 +650,16 @@
                       style={{
                         opacity: idx === activeScene ? 1 : (idx === 3 && activeScene === 4) ? 1 : 0,
                         pointerEvents: idx === activeScene ? 'auto' : 'none',
-                        transform: idx === activeScene 
+                        transform: (idx === activeScene || (idx === 3 && activeScene === 4))
                           ? 'translateY(0px)' 
                           : idx < activeScene 
                             ? 'translateY(-20px)' 
                             : 'translateY(20px)',
                         transition: (idx === 3 && activeScene === 4)
                           ? 'none'
-                          : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                          : idx === activeScene
+                            ? 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s, opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s'
+                            : 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s, opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0s'
                       }}
                     >
                       {/* Badge */}
@@ -679,28 +681,29 @@
                         {scene.sub}
                       </p>
 
-                      {/* Scene-specific content badges/tags */}
-                      {scene.tags && (
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {scene.tags.map((tag, ti) => (
-                            <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {/* Standardized Bottom Container to prevent layout jumps */}
+                      <div className="min-h-[90px] w-full flex items-start">
+                        {scene.tags && (
+                          <div className="flex flex-wrap gap-2 w-full pt-2">
+                            {scene.tags.map((tag, ti) => (
+                              <span key={ti} className="px-3 py-1 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest text-white/80 border border-white/10 bg-white/5 backdrop-blur-sm">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
-                      {/* Scene 1 Stat grid */}
-                      {idx === 0 && (
-                        <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10" style={{ maxWidth: '420px' }}>
-                          {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
-                            <div key={i} className="flex flex-col">
-                              <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
-                              <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                        {idx === 0 && (
+                          <div className="flex flex-wrap gap-6 pt-5 border-t border-white/10 w-full animate-fade-in" style={{ maxWidth: '420px' }}>
+                            {[{ v: '1000+', l: 'Students' }, { v: '5', l: 'AI Programs' }, { v: '100%', l: 'Project-Based' }, { v: 'Live', l: 'Tools' }].map((s, i) => (
+                              <div key={i} className="flex flex-col">
+                                <span className="text-white font-black font-heading tracking-tight" style={{ fontSize: 'clamp(1.1rem, 1.5vw, 1.4rem)' }}>{s.v}</span>
+                                <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">{s.l}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1887,7 +1890,7 @@
               <img
                 src="public/Images/logo/Dxign logo.png"
                 alt="Dxign Logo"
-                className="h-16 w-auto object-contain"
+                className="h-10 md:h-11 w-auto object-contain"
                 style={{ display: 'block' }}
               />
             </div>
@@ -1972,51 +1975,56 @@
 
           {/* About us split screen */}
           <section id="about-us" className="py-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
-            <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            <div className="max-w-7xl mx-auto w-full">
               
-              {/* Left Side: 3D rotating network globe */}
-              <div className="lg:col-span-5 flex justify-center items-center relative z-10">
-                <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
-                <div className="w-full relative flex justify-center items-center">
-                  <About3DCanvas />
-                </div>
-              </div>
-
-              {/* Right Side: Content description */}
-              <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
+              {/* Header (aligned with other section titles) */}
+              <div className="max-w-xl text-left mb-16 reveal-about-item">
                 <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                   <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
                   Mission Objective
                 </span>
-                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
                   About Dxign.learn
                 </h2>
-                
-                <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
-                  <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
-                    We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
-                  </p>
+              </div>
 
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
-                    {[
-                      'Practical Learning',
-                      'Industry Experts',
-                      'Real Projects',
-                      'Latest AI Tools',
-                      'Career-Oriented Training',
-                      'Business Growth Strategies'
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
-                        <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
-                          <i data-lucide="check" className="w-3.5 h-3.5"></i>
-                        </div>
-                        <span>{item}</span>
-                      </div>
-                    ))}
+              {/* Split Content layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                {/* Left Side: 3D rotating network globe */}
+                <div className="lg:col-span-5 flex justify-center items-center relative z-10">
+                  <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
+                  <div className="w-full relative flex justify-center items-center">
+                    <About3DCanvas />
                   </div>
                 </div>
 
+                {/* Right Side: Content description card */}
+                <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
+                  <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
+                    <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
+                      We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
+                    </p>
+
+                    {/* Highlights Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
+                      {[
+                        'Practical Learning',
+                        'Industry Experts',
+                        'Real Projects',
+                        'Latest AI Tools',
+                        'Career-Oriented Training',
+                        'Business Growth Strategies'
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
+                          <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
+                            <i data-lucide="check" className="w-3.5 h-3.5"></i>
+                          </div>
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
             </div>
