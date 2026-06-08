@@ -406,42 +406,58 @@
         };
 
         window.goToHeroStart = () => {
-          // 1. Force the active scene back to 0 (Intro)
-          setActiveScene(0);
+          if (isAnimatingRef.current) return;
           isAnimatingRef.current = true;
+          window.isReturningToHome = true;
 
-          // 2. Kill active animations
+          // 1. Kill active animations
           gsap.killTweensOf([canvasRef.current, textRefs.current, containerRef.current]);
           if (frameTweenRef.current) frameTweenRef.current.kill();
 
-          // 3. Reset scroll position to top
-          window.scrollTo(0, 0);
+          const finalizeGoToStart = () => {
+            // Force active scene back to 0 (Intro)
+            setActiveScene(0);
 
-          // 4. Lock body scroll and stop Lenis smooth scrolling
-          setScrollLock(true);
-          if (window.lenis) window.lenis.stop();
+            // Lock body scroll and stop Lenis smooth scrolling
+            setScrollLock(true);
+            if (window.lenis) window.lenis.stop();
 
-          // 5. Fade controls back in
-          gsap.to(['.hero-controls', '.hero-scroll-cue'], {
-            opacity: 1,
-            duration: 0.5,
-            ease: 'power2.out',
-          });
+            // Fade controls back in
+            gsap.to(['.hero-controls', '.hero-scroll-cue'], {
+              opacity: 1,
+              duration: 0.5,
+              ease: 'power2.out',
+            });
 
-          // 6. Scrub frames back to Scene 0
-          const frameObj = { val: currentFrameRef.current };
-          frameTweenRef.current = gsap.to(frameObj, {
-            val: SCENE_FRAMES[0],
-            duration: 0.8,
-            ease: 'power2.out',
-            onUpdate: () => {
-              currentFrameRef.current = frameObj.val;
-              drawFrame(Math.round(frameObj.val));
-            },
-            onComplete: () => {
-              isAnimatingRef.current = false;
-            }
-          });
+            // Scrub frames back to Scene 0
+            const frameObj = { val: currentFrameRef.current };
+            frameTweenRef.current = gsap.to(frameObj, {
+              val: SCENE_FRAMES[0],
+              duration: 0.8,
+              ease: 'power2.out',
+              onUpdate: () => {
+                currentFrameRef.current = frameObj.val;
+                drawFrame(Math.round(frameObj.val));
+              },
+              onComplete: () => {
+                isAnimatingRef.current = false;
+                window.isReturningToHome = false;
+              }
+            });
+          };
+
+          // 2. Perform fast scroll to top using Lenis if available
+          if (window.lenis && window.scrollY > 0) {
+            window.lenis.scrollTo(0, {
+              duration: 1.0,
+              force: true,
+              lock: false,
+              onComplete: finalizeGoToStart
+            });
+          } else {
+            window.scrollTo(0, 0);
+            finalizeGoToStart();
+          }
         };
 
         return () => {
@@ -571,8 +587,8 @@
               currentFrameRef.current = frameIdx;
               drawFrame(Math.round(frameIdx));
 
-              // If scrolled back to top, trigger re-pinning
-              if (sy <= 3 && !isAnimatingRef.current) {
+              // If scrolled back to top, trigger re-pinning (bypass if returning to home)
+              if (sy <= 3 && !isAnimatingRef.current && !window.isReturningToHome) {
                 goToScene(3);
               }
               ticking = false;
