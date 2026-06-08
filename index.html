@@ -3073,6 +3073,8 @@
                 className="fixed inset-0 z-[10005] overflow-y-auto"
                 style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
                 onClick={closeEnrollModal}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
               >
                 <div className="min-h-full flex items-center justify-center py-8" onClick={closeEnrollModal}>
                   <div
@@ -3276,6 +3278,8 @@
               className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-10"
               style={{ backgroundColor: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(20px)' }}
               onClick={() => setTheaterVideo(null)}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
@@ -3439,7 +3443,11 @@
 
           {/* ===== ADMIN PORTAL OVERLAY ===== */}
           {isAdminOpen && (
-            <div className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text overflow-hidden text-left">
+            <div
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text overflow-hidden text-left"
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
               {!isAdminAuthenticated ? (
                 /* Admin Login View */
                 <div className="flex-grow flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #050505 0%, #0c0c0c 100%)' }}>
