@@ -375,7 +375,7 @@
         }
       }, [isLoading]);
 
-      // Register global unpin function
+      // Register global unpin and reset functions
       useEffect(() => {
         window.unpinHero = () => {
           if (activeScene >= 4) return;
@@ -405,8 +405,48 @@
           }, 1000);
         };
 
+        window.goToHeroStart = () => {
+          // 1. Force the active scene back to 0 (Intro)
+          setActiveScene(0);
+          isAnimatingRef.current = true;
+
+          // 2. Kill active animations
+          gsap.killTweensOf([canvasRef.current, textRefs.current, containerRef.current]);
+          if (frameTweenRef.current) frameTweenRef.current.kill();
+
+          // 3. Reset scroll position to top
+          window.scrollTo(0, 0);
+
+          // 4. Lock body scroll and stop Lenis smooth scrolling
+          setScrollLock(true);
+          if (window.lenis) window.lenis.stop();
+
+          // 5. Fade controls back in
+          gsap.to(['.hero-controls', '.hero-scroll-cue'], {
+            opacity: 1,
+            duration: 0.5,
+            ease: 'power2.out',
+          });
+
+          // 6. Scrub frames back to Scene 0
+          const frameObj = { val: currentFrameRef.current };
+          frameTweenRef.current = gsap.to(frameObj, {
+            val: SCENE_FRAMES[0],
+            duration: 0.8,
+            ease: 'power2.out',
+            onUpdate: () => {
+              currentFrameRef.current = frameObj.val;
+              drawFrame(Math.round(frameObj.val));
+            },
+            onComplete: () => {
+              isAnimatingRef.current = false;
+            }
+          });
+        };
+
         return () => {
           delete window.unpinHero;
+          delete window.goToHeroStart;
         };
       }, [activeScene]);
 
@@ -1981,7 +2021,13 @@
             {/* Logo */}
             <div 
               className="flex items-center self-center cursor-pointer"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => {
+                if (window.goToHeroStart) {
+                  window.goToHeroStart();
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
             >
               <img
                 src="public/Images/logo/Dxign logo.png"
@@ -1996,7 +2042,13 @@
               {/* Menu Links */}
               <nav className="hidden lg:flex items-center space-x-1">
                 <button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  onClick={() => {
+                    if (window.goToHeroStart) {
+                      window.goToHeroStart();
+                    } else {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
                   className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   Home
