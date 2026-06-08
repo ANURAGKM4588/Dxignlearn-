@@ -2226,7 +2226,7 @@
 
         const el = document.getElementById(id);
         if (el) {
-          const offset = el.offsetTop - 85;
+          const offset = id === 'pricing-cta' ? el.offsetTop - 45 : el.offsetTop - 85;
           window.scrollTo({ top: offset, behavior: 'smooth' });
 
           if (targetToFocusId) {
@@ -2908,7 +2908,7 @@
           </section>
 
           {/* Immersive CTA with warp particle canvas */}
-          <section id="pricing-cta" className="relative pt-16 pb-36 px-6 md:px-12 lg:px-24 border-t border-white/5 select-none bg-brand-bg flex items-center justify-center">
+          <section id="pricing-cta" className="relative pt-8 pb-20 px-6 md:px-12 lg:px-24 border-t border-white/5 select-none bg-brand-bg flex items-center justify-center">
             
             {/* Warp particles Canvas */}
             <Cta3DCanvas />
@@ -2919,21 +2919,21 @@
             {/* Container details */}
             <div className="max-w-4xl mx-auto w-full relative z-10 flex flex-col items-center justify-center text-center">
               
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-4 bg-brand-cyan/10 border border-brand-cyan/20 px-3.5 py-1.5 rounded-full">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3 bg-brand-cyan/10 border border-brand-cyan/20 px-3.5 py-1.5 rounded-full">
                 <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
                 Launch Offer &middot; Lifetime Access
               </span>
 
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-none font-heading mb-6 max-w-2xl text-white-glow">
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-none font-heading mb-4 max-w-2xl text-white-glow">
                 Ready to Master AI and Build Your Future?
               </h2>
 
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mb-12 font-light">
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mb-6 font-light">
                 Join the next generation of creators, entrepreneurs, and professionals using AI to achieve extraordinary results. Get complete lifetime access to all future course modules.
               </p>
 
               {/* Price Tag Details panel */}
-              <div className="liquid-glass p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 max-w-xl w-full mb-12 border border-brand-cyan/20">
+              <div className="liquid-glass py-5 px-6 md:py-6 md:px-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 max-w-xl w-full mb-8 border border-brand-cyan/20">
                 <div className="text-left">
                   <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight">Dxign.learn Lifetime Access</h3>
                   <p className="text-xs text-gray-500 mt-1">One-time payment. All updates included.</p>
@@ -2951,13 +2951,13 @@
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md">
                 <button
                   onClick={handleGeneralEnroll}
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02] flex-grow"
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02] flex-grow"
                 >
                   Enroll Now
                 </button>
                 <a
                   href="mailto:contact@aimastery.academy?subject=General%20Inquiry"
-                  className="px-8 py-4 rounded-xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300 flex-grow"
+                  className="px-8 py-3 rounded-xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300 flex-grow"
                 >
                   Contact Us
                 </a>
