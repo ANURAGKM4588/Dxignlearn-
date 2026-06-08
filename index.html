@@ -478,6 +478,7 @@
         }
 
         const handleGlobalWheel = (e) => {
+          if (document.body.getAttribute('data-modal-active') === 'true') return;
           if (activeScene < 4) {
             e.preventDefault();
             if (isAnimatingRef.current) return;
@@ -498,6 +499,7 @@
         };
 
         const handleTouchMove = (e) => {
+          if (document.body.getAttribute('data-modal-active') === 'true') return;
           if (activeScene < 4) {
             e.preventDefault();
           }
@@ -515,10 +517,12 @@
       // Touch swipe detection handlers
       useEffect(() => {
         const handleTouchStart = (e) => {
+          if (document.body.getAttribute('data-modal-active') === 'true') return;
           touchStartY.current = e.touches[0].clientY;
         };
 
         const handleTouchEnd = (e) => {
+          if (document.body.getAttribute('data-modal-active') === 'true') return;
           const touchEndY = e.changedTouches[0].clientY;
           const diffY = touchStartY.current - touchEndY;
 
@@ -1828,16 +1832,19 @@
       useEffect(() => {
         const isModalOpen = !!enrollModal || !!theaterVideo || !!isAdminOpen;
         const header = document.querySelector('header');
+        
         if (isModalOpen) {
+          document.body.setAttribute('data-modal-active', 'true');
           const sbWidth = window.innerWidth - document.documentElement.clientWidth;
           document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
+          document.documentElement.style.overflow = ''; // Clear html overflow so overlay scrolling works on mobile
           if (sbWidth > 0) {
             document.body.style.paddingRight = `${sbWidth}px`;
             if (header) header.style.right = `${sbWidth}px`;
           }
           if (window.lenis) window.lenis.stop();
         } else {
+          document.body.removeAttribute('data-modal-active');
           const shouldLock = window.scrollY <= 10;
           if (shouldLock) {
             document.body.style.overflow = 'hidden';
