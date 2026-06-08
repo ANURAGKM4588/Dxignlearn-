@@ -1793,13 +1793,47 @@
       const [theaterVideo, setTheaterVideo] = useState(null);
       const [carouselIndex, setCarouselIndex] = useState(0);
 
+      // Customer prefill login details for payment
+      const [emailInput, setEmailInput] = useState('');
+      const [phoneInput, setPhoneInput] = useState('');
+      const [enrollError, setEnrollError] = useState('');
+
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
 
-      const openEnrollModal = (course) => setEnrollModal(course);
-      const closeEnrollModal = () => setEnrollModal(null);
+      const openEnrollModal = (course) => {
+        setEmailInput('');
+        setPhoneInput('');
+        setEnrollError('');
+        setEnrollModal(course);
+      };
+      const closeEnrollModal = () => {
+        setEnrollModal(null);
+      };
 
       const handleRazorpayPay = () => {
         if (!enrollModal) return;
+
+        // Validations
+        if (!emailInput.trim()) {
+          setEnrollError('Please enter your email address.');
+          return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.trim())) {
+          setEnrollError('Please enter a valid email address.');
+          return;
+        }
+        if (!phoneInput.trim()) {
+          setEnrollError('Please enter your mobile number.');
+          return;
+        }
+        if (phoneInput.trim().length !== 10) {
+          setEnrollError('Please enter a valid 10-digit mobile number.');
+          return;
+        }
+
+        setEnrollError('');
+
         const options = {
           key: RAZORPAY_KEY,
           amount: enrollModal.priceAmount,
@@ -1813,8 +1847,8 @@
           },
           prefill: {
             name: '',
-            email: '',
-            contact: ''
+            email: emailInput.trim(),
+            contact: phoneInput.trim()
           },
           notes: {
             course_id: enrollModal.id,
@@ -1838,26 +1872,23 @@
 
       // General Enroll Now — All Courses Lifetime Access ₹5
       const handleGeneralEnroll = () => {
-        const options = {
-          key: RAZORPAY_KEY,
-          amount: 500, // ₹5 in paise
-          currency: 'INR',
-          name: 'Dxign Learn',
-          description: 'Dxign.learn Lifetime Access — All 5 Courses',
-          image: 'public/Images/logo/Dxign logo.png',
-          handler: function(response) {
-            alert('🎉 Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nWelcome to Dxign Learn! You now have lifetime access to all 5 AI courses. Check your email for access details.');
-          },
-          prefill: { name: '', email: '', contact: '' },
-          notes: { package: 'All Courses Lifetime Access' },
-          theme: { color: '#00f0ff' },
-          modal: { ondismiss: function() {} }
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function(response) {
-          alert('Payment failed. Reason: ' + response.error.description);
+        openEnrollModal({
+          id: 'all-courses',
+          title: 'All Courses Lifetime Access',
+          subtitle: 'Complete AI Mastery Suite',
+          description: 'Get immediate lifetime access to all 5 AI courses: Graphic Design, Film Making, Content Creation, Vibe Coding, and AI for Business Owners, including all future updates.',
+          icon: 'layers',
+          colorName: 'cyan',
+          colorCode: '#00f0ff',
+          badge: 'Launch Offer',
+          category: 'bundle',
+          tools: ['All 5 Courses', 'Full Modules', 'Source Files'],
+          duration: 'Lifetime',
+          price: '₹5',
+          originalPrice: '₹999',
+          discount: 'Save 99%',
+          priceAmount: 500
         });
-        rzp.open();
       };
 
       const colorThemes = {
@@ -2832,7 +2863,7 @@
                 onClick={closeEnrollModal}
               >
                 <div
-                  className="relative w-full max-w-md mx-4 rounded-3xl border border-white/10 overflow-hidden"
+                  className="relative w-full max-w-md mx-4 my-8 rounded-3xl border border-white/10 overflow-y-auto max-h-[90vh]"
                   style={{
                     background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
                     boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
@@ -2902,6 +2933,75 @@
                       <span className="px-3 py-1.5 rounded-full text-[10px] font-mono text-white border border-white/10 bg-white/5">
                         Lifetime Access
                       </span>
+                    </div>
+
+                    {/* Customer Login Details Form */}
+                    <div className="space-y-4 mb-6">
+                      <div className="text-left">
+                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
+                          Enter Email Address
+                        </label>
+                        <div className="relative flex items-center">
+                          <i data-lucide="mail" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                          <input
+                            type="email"
+                            placeholder="name@example.com"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                            style={{
+                              fontFamily: 'Outfit, sans-serif',
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = enrollModal.colorCode;
+                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                              e.target.style.boxShadow = 'none';
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-left">
+                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
+                          Enter Mobile Number
+                        </label>
+                        <div className="relative flex items-center">
+                          <i data-lucide="phone" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                          <input
+                            type="tel"
+                            placeholder="10-digit mobile number"
+                            value={phoneInput}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 10) {
+                                setPhoneInput(val);
+                              }
+                            }}
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                            style={{
+                              fontFamily: 'Outfit, sans-serif',
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = enrollModal.colorCode;
+                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                              e.target.style.boxShadow = 'none';
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {enrollError && (
+                        <div className="text-left text-rose-500 text-[10px] font-mono mt-2 bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-lg flex items-center space-x-1.5">
+                          <i data-lucide="alert-triangle" className="w-3.5 h-3.5 flex-shrink-0 text-rose-500"></i>
+                          <span>{enrollError}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Payment Button */}
