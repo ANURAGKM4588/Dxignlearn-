@@ -1798,6 +1798,17 @@
       const [phoneInput, setPhoneInput] = useState('');
       const [enrollError, setEnrollError] = useState('');
 
+      // Admin Portal States
+      const [isAdminOpen, setIsAdminOpen] = useState(false);
+      const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+      const [adminPasswordInput, setAdminPasswordInput] = useState('');
+      const [adminData, setAdminData] = useState([]);
+      const [adminLoading, setAdminLoading] = useState(false);
+      const [adminError, setAdminError] = useState('');
+      const [adminSearch, setAdminSearch] = useState('');
+      const [adminFilterCourse, setAdminFilterCourse] = useState('All');
+      const [adminFilterStatus, setAdminFilterStatus] = useState('All');
+
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
       const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbww2LgUDdxh7nSZy-fmAfeuTDBgPDjjY6xX66N2ImGoR1NCn6Vwx4RNd9WDYOLiFyxq/exec'; // Paste your Google Sheet web app URL here
 
@@ -1809,6 +1820,108 @@
       };
       const closeEnrollModal = () => {
         setEnrollModal(null);
+      };
+
+      // Listen to hash changes for Admin Portal
+      useEffect(() => {
+        const handleHashChange = () => {
+          if (window.location.hash === '#admin') {
+            setIsAdminOpen(true);
+          } else {
+            setIsAdminOpen(false);
+          }
+        };
+
+        handleHashChange();
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => {
+          window.removeEventListener('hashchange', handleHashChange);
+        };
+      }, []);
+
+      // Fetch admin registrations list
+      const fetchAdminData = async () => {
+        if (!GOOGLE_SHEET_WEBHOOK_URL) {
+          setAdminError('Google Sheet Webhook URL is not configured.');
+          return;
+        }
+
+        setAdminLoading(true);
+        setAdminError('');
+        try {
+          const response = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          if (data && data.error) {
+            throw new Error(data.error);
+          }
+          setAdminData(Array.isArray(data) ? data.reverse() : []);
+        } catch (error) {
+          console.error('Error fetching admin data:', error);
+          setAdminError('Failed to fetch data. Make sure doGet(e) is deployed in Apps Script.');
+        } finally {
+          setAdminLoading(false);
+        }
+      };
+
+      // Auto-fetch data on login success
+      useEffect(() => {
+        if (isAdminAuthenticated) {
+          fetchAdminData();
+        }
+      }, [isAdminAuthenticated]);
+
+      const handleAdminLogin = (e) => {
+        if (e) e.preventDefault();
+        const correctPassword = 'DxignAdmin2026';
+        if (adminPasswordInput === correctPassword) {
+          setIsAdminAuthenticated(true);
+          setAdminPasswordInput('');
+          setAdminError('');
+        } else {
+          setAdminError('Incorrect Admin Passkey.');
+        }
+      };
+
+      const handleAdminLogout = () => {
+        setIsAdminAuthenticated(false);
+        setAdminPasswordInput('');
+        setAdminData([]);
+        window.location.hash = '';
+      };
+
+      const exportToCSV = () => {
+        if (!adminData || adminData.length === 0) return;
+        
+        const headers = ['Date', 'Email', 'Phone', 'Course', 'Price', 'Status', 'Payment ID'];
+        const csvRows = [headers.join(',')];
+
+        adminData.forEach(row => {
+          const values = [
+            `"${(row.date || '').replace(/"/g, '""')}"`,
+            `"${(row.email || '').replace(/"/g, '""')}"`,
+            `"${(row.phone || '').replace(/"/g, '""')}"`,
+            `"${(row.course || '').replace(/"/g, '""')}"`,
+            `"${(row.price || '').replace(/"/g, '""')}"`,
+            `"${(row.status || '').replace(/"/g, '""')}"`,
+            `"${(row.paymentid || '').replace(/"/g, '""')}"`
+          ];
+          csvRows.push(values.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `dxign_learn_students_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       };
 
       const saveToGoogleSheet = async (status, paymentId = '', emailVal = '', phoneVal = '', courseVal = '', priceVal = '') => {
@@ -2891,7 +3004,12 @@
 
             {/* Copyright notes */}
             <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
-              <span>&copy; 2026 Dxign.learn. All Rights Reserved.</span>
+              <span
+                onClick={() => { window.location.hash = '#admin'; }}
+                className="cursor-default hover:text-white/40 transition-colors select-none"
+              >
+                &copy; 2026 Dxign.learn. All Rights Reserved.
+              </span>
               <span className="text-gray-600">Site inspired by Apple. Engineered using React, CSS, and Tailwind CSS.</span>
             </div>
           </footer>
@@ -3236,6 +3354,320 @@
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ===== ADMIN PORTAL OVERLAY ===== */}
+          {isAdminOpen && (
+            <div className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text overflow-hidden text-left">
+              {!isAdminAuthenticated ? (
+                /* Admin Login View */
+                <div className="flex-grow flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #050505 0%, #0c0c0c 100%)' }}>
+                  {/* Close Login View */}
+                  <button 
+                    onClick={() => { window.location.hash = ''; }}
+                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+                  >
+                    <i data-lucide="x" className="w-5 h-5"></i>
+                  </button>
+
+                  <form onSubmit={handleAdminLogin} className="max-w-md w-full p-8 liquid-glass border border-white/10 rounded-3xl text-center shadow-[0_20px_60px_rgba(0,240,255,0.05)] relative overflow-hidden">
+                    {/* Top cyan bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
+                    
+                    <div className="w-14 h-14 rounded-2xl bg-brand-cyan/5 border border-brand-cyan/10 flex items-center justify-center mx-auto mb-6 text-brand-cyan">
+                      <i data-lucide="shield-alert" className="w-7 h-7"></i>
+                    </div>
+
+                    <h2 className="text-xl font-black uppercase tracking-wider text-white font-heading mb-2">
+                      Dxign.learn Admin Gateway
+                    </h2>
+                    <p className="text-xs text-gray-500 mb-8 font-mono">AUTHORIZED PERSONNEL ONLY</p>
+
+                    <div className="text-left mb-6">
+                      <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
+                        Enter Passkey
+                      </label>
+                      <div className="relative flex items-center">
+                        <i data-lucide="key-round" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          value={adminPasswordInput}
+                          onChange={(e) => setAdminPasswordInput(e.target.value)}
+                          className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                          onFocus={(e) => {
+                            e.target.style.borderColor = '#00f0ff';
+                            e.target.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.15)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {adminError && (
+                      <div className="mb-6 text-left text-rose-500 text-[10px] font-mono bg-rose-500/10 border border-rose-500/20 px-3.5 py-2.5 rounded-lg flex items-center space-x-1.5">
+                        <i data-lucide="alert-triangle" className="w-4 h-4 flex-shrink-0 text-rose-500"></i>
+                        <span>{adminError}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] bg-gradient-to-r from-brand-cyan to-brand-blue shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                    >
+                      Authenticate
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                /* Admin Dashboard View */
+                <div className="flex-grow flex flex-col min-h-screen text-gray-300 overflow-hidden">
+                  {/* Top Bar Header */}
+                  <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
+                    <div className="flex items-center space-x-3 text-left">
+                      <div className="w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
+                        <i data-lucide="layout-dashboard" className="w-5 h-5"></i>
+                      </div>
+                      <div>
+                        <h1 className="text-sm font-black tracking-widest font-mono text-white flex items-center">
+                          DXIGN.LEARN <span className="ml-2 px-2 py-0.5 rounded text-[8px] tracking-normal font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/25">ADMIN</span>
+                        </h1>
+                        <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Student Registrations Database</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={fetchAdminData}
+                        disabled={adminLoading}
+                        className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+                      >
+                        <i data-lucide="refresh-cw" className={`w-3.5 h-3.5 ${adminLoading ? 'animate-spin' : ''}`}></i>
+                        Refresh
+                      </button>
+                      <button
+                        onClick={exportToCSV}
+                        className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2"
+                      >
+                        <i data-lucide="download" className="w-3.5 h-3.5"></i>
+                        Export CSV
+                      </button>
+                      <button
+                        onClick={handleAdminLogout}
+                        className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-mono font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-200 flex items-center gap-2"
+                      >
+                        <i data-lucide="log-out" className="w-3.5 h-3.5"></i>
+                        Logout
+                      </button>
+                    </div>
+                  </header>
+
+                  {/* Main Scrollable Content */}
+                  <main className="flex-grow p-6 md:p-12 max-w-7xl mx-auto w-full flex flex-col space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    {/* Metrics/KPI Cards */}
+                    {(() => {
+                      const successRows = adminData.filter(r => (r.status || '').toLowerCase() === 'success');
+                      const totalSales = successRows.length;
+                      const totalRevenue = successRows.reduce((sum, r) => {
+                        const cleanPrice = parseInt((r.price || '').replace(/\D/g, '')) || 0;
+                        return sum + cleanPrice;
+                      }, 0);
+                      const conversionRate = adminData.length > 0 ? ((totalSales / adminData.length) * 100).toFixed(1) : 0;
+
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* KPI Leads */}
+                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-cyan">
+                              <i data-lucide="users" className="w-12 h-12"></i>
+                            </div>
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
+                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
+                            <p className="text-[9px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
+                          </div>
+
+                          {/* KPI Sales */}
+                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-emerald">
+                              <i data-lucide="shopping-bag" className="w-12 h-12"></i>
+                            </div>
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
+                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
+                            <p className="text-[9px] font-mono text-gray-600 mt-2">Completed course orders</p>
+                          </div>
+
+                          {/* KPI Revenue */}
+                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-violet">
+                              <i data-lucide="indian-rupee" className="w-12 h-12"></i>
+                            </div>
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
+                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
+                            <p className="text-[9px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
+                          </div>
+
+                          {/* KPI Conversion */}
+                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-rose">
+                              <i data-lucide="trending-up" className="w-12 h-12"></i>
+                            </div>
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
+                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
+                            <p className="text-[9px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Filter & Search Panel */}
+                    <div className="p-6 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 justify-between items-center text-left">
+                      {/* Search */}
+                      <div className="relative flex items-center w-full md:w-5/12">
+                        <i data-lucide="search" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                        <input
+                          type="text"
+                          placeholder="Search by student email or phone..."
+                          value={adminSearch}
+                          onChange={(e) => setAdminSearch(e.target.value)}
+                          className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
+                        />
+                      </div>
+
+                      {/* Filters */}
+                      <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
+                        {/* Course Filter */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Course:</span>
+                          <select
+                            value={adminFilterCourse}
+                            onChange={(e) => setAdminFilterCourse(e.target.value)}
+                            className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                          >
+                            <option value="All">All Items</option>
+                            <option value="All Courses Lifetime Access">All Courses Bundle</option>
+                            {courseList.map(c => (
+                              <option key={c.id} value={c.title}>{c.title}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status:</span>
+                          <select
+                            value={adminFilterStatus}
+                            onChange={(e) => setAdminFilterStatus(e.target.value)}
+                            className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                          >
+                            <option value="All">All Status</option>
+                            <option value="Success">Success (Paid)</option>
+                            <option value="Initiated">Initiated (Lead)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Registrations List Table */}
+                    <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[300px]">
+                      {adminLoading && (
+                        <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                          <div className="flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest">
+                            <i data-lucide="refresh-cw" className="w-5 h-5 animate-spin"></i>
+                            <span>Fetching Live Data...</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {adminError && (
+                        <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center">
+                          <div className="max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center">
+                            <i data-lucide="alert-triangle" className="w-8 h-8 text-rose-500 mb-3"></i>
+                            <h4 className="text-xs font-mono font-bold uppercase text-white tracking-widest mb-1">Retrieval Failed</h4>
+                            <p className="text-[11px] text-gray-500 mb-4 font-mono">{adminError}</p>
+                            <button
+                              onClick={fetchAdminData}
+                              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200"
+                            >
+                              Retry Fetch
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="overflow-x-auto w-full">
+                        <table className="min-w-full divide-y divide-white/5 text-left text-xs font-mono">
+                          <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px]">
+                            <tr>
+                              <th className="px-6 py-4">Date</th>
+                              <th className="px-6 py-4">Email</th>
+                              <th className="px-6 py-4">Phone</th>
+                              <th className="px-6 py-4">Course</th>
+                              <th className="px-6 py-4 text-center">Price</th>
+                              <th className="px-6 py-4 text-center">Status</th>
+                              <th className="px-6 py-4">Payment ID</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5 text-gray-300">
+                            {(() => {
+                              const filteredRows = adminData.filter(row => {
+                                const emailMatch = (row.email || '').toLowerCase().includes(adminSearch.toLowerCase());
+                                const phoneMatch = (row.phone || '').toLowerCase().includes(adminSearch.toLowerCase());
+                                const searchMatch = emailMatch || phoneMatch;
+
+                                const courseMatch = adminFilterCourse === 'All' || 
+                                  (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
+                                  (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+
+                                const statusMatch = adminFilterStatus === 'All' || 
+                                  (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+
+                                return searchMatch && courseMatch && statusMatch;
+                              });
+
+                              if (filteredRows.length === 0) {
+                                return (
+                                  <tr>
+                                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">
+                                      No Student Records Found
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
+                              return filteredRows.map((row, index) => {
+                                const isSuccess = (row.status || '').toLowerCase() === 'success';
+                                return (
+                                  <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
+                                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">{row.date}</td>
+                                    <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{row.phone}</td>
+                                    <td className="px-6 py-4 text-white uppercase font-bold tracking-tight text-[11px]">{row.course}</td>
+                                    <td className="px-6 py-4 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
+                                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                                      <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                        isSuccess 
+                                          ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                                          : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                      }`}>
+                                        {row.status}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[10px] text-gray-500 selection:bg-brand-cyan/30">{row.paymentid || '—'}</td>
+                                  </tr>
+                                );
+                              });
+                            })()}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </main>
+                </div>
+              )}
             </div>
           )}
 
