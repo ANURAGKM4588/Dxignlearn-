@@ -45,7 +45,7 @@ function doPost(e) {
     }
     
     // 1. Log to the Google Sheet (Current existing behavior)
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var sheet = getSheet();
     sheet.appendRow([
       data.date,
       data.name,
@@ -101,7 +101,7 @@ function doGet(e) {
     // 1. Request OTP Flow
     if (action === 'send_otp' && email) {
       email = email.toLowerCase().trim();
-      var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      var sheet = getSheet();
       var rows = sheet.getDataRange().getValues();
       var isRegistered = false;
       var studentName = "";
@@ -175,7 +175,7 @@ function doGet(e) {
     }
     
     // 3. Fallback: Default Admin Dashboard List
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var sheet = getSheet();
     var rows = sheet.getDataRange().getValues();
     var data = [];
     
@@ -319,4 +319,29 @@ function authorizeDrive() {
   Logger.log("Triggering Google Drive access authorization...");
   var folders = DriveApp.getFoldersByName("Dxignlearn Doubt Attachments");
   Logger.log("Access status: authorized. Found folders count: " + (folders.hasNext() ? "yes" : "no"));
+}
+
+/**
+ * Helper to retrieve the target Google Sheet.
+ * Safely handles both container-bound scripts and standalone scripts by allowing an explicit fallback ID.
+ */
+function getSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss) {
+    return ss.getActiveSheet();
+  }
+  
+  // Standalone script fallback: If you deployed this script as a standalone script (directly via script.google.com),
+  // paste your Google Spreadsheet ID (the long code in the Google Sheet's browser address URL) inside the quotes below!
+  var SPREADSHEET_ID = ""; 
+  
+  if (SPREADSHEET_ID) {
+    try {
+      return SpreadsheetApp.openById(SPREADSHEET_ID).getActiveSheet();
+    } catch (err) {
+      throw new Error("Failed to open spreadsheet by ID: " + err.toString());
+    }
+  }
+  
+  throw new Error("Could not find active spreadsheet. Ensure this Apps Script was opened from your Google Sheet via: Extensions -> Apps Script. Otherwise, paste your spreadsheet ID inside Code.gs in the SPREADSHEET_ID variable.");
 }
