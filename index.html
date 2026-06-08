@@ -1877,52 +1877,9 @@
       // Full screen media preview
       const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
 
-      // Mock Data States for Local Fallback Simulation Mode
-      const [mockChats, setMockChats] = useState([
-        {
-          id: 'student1_gmail_com',
-          email: 'student1@gmail.com',
-          name: 'Sarah Jenkins',
-          lastMessage: 'Can you help me with the camera settings in Midjourney?',
-          lastActive: { seconds: Date.now() / 1000 - 3600 },
-          courses: ['Graphic Design', 'Content Creation'],
-          unread: true
-        },
-        {
-          id: 'student2_gmail_com',
-          email: 'student2@gmail.com',
-          name: 'Rajesh Kumar',
-          lastMessage: 'Thanks, the video is playing perfectly now!',
-          lastActive: { seconds: Date.now() / 1000 - 7200 },
-          courses: ['Film Making'],
-          unread: false
-        },
-        {
-          id: 'student3_gmail_com',
-          email: 'student3@gmail.com',
-          name: 'David Miller',
-          lastMessage: 'Is Vibe Coding course for beginners?',
-          lastActive: { seconds: Date.now() / 1000 - 18000 },
-          courses: ['Vibe Coding', 'Business Automation'],
-          unread: true
-        }
-      ]);
-
-      const [mockMessages, setMockMessages] = useState({
-        'student1_gmail_com': [
-          { id: 'm1_1', sender: 'student1@gmail.com', name: 'Sarah Jenkins', text: 'Hello Anurag, I am working on the CGI Ad project.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 7200 } },
-          { id: 'm1_2', sender: 'mentor', name: 'Anurag KM (Mentor)', text: 'Great! Which part are you working on?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 5400 } },
-          { id: 'm1_3', sender: 'student1@gmail.com', name: 'Sarah Jenkins', text: 'Can you help me with the camera settings in Midjourney?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 3600 } }
-        ],
-        'student2_gmail_com': [
-          { id: 'm2_1', sender: 'student2@gmail.com', name: 'Rajesh Kumar', text: 'Hi! The video course is awesome.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 10000 } },
-          { id: 'm2_2', sender: 'mentor', name: 'Anurag KM (Mentor)', text: 'Thanks Rajesh! Glad you like it.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 8600 } },
-          { id: 'm2_3', sender: 'student2@gmail.com', name: 'Rajesh Kumar', text: 'Thanks, the video is playing perfectly now!', type: 'text', timestamp: { seconds: Date.now() / 1000 - 7200 } }
-        ],
-        'student3_gmail_com': [
-          { id: 'm3_1', sender: 'student3@gmail.com', name: 'David Miller', text: 'Is Vibe Coding course for beginners?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 18000 } }
-        ]
-      });
+      // Mock Data States for Local Fallback Simulation Mode (Initially empty to allow clean testing)
+      const [mockChats, setMockChats] = useState([]);
+      const [mockMessages, setMockMessages] = useState({});
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
       const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbww2LgUDDxh7nSZy-fmAfeuTDBgPDjjY6xX66N2lmGoR1NCn6Vwx4RNd9WDYOliFyxq/exec'; // Paste your Google Sheet web app URL here
