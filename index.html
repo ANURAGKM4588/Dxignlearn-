@@ -2827,7 +2827,7 @@
             const theme = colorThemes[enrollModal.colorName] || colorThemes.cyan;
             return (
               <div
-                className="fixed inset-0 z-[9999] flex items-center justify-center"
+                className="fixed inset-0 z-[10005] flex items-center justify-center"
                 style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
                 onClick={closeEnrollModal}
               >
@@ -3073,8 +3073,6 @@
                       
                       <button
                         onClick={() => {
-                          setTheaterVideo(null);
-                          
                           // Determine the matching course ID based on category and tags
                           let targetCourseId = 'content-creation';
                           if (theaterVideo.tags && theaterVideo.tags.includes('Vibe Coding')) {
