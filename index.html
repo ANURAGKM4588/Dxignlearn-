@@ -1788,6 +1788,109 @@
         </div>
       );
     };
+    const getDriveFileId = (url) => {
+      if (!url) return null;
+      if (url.includes('drive.google.com')) {
+        const matchUc = url.match(/[?&]id=([^&]+)/);
+        if (matchUc && matchUc[1]) return matchUc[1];
+        const matchFileD = url.match(/\/file\/d\/([^/]+)/);
+        if (matchFileD && matchFileD[1]) return matchFileD[1];
+      }
+      return null;
+    };
+
+    const AudioPlayer = ({ fileUrl, getAttachmentUrl, GOOGLE_SHEET_WEBHOOK_URL }) => {
+      const [audioSrc, setAudioSrc] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      useEffect(() => {
+        if (!fileUrl) return;
+
+        const fileId = getDriveFileId(fileUrl);
+        if (!fileId) {
+          // Fallback for non-Drive URLs
+          setAudioSrc(fileUrl);
+          return;
+        }
+
+        let active = true;
+        setLoading(true);
+        setError('');
+
+        const fetchAudio = async () => {
+          try {
+            const url = `${GOOGLE_SHEET_WEBHOOK_URL}?action=get_file_base64&id=${fileId}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const result = await response.json();
+            if (result.status === 'success' && result.base64) {
+              const byteCharacters = atob(result.base64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: result.mimeType || 'audio/m4a' });
+              const blobUrl = URL.createObjectURL(blob);
+              
+              if (active) {
+                setAudioSrc(blobUrl);
+              }
+            } else {
+              throw new Error(result.message || 'Failed to fetch base64 data');
+            }
+          } catch (err) {
+            console.error("Error loading voice message:", err);
+            if (active) {
+              setError('Failed to load audio');
+            }
+          } finally {
+            if (active) {
+              setLoading(false);
+            }
+          }
+        };
+
+        fetchAudio();
+
+        return () => {
+          active = false;
+          if (audioSrc && audioSrc.startsWith('blob:')) {
+            URL.revokeObjectURL(audioSrc);
+          }
+        };
+      }, [fileUrl, GOOGLE_SHEET_WEBHOOK_URL]);
+
+      if (loading) {
+        return (
+          <div className="flex items-center gap-2 py-1 text-[10px] text-brand-cyan font-mono animate-pulse">
+            <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Downloading voice note...</span>
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div className="text-[10px] text-rose-500 font-mono py-1">
+            ⚠️ {error}
+          </div>
+        );
+      }
+
+      return (
+        <audio
+          src={audioSrc}
+          controls
+          className="w-full max-w-[220px] mt-1 h-8 filter invert opacity-80"
+        />
+      );
+    };
 
     // --- MAIN REACT APPLICATION APP ---
 
@@ -1877,12 +1980,28 @@
       // Full screen media preview
       const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
 
+      const getAttachmentUrl = (url, type) => {
+        if (!url) return '';
+        if (url.includes('drive.google.com/uc')) {
+          const match = url.match(/[?&]id=([^&]+)/);
+          if (match && match[1]) {
+            if (type === 'image') {
+              return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            } else {
+              return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+            }
+          }
+        }
+        return url;
+      };
+
+
       // Mock Data States for Local Fallback Simulation Mode (Initially empty to allow clean testing)
       const [mockChats, setMockChats] = useState([]);
       const [mockMessages, setMockMessages] = useState({});
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
-      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbww2LgUDDxh7nSZy-fmAfeuTDBgPDjjY6xX66N2lmGoR1NCn6Vwx4RNd9WDYOliFyxq/exec'; // Paste your Google Sheet web app URL here
+      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbysbD0IywpeLdCZxIaEl4BuGBxsSEcgdVY9JUu7QcyoOObxhlaT0kNkox_UyoralMtFsA/exec'; // Paste your Google Sheet web app URL here
 
       const openEnrollModal = (course) => {
         setNameInput('');
@@ -4603,9 +4722,9 @@
                                             {msg.type === 'image' && (
                                               <div className="space-y-1">
                                                 <img
-                                                  src={msg.fileUrl}
+                                                  src={getAttachmentUrl(msg.fileUrl, 'image')}
                                                   alt="Student attachment"
-                                                  onClick={() => setActivePreviewMedia({ type: 'image', url: msg.fileUrl })}
+                                                  onClick={() => setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') })}
                                                   className="rounded-lg max-h-48 max-w-full object-cover cursor-zoom-in border border-white/5 hover:opacity-90 transition"
                                                 />
                                                 {msg.text && <p className="text-xs mt-1 leading-relaxed">{msg.text}</p>}
@@ -4614,7 +4733,7 @@
 
                                             {msg.type === 'video' && (
                                               <div
-                                                onClick={() => setActivePreviewMedia({ type: 'video', url: msg.fileUrl })}
+                                                onClick={() => setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') })}
                                                 className="flex items-center gap-3 bg-zinc-950/40 hover:bg-zinc-950/60 p-3 rounded-xl cursor-pointer border border-white/10 transition"
                                               >
                                                 <div className="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan">
@@ -4635,16 +4754,20 @@
                                                   </div>
                                                   <div className="text-left">
                                                     <span className="text-[10px] font-bold block text-white">Voice Message</span>
-                                                    <a href={msg.fileUrl} target="_blank" className="text-[8px] text-brand-cyan font-mono hover:underline block mt-0.5">Open in new window</a>
+                                                    <a href={getDriveFileId(msg.fileUrl) ? `https://drive.google.com/file/d/${getDriveFileId(msg.fileUrl)}/view` : msg.fileUrl} target="_blank" className="text-[8px] text-brand-cyan font-mono hover:underline block mt-0.5">Open in new window</a>
                                                   </div>
                                                 </div>
-                                                <audio src={msg.fileUrl} controls className="w-full max-w-[220px] mt-1 h-8 filter invert opacity-80" />
+                                                <AudioPlayer 
+                                                  fileUrl={msg.fileUrl} 
+                                                  getAttachmentUrl={getAttachmentUrl} 
+                                                  GOOGLE_SHEET_WEBHOOK_URL={GOOGLE_SHEET_WEBHOOK_URL} 
+                                                />
                                               </div>
                                             )}
 
                                             {msg.type === 'document' && (
                                               <a
-                                                href={msg.fileUrl}
+                                                href={getAttachmentUrl(msg.fileUrl, 'document')}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-3 bg-zinc-950/40 hover:bg-zinc-950/60 p-3 rounded-xl border border-white/10 transition text-left text-white"

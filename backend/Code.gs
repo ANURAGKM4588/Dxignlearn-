@@ -5,8 +5,8 @@
  */
 
 // REPLACE with your Firebase Realtime Database or Firestore project URL and Web API key
-var FIREBASE_PROJECT_ID = "YOUR_FIREBASE_PROJECT_ID";
-var FIREBASE_API_KEY = "YOUR_FIREBASE_API_KEY";
+var FIREBASE_PROJECT_ID = "dxign-website";
+var FIREBASE_API_KEY = "AIzaSyDAhD8X6zf9ie7g4QLBLHRanyroHgFNO_8";
 var FIRESTORE_URL = "https://firestore.googleapis.com/v1/projects/" + FIREBASE_PROJECT_ID + "/databases/(default)/documents/";
 
 /**
@@ -78,6 +78,25 @@ function doGet(e) {
   try {
     var action = e.parameter.action;
     var email = e.parameter.email;
+    
+    // A. Handle Google Drive File Retrieval (Base64 conversion) for inline playback without CORS/Download block
+    if (action === 'get_file_base64' && e.parameter.id) {
+      try {
+        var file = DriveApp.getFileById(e.parameter.id);
+        var base64Data = Utilities.base64Encode(file.getBlob().getBytes());
+        var mimeType = file.getMimeType();
+        var result = {
+          "status": "success",
+          "mimeType": mimeType,
+          "base64": base64Data
+        };
+        return ContentService.createTextOutput(JSON.stringify(result))
+          .setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": err.toString() }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
     
     // 1. Request OTP Flow
     if (action === 'send_otp' && email) {
