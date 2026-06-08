@@ -3063,18 +3063,19 @@
             const theme = colorThemes[enrollModal.colorName] || colorThemes.cyan;
             return (
               <div
-                className="fixed inset-0 z-[10005] flex items-center justify-center"
+                className="fixed inset-0 z-[10005] overflow-y-auto"
                 style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
                 onClick={closeEnrollModal}
               >
-                <div
-                  className="relative w-full max-w-md mx-4 my-8 rounded-3xl border border-white/10 overflow-y-auto max-h-[90vh]"
-                  style={{
-                    background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
-                    boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div className="min-h-full flex items-center justify-center py-8" onClick={closeEnrollModal}>
+                  <div
+                    className="relative w-full max-w-md mx-4 rounded-3xl border border-white/10"
+                    style={{
+                      background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
+                      boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                   {/* Gradient top accent bar */}
                   <div className="h-1 w-full" style={{ background: theme.grad }} />
 
@@ -3258,8 +3259,9 @@
                   </div>
                 </div>
               </div>
-            );
-          })()}
+            </div>
+          );
+        })()}
 
           {/* ===== THEATER MODE MODAL ===== */}
           {theaterVideo && (
