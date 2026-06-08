@@ -60,6 +60,10 @@
   <!-- Razorpay Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+  <!-- Firebase Compat SDK (v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <!-- Babel Standalone for transpilation -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
 </head>
@@ -1560,7 +1564,7 @@
         tags: ['Runway Gen-3', 'ElevenLabs', 'UDIO'],
         video: 'https://res.cloudinary.com/dwfjax67x/video/upload/Mayflower_Reel_2_blefup.mp4',
         studentName: 'Siddharth K.',
-        studentImg: 'https://images.unsplash.com/photo-1542343633-ce485ffad27f?q=80&w=150&auto=format&fit=crop'
+        studentImg: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?q=80&w=150&auto=format&fit=crop'
       },
       {
         title: 'Optic Expo Promo Reel',
@@ -1580,7 +1584,7 @@
         tags: ['Luma LGM', 'Kling', 'Color grading'],
         video: 'https://res.cloudinary.com/dwfjax67x/video/upload/Regalia_reel_1_gc2qyp.mp4',
         studentName: 'Vishnu Prasad',
-        studentImg: 'https://images.unsplash.com/photo-1618015358954-115ef1ed6515?q=80&w=150&auto=format&fit=crop'
+        studentImg: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=150&auto=format&fit=crop'
       },
       {
         title: 'WebQ Ad Reel',
@@ -1590,7 +1594,7 @@
         tags: ['Vibe Coding', 'Tailwind', 'Figma AI'],
         video: 'https://res.cloudinary.com/dwfjax67x/video/upload/Reshma_Website_WebQ_Reel_1_gqohvf.mp4',
         studentName: 'Abhishek S.',
-        studentImg: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?q=80&w=150&auto=format&fit=crop'
+        studentImg: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=150&auto=format&fit=crop'
       },
       {
         title: 'Arike Romantic Album',
@@ -1600,7 +1604,7 @@
         tags: ['Sora', 'Midjourney Ref', 'Luma'],
         video: 'https://res.cloudinary.com/dwfjax67x/video/upload/Romantic_Couple_Short_video_k1m9ba.mp4',
         studentName: 'Sanjay Nair',
-        studentImg: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?q=80&w=150&auto=format&fit=crop'
+        studentImg: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=150&auto=format&fit=crop'
       },
       {
         title: 'Velox Technology',
@@ -1745,7 +1749,7 @@
               </div>
             )}
 
-            <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-brand-cyan/25 border border-brand-cyan/35 text-[9px] font-mono font-bold uppercase tracking-wider text-brand-cyan">
+            <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-brand-cyan/25 border border-brand-cyan/35 text-[9px] font-mono font-bold uppercase tracking-wider text-brand-cyan">
               {proj.cat}
             </span>
           </div>
@@ -1815,6 +1819,110 @@
       const [adminSearch, setAdminSearch] = useState('');
       const [adminFilterCourse, setAdminFilterCourse] = useState('All');
       const [adminFilterStatus, setAdminFilterStatus] = useState('All');
+
+      // --- App Admin Panel States ---
+      const [adminTab, setAdminTab] = useState('registrations'); // 'registrations' | 'chat' | 'control'
+      
+      // Firebase Config (Replace these placeholder values with actual Firebase keys if connecting a live Firestore db)
+      const firebaseConfig = {
+        apiKey: "YOUR_FIREBASE_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      const isFirebaseMock = !firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_FIREBASE_API_KEY");
+      const [firebaseDb, setFirebaseDb] = useState(null);
+
+      // Initialize Firestore on mount if not in mock mode
+      useEffect(() => {
+        if (!isFirebaseMock) {
+          try {
+            if (!window.firebase) {
+              console.error("Firebase SDK not loaded in window scope.");
+              return;
+            }
+            if (!firebase.apps.length) {
+              firebase.initializeApp(firebaseConfig);
+            }
+            setFirebaseDb(firebase.firestore());
+          } catch (err) {
+            console.error("Firebase initialization failed: ", err);
+          }
+        }
+      }, [isAdminAuthenticated]);
+
+      // Chat States
+      const [chatSearch, setChatSearch] = useState('');
+      const [studentChats, setStudentChats] = useState([]);
+      const [selectedChatId, setSelectedChatId] = useState(''); // student email_escaped
+      const [chatMessages, setChatMessages] = useState([]);
+      const [replyInput, setReplyInput] = useState('');
+      const [sendingReply, setSendingReply] = useState(false);
+
+      // Support settings state
+      const [supportSettings, setSupportSettings] = useState({ isOnline: true, avgResponseTime: '4 mins' });
+      const [savingSupport, setSavingSupport] = useState(false);
+
+      // Whitelist Form state
+      const [whitelistName, setWhitelistName] = useState('');
+      const [whitelistEmail, setWhitelistEmail] = useState('');
+      const [whitelistPhone, setWhitelistPhone] = useState('');
+      const [whitelistCourses, setWhitelistCourses] = useState([]); // array of selected courses
+      const [whitelistingLoading, setWhitelistingLoading] = useState(false);
+      const [whitelistStatus, setWhitelistStatus] = useState({ type: '', text: '' }); // type: 'success' | 'error'
+
+      // Full screen media preview
+      const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
+
+      // Mock Data States for Local Fallback Simulation Mode
+      const [mockChats, setMockChats] = useState([
+        {
+          id: 'student1_gmail_com',
+          email: 'student1@gmail.com',
+          name: 'Sarah Jenkins',
+          lastMessage: 'Can you help me with the camera settings in Midjourney?',
+          lastActive: { seconds: Date.now() / 1000 - 3600 },
+          courses: ['Graphic Design', 'Content Creation'],
+          unread: true
+        },
+        {
+          id: 'student2_gmail_com',
+          email: 'student2@gmail.com',
+          name: 'Rajesh Kumar',
+          lastMessage: 'Thanks, the video is playing perfectly now!',
+          lastActive: { seconds: Date.now() / 1000 - 7200 },
+          courses: ['Film Making'],
+          unread: false
+        },
+        {
+          id: 'student3_gmail_com',
+          email: 'student3@gmail.com',
+          name: 'David Miller',
+          lastMessage: 'Is Vibe Coding course for beginners?',
+          lastActive: { seconds: Date.now() / 1000 - 18000 },
+          courses: ['Vibe Coding', 'Business Automation'],
+          unread: true
+        }
+      ]);
+
+      const [mockMessages, setMockMessages] = useState({
+        'student1_gmail_com': [
+          { id: 'm1_1', sender: 'student1@gmail.com', name: 'Sarah Jenkins', text: 'Hello Anurag, I am working on the CGI Ad project.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 7200 } },
+          { id: 'm1_2', sender: 'mentor', name: 'Anurag KM (Mentor)', text: 'Great! Which part are you working on?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 5400 } },
+          { id: 'm1_3', sender: 'student1@gmail.com', name: 'Sarah Jenkins', text: 'Can you help me with the camera settings in Midjourney?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 3600 } }
+        ],
+        'student2_gmail_com': [
+          { id: 'm2_1', sender: 'student2@gmail.com', name: 'Rajesh Kumar', text: 'Hi! The video course is awesome.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 10000 } },
+          { id: 'm2_2', sender: 'mentor', name: 'Anurag KM (Mentor)', text: 'Thanks Rajesh! Glad you like it.', type: 'text', timestamp: { seconds: Date.now() / 1000 - 8600 } },
+          { id: 'm2_3', sender: 'student2@gmail.com', name: 'Rajesh Kumar', text: 'Thanks, the video is playing perfectly now!', type: 'text', timestamp: { seconds: Date.now() / 1000 - 7200 } }
+        ],
+        'student3_gmail_com': [
+          { id: 'm3_1', sender: 'student3@gmail.com', name: 'David Miller', text: 'Is Vibe Coding course for beginners?', type: 'text', timestamp: { seconds: Date.now() / 1000 - 18000 } }
+        ]
+      });
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
       const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbww2LgUDDxh7nSZy-fmAfeuTDBgPDjjY6xX66N2lmGoR1NCn6Vwx4RNd9WDYOliFyxq/exec'; // Paste your Google Sheet web app URL here
@@ -1915,6 +2023,281 @@
           fetchAdminData();
         }
       }, [isAdminAuthenticated]);
+
+      // --- Firebase Live Listeners ---
+      
+      // 1. Listen to Support Settings
+      useEffect(() => {
+        if (isFirebaseMock) return;
+        if (!firebaseDb) return;
+        
+        const unsubscribe = firebaseDb.collection('settings').doc('support').onSnapshot((doc) => {
+          if (doc.exists) {
+            setSupportSettings(doc.data());
+          }
+        }, (error) => {
+          console.error("Error listening to support settings:", error);
+        });
+        return unsubscribe;
+      }, [firebaseDb, isFirebaseMock]);
+
+      // 2. Listen to active student chats list
+      useEffect(() => {
+        if (isFirebaseMock) {
+          setStudentChats(mockChats);
+          return;
+        }
+        if (!firebaseDb) return;
+        
+        const unsubscribe = firebaseDb.collection('chats')
+          .orderBy('lastActive', 'desc')
+          .onSnapshot((snapshot) => {
+            const chats = [];
+            snapshot.forEach((doc) => {
+              chats.push({ id: doc.id, ...doc.data() });
+            });
+            setStudentChats(chats);
+          }, (error) => {
+            console.error("Error listening to chats:", error);
+          });
+        return unsubscribe;
+      }, [firebaseDb, isFirebaseMock, mockChats]);
+
+      // 3. Listen to messages for selected student chat room
+      useEffect(() => {
+        if (!selectedChatId) {
+          setChatMessages([]);
+          return;
+        }
+
+        if (isFirebaseMock) {
+          setChatMessages(mockMessages[selectedChatId] || []);
+          return;
+        }
+
+        if (!firebaseDb) return;
+
+        const unsubscribe = firebaseDb.collection('chats').doc(selectedChatId).collection('messages')
+          .orderBy('timestamp', 'asc')
+          .onSnapshot((snapshot) => {
+            const msgs = [];
+            snapshot.forEach((doc) => {
+              msgs.push({ id: doc.id, ...doc.data() });
+            });
+            setChatMessages(msgs);
+            
+            // Auto mark chat as read
+            firebaseDb.collection('chats').doc(selectedChatId).update({ unread: false }).catch(() => {});
+          }, (error) => {
+            console.error("Error listening to messages:", error);
+          });
+
+        return unsubscribe;
+      }, [firebaseDb, selectedChatId, isFirebaseMock, mockMessages]);
+
+      // --- Admin Handlers for App Actions ---
+
+      // Send a text reply to the selected student chat
+      const handleSendReply = async (e) => {
+        if (e) e.preventDefault();
+        if (!replyInput.trim() || !selectedChatId) return;
+
+        const text = replyInput.trim();
+        setReplyInput('');
+        setSendingReply(true);
+
+        const msgData = {
+          sender: 'mentor',
+          name: 'Anurag KM (Mentor)',
+          text: text,
+          type: 'text',
+          timestamp: isFirebaseMock ? { seconds: Date.now() / 1000 } : firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (isFirebaseMock) {
+          // Local State Update
+          const updatedMessages = { ...mockMessages };
+          if (!updatedMessages[selectedChatId]) {
+            updatedMessages[selectedChatId] = [];
+          }
+          updatedMessages[selectedChatId].push({ id: `mentor_${Date.now()}`, ...msgData });
+          setMockMessages(updatedMessages);
+          setChatMessages(updatedMessages[selectedChatId]);
+
+          // Update last active in mock chats list
+          const updatedChats = mockChats.map(c => {
+            if (c.id === selectedChatId) {
+              return {
+                ...c,
+                lastMessage: text,
+                lastActive: { seconds: Date.now() / 1000 },
+                unread: false
+              };
+            }
+            return c;
+          });
+          setMockChats(updatedChats);
+          setSendingReply(false);
+
+          // Simulated Student Response trigger (auto reply)
+          setTimeout(() => {
+            let replyText = 'Thank you for the quick reply, Anurag! I will implement this visual change.';
+            let studentEmail = 'student@gmail.com';
+            let studentName = 'Student';
+
+            const activeChat = mockChats.find(c => c.id === selectedChatId);
+            if (activeChat) {
+              studentEmail = activeChat.email;
+              studentName = activeChat.name;
+              if (activeChat.name === 'Sarah Jenkins') {
+                replyText = 'Got it! I am trying those prompt options in Midjourney now. Will share a screenshot soon.';
+              } else if (activeChat.name === 'Rajesh Kumar') {
+                replyText = 'Awesome, thank you! I will finalize this lecture and move to the film making section.';
+              } else if (activeChat.name === 'David Miller') {
+                replyText = 'Great, thank you! I will purchase the lifetime bundle now.';
+              }
+            }
+
+            const studentMsgData = {
+              sender: studentEmail,
+              name: studentName,
+              text: replyText,
+              type: 'text',
+              timestamp: { seconds: Date.now() / 1000 }
+            };
+
+            const followUpMessages = { ...updatedMessages };
+            if (!followUpMessages[selectedChatId]) {
+              followUpMessages[selectedChatId] = [];
+            }
+            followUpMessages[selectedChatId].push({ id: `student_${Date.now()}`, ...studentMsgData });
+            setMockMessages(followUpMessages);
+            
+            // Only update messages list in UI if the user is still looking at this student
+            setSelectedChatId(prev => {
+              if (prev === selectedChatId) {
+                setChatMessages(followUpMessages[selectedChatId]);
+              }
+              return prev;
+            });
+
+            const followUpChats = updatedChats.map(c => {
+              if (c.id === selectedChatId) {
+                return {
+                  ...c,
+                  lastMessage: replyText,
+                  lastActive: { seconds: Date.now() / 1000 },
+                  unread: true
+                };
+              }
+              return c;
+            });
+            setMockChats(followUpChats);
+          }, 2000);
+        } else {
+          try {
+            // Add message to Firestore subcollection
+            await firebaseDb.collection('chats').doc(selectedChatId).collection('messages').add(msgData);
+            // Update parent document summary
+            await firebaseDb.collection('chats').doc(selectedChatId).set({
+              lastMessage: text,
+              lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+              unread: false
+            }, { merge: true });
+          } catch (error) {
+            console.error("Error writing message to Firestore:", error);
+            alert("Failed to send reply: " + error.message);
+          } finally {
+            setSendingReply(false);
+          }
+        }
+      };
+
+      // Toggle Support settings in Firestore
+      const handleSaveSupportSettings = async (isOnline, avgTime) => {
+        setSavingSupport(true);
+        const settings = { isOnline, avgResponseTime: avgTime };
+        if (isFirebaseMock) {
+          setSupportSettings(settings);
+          setSavingSupport(false);
+          alert("Offline simulation settings updated! Average response: " + avgTime);
+        } else {
+          try {
+            await firebaseDb.collection('settings').doc('support').set(settings);
+            alert("Support status successfully synced in Firestore!");
+          } catch (error) {
+            console.error("Error updating support status:", error);
+            alert("Firestore sync failed: " + error.message);
+          } finally {
+            setSavingSupport(false);
+          }
+        }
+      };
+
+      // Handle Manual Student Whitelist
+      const handleWhitelistSubmit = async (e) => {
+        if (e) e.preventDefault();
+        setWhitelistStatus({ type: '', text: '' });
+
+        if (!whitelistName.trim() || !whitelistEmail.trim() || !whitelistPhone.trim()) {
+          setWhitelistStatus({ type: 'error', text: 'All contact details (Name, Email, Phone) are required.' });
+          return;
+        }
+
+        if (whitelistCourses.length === 0) {
+          setWhitelistStatus({ type: 'error', text: 'Please select at least one course to whitelist.' });
+          return;
+        }
+
+        setWhitelistingLoading(true);
+
+        try {
+          const coursesList = whitelistCourses;
+          for (let c of coursesList) {
+            const payload = {
+              date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+              name: whitelistName.trim(),
+              email: whitelistEmail.toLowerCase().trim(),
+              phone: whitelistPhone.trim(),
+              course: c,
+              price: '₹0 (Admin Whitelist)',
+              status: 'success',
+              paymentId: 'ADMIN_WHITELIST_' + Date.now().toString().slice(-6)
+            };
+
+            // Post request to Google Sheet webhook
+            await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+          }
+
+          setWhitelistStatus({ 
+            type: 'success', 
+            text: `Successfully whitelisted ${whitelistName} (${whitelistEmail}) for: ${whitelistCourses.join(', ')}. The student can now log in via the mobile app.` 
+          });
+          
+          setWhitelistName('');
+          setWhitelistEmail('');
+          setWhitelistPhone('');
+          setWhitelistCourses([]);
+          
+          // Re-fetch registrations table details
+          setTimeout(fetchAdminData, 1500);
+
+        } catch (error) {
+          console.error("Whitelisting execution error:", error);
+          setWhitelistStatus({ type: 'error', text: 'Webhook execution failed: ' + error.message });
+        } finally {
+          setWhitelistingLoading(false);
+        }
+      };
+
+
 
       const handleAdminLogin = (e) => {
         if (e) e.preventDefault();
@@ -3808,7 +4191,7 @@
                 /* Admin Dashboard View */
                 <div className="flex-grow flex flex-col min-h-screen text-gray-300 overflow-hidden">
                   {/* Top Bar Header */}
-                  <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
+                  <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col xl:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
                     <div className="flex items-center space-x-3 text-left">
                       <div className="w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
                         <i data-lucide="layout-dashboard" className="w-5 h-5"></i>
@@ -3817,8 +4200,48 @@
                         <h1 className="text-sm font-black tracking-widest font-mono text-white flex items-center">
                           DXIGN.LEARN <span className="ml-2 px-2 py-0.5 rounded text-[8px] tracking-normal font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/25">ADMIN</span>
                         </h1>
-                        <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Student Registrations Database</p>
+                        <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">App & Web Management Portal</p>
                       </div>
+                    </div>
+
+                    {/* Secondary Navigation Tabs */}
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] font-bold">
+                      <button
+                        onClick={() => setAdminTab('registrations')}
+                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                          adminTab === 'registrations' 
+                            ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                        Web Registrations
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('chat')}
+                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 relative ${
+                          adminTab === 'chat' 
+                            ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Student Doubt Chat
+                        {studentChats.some(c => c.unread) && (
+                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse border border-zinc-950"></span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('control')}
+                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                          adminTab === 'control' 
+                            ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        App Control Panel
+                      </button>
                     </div>
 
                     <div className="flex items-center space-x-3">
@@ -3849,205 +4272,653 @@
 
                   {/* Main Scrollable Content */}
                   <main className="flex-grow p-6 md:p-12 max-w-7xl mx-auto w-full flex flex-col space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
-                    {/* Metrics/KPI Cards */}
-                    {(() => {
-                      const successRows = adminData.filter(r => (r.status || '').toLowerCase() === 'success');
-                      const totalSales = successRows.length;
-                      const totalRevenue = successRows.reduce((sum, r) => {
-                        const cleanPrice = parseInt((r.price || '').replace(/\D/g, '')) || 0;
-                        return sum + cleanPrice;
-                      }, 0);
-                      const conversionRate = adminData.length > 0 ? ((totalSales / adminData.length) * 100).toFixed(1) : 0;
+                    {adminTab === 'registrations' && (
+                      <>
+                        {/* Metrics/KPI Cards */}
+                        {(() => {
+                          const successRows = adminData.filter(r => (r.status || '').toLowerCase() === 'success');
+                          const totalSales = successRows.length;
+                          const totalRevenue = successRows.reduce((sum, r) => {
+                            const cleanPrice = parseInt((r.price || '').replace(/\D/g, '')) || 0;
+                            return sum + cleanPrice;
+                          }, 0);
+                          const conversionRate = adminData.length > 0 ? ((totalSales / adminData.length) * 100).toFixed(1) : 0;
 
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {/* KPI Leads */}
-                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-cyan">
-                              <i data-lucide="users" className="w-12 h-12"></i>
+                          return (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                              {/* KPI Leads */}
+                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-cyan">
+                                  <i data-lucide="users" className="w-12 h-12"></i>
+                                </div>
+                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
+                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
+                                <p className="text-[9px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
+                              </div>
+
+                              {/* KPI Sales */}
+                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-emerald">
+                                  <i data-lucide="shopping-bag" className="w-12 h-12"></i>
+                                </div>
+                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
+                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
+                                <p className="text-[9px] font-mono text-gray-600 mt-2">Completed course orders</p>
+                              </div>
+
+                              {/* KPI Revenue */}
+                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-violet">
+                                  <i data-lucide="indian-rupee" className="w-12 h-12"></i>
+                                </div>
+                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
+                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
+                                <p className="text-[9px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
+                              </div>
+
+                              {/* KPI Conversion */}
+                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-rose">
+                                  <i data-lucide="trending-up" className="w-12 h-12"></i>
+                                </div>
+                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
+                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
+                                <p className="text-[9px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
+                              </div>
                             </div>
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
-                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
-                            <p className="text-[9px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
+                          );
+                        })()}
+
+                        {/* Filter & Search Panel */}
+                        <div className="p-6 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 justify-between items-center text-left">
+                          {/* Search */}
+                          <div className="relative flex items-center w-full md:w-5/12">
+                            <i data-lucide="search" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                            <input
+                              type="text"
+                              placeholder="Search by student email or phone..."
+                              value={adminSearch}
+                              onChange={(e) => setAdminSearch(e.target.value)}
+                              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
+                            />
                           </div>
 
-                          {/* KPI Sales */}
-                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-emerald">
-                              <i data-lucide="shopping-bag" className="w-12 h-12"></i>
+                          {/* Filters */}
+                          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
+                            {/* Course Filter */}
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Course:</span>
+                              <select
+                                value={adminFilterCourse}
+                                onChange={(e) => setAdminFilterCourse(e.target.value)}
+                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                              >
+                                <option value="All">All Items</option>
+                                <option value="All Courses Lifetime Access">All Courses Bundle</option>
+                                {courseList.map(c => (
+                                  <option key={c.id} value={c.title}>{c.title}</option>
+                                ))}
+                              </select>
                             </div>
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
-                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
-                            <p className="text-[9px] font-mono text-gray-600 mt-2">Completed course orders</p>
-                          </div>
 
-                          {/* KPI Revenue */}
-                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-violet">
-                              <i data-lucide="indian-rupee" className="w-12 h-12"></i>
+                            {/* Status Filter */}
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status:</span>
+                              <select
+                                value={adminFilterStatus}
+                                onChange={(e) => setAdminFilterStatus(e.target.value)}
+                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                              >
+                                <option value="All">All Status</option>
+                                <option value="Success">Success (Paid)</option>
+                                <option value="Initiated">Initiated (Lead)</option>
+                              </select>
                             </div>
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
-                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
-                            <p className="text-[9px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
-                          </div>
-
-                          {/* KPI Conversion */}
-                          <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-rose">
-                              <i data-lucide="trending-up" className="w-12 h-12"></i>
-                            </div>
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
-                            <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
-                            <p className="text-[9px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
                           </div>
                         </div>
-                      );
-                    })()}
 
-                    {/* Filter & Search Panel */}
-                    <div className="p-6 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 justify-between items-center text-left">
-                      {/* Search */}
-                      <div className="relative flex items-center w-full md:w-5/12">
-                        <i data-lucide="search" className="absolute left-4 w-4 h-4 text-gray-500"></i>
-                        <input
-                          type="text"
-                          placeholder="Search by student email or phone..."
-                          value={adminSearch}
-                          onChange={(e) => setAdminSearch(e.target.value)}
-                          className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
-                        />
+                        {/* Registrations List Table */}
+                        <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[300px]">
+                          {adminLoading && (
+                            <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                              <div className="flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest">
+                                <i data-lucide="refresh-cw" className="w-5 h-5 animate-spin"></i>
+                                <span>Fetching Live Data...</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {adminError && (
+                            <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center">
+                              <div className="max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center">
+                                <i data-lucide="alert-triangle" className="w-8 h-8 text-rose-500 mb-3"></i>
+                                <h4 className="text-xs font-mono font-bold uppercase text-white tracking-widest mb-1">Retrieval Failed</h4>
+                                <p className="text-[11px] text-gray-500 mb-4 font-mono">{adminError}</p>
+                                <button
+                                  onClick={fetchAdminData}
+                                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200"
+                                >
+                                  Retry Fetch
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="overflow-x-auto w-full">
+                            <table className="min-w-full divide-y divide-white/5 text-left text-xs font-mono">
+                              <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px]">
+                                <tr>
+                                  <th className="px-6 py-4">Date</th>
+                                  <th className="px-6 py-4">Name</th>
+                                  <th className="px-6 py-4">Email</th>
+                                  <th className="px-6 py-4">Phone</th>
+                                  <th className="px-6 py-4">Course</th>
+                                  <th className="px-6 py-4 text-center">Price</th>
+                                  <th className="px-6 py-4 text-center">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-white/5 text-gray-300">
+                                {(() => {
+                                  const filteredRows = adminData.filter(row => {
+                                    const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                    const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                    const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                    const searchMatch = nameMatch || emailMatch || phoneMatch;
+
+                                    const courseMatch = adminFilterCourse === 'All' || 
+                                      (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
+                                      (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+
+                                    const statusMatch = adminFilterStatus === 'All' || 
+                                      (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+
+                                    return searchMatch && courseMatch && statusMatch;
+                                  });
+
+                                  if (filteredRows.length === 0) {
+                                    return (
+                                      <tr>
+                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">
+                                          No Student Records Found
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+
+                                  return filteredRows.map((row, index) => {
+                                    const isSuccess = (row.status || '').toLowerCase() === 'success';
+                                    return (
+                                      <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
+                                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">{row.date}</td>
+                                        <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
+                                        <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{row.phone}</td>
+                                        <td className="px-6 py-4 text-white uppercase font-bold tracking-tight text-[11px]">{row.course}</td>
+                                        <td className="px-6 py-4 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
+                                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                                          <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                            isSuccess 
+                                              ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                                              : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                          }`}>
+                                            {row.status}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    );
+                                  });
+                                })()}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {adminTab === 'chat' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-190px)] min-h-[500px]">
+                        {/* Left sidebar - Chats list */}
+                        <div className="lg:col-span-4 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl">
+                          <div className="p-4 border-b border-white/5">
+                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold block mb-3">Doubt Rooms ({studentChats.length})</span>
+                            <div className="relative flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 w-3.5 h-3.5 text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                              <input
+                                type="text"
+                                placeholder="Filter active doubts..."
+                                value={chatSearch}
+                                onChange={(e) => setChatSearch(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition-all duration-300"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex-grow overflow-y-auto p-2 space-y-1">
+                            {studentChats.filter(chat => {
+                              const searchVal = chatSearch.toLowerCase();
+                              return (chat.name || '').toLowerCase().includes(searchVal) || (chat.email || '').toLowerCase().includes(searchVal);
+                            }).length === 0 ? (
+                              <div className="py-8 text-center text-gray-600 uppercase font-mono text-[9px] tracking-widest">No active chats found</div>
+                            ) : (
+                              studentChats.filter(chat => {
+                                const searchVal = chatSearch.toLowerCase();
+                                return (chat.name || '').toLowerCase().includes(searchVal) || (chat.email || '').toLowerCase().includes(searchVal);
+                              }).map(chat => {
+                                const isSelected = selectedChatId === chat.id;
+                                const isUnread = chat.unread;
+                                const activeDate = chat.lastActive ? new Date(chat.lastActive.seconds * 1000) : new Date();
+                                const timeStr = activeDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                                return (
+                                  <button
+                                    key={chat.id}
+                                    onClick={() => setSelectedChatId(chat.id)}
+                                    className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-3 transition-all duration-300 ${
+                                      isSelected 
+                                        ? 'bg-white/[0.06] border border-white/10 shadow-[0_4px_20px_rgba(0,240,255,0.03)]' 
+                                        : 'bg-transparent border border-transparent hover:bg-white/[0.02]'
+                                    }`}
+                                  >
+                                    {/* Initials Avatar */}
+                                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border relative ${
+                                      isSelected
+                                        ? 'bg-brand-cyan/20 border-brand-cyan/40 text-brand-cyan'
+                                        : 'bg-white/5 border-white/10 text-white'
+                                    }`}>
+                                      {((chat.name || chat.email || 'S').charAt(0)).toUpperCase()}
+                                      {/* Unread Indicator */}
+                                      {isUnread && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border border-zinc-950"></span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex-grow min-w-0">
+                                      <div className="flex justify-between items-baseline mb-0.5">
+                                        <h4 className="text-xs font-bold text-white truncate font-heading">{chat.name || 'Student'}</h4>
+                                        <span className="text-[8px] font-mono text-gray-500 shrink-0">{timeStr}</span>
+                                      </div>
+                                      <p className="text-[10px] text-gray-400 truncate font-sans">{chat.lastMessage || 'No messages yet'}</p>
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right active chat pane */}
+                        <div className="lg:col-span-8 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative">
+                          {!selectedChatId ? (
+                            // Empty state
+                            <div className="flex-grow flex flex-col items-center justify-center p-8 text-center">
+                              <div className="w-16 h-16 rounded-3xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan/50 mb-4 animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                              </div>
+                              <h3 className="text-sm font-bold text-white uppercase tracking-widest font-heading">Doubt Resolution Hub</h3>
+                              <p className="text-[10px] font-mono text-gray-500 max-w-xs mt-2">Select a student from the sidebar folder directory to view chat logs and send dynamic feedback.</p>
+                            </div>
+                          ) : (
+                            // Active chat
+                            <>
+                              {/* Chat Header */}
+                              {(() => {
+                                const activeChat = studentChats.find(c => c.id === selectedChatId) || {};
+                                return (
+                                  <div className="px-6 py-4 border-b border-white/5 bg-zinc-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center font-bold text-sm text-brand-cyan">
+                                        {((activeChat.name || activeChat.email || 'S').charAt(0)).toUpperCase()}
+                                      </div>
+                                      <div>
+                                        <h3 className="text-xs font-bold text-white font-heading">{activeChat.name || 'Student'}</h3>
+                                        <p className="text-[9px] font-mono text-gray-500">{activeChat.email}</p>
+                                      </div>
+                                    </div>
+
+                                    {activeChat.courses && activeChat.courses.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 items-center">
+                                        <span className="text-[8px] font-mono text-gray-500 mr-1 uppercase">Enrolled:</span>
+                                        {activeChat.courses.map((course, idx) => (
+                                          <span key={idx} className="px-2 py-0.5 rounded-md text-[8px] font-mono font-bold bg-brand-violet/10 text-brand-violet border border-brand-violet/20">{course}</span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Message Timeline */}
+                              <div className="flex-grow overflow-y-auto p-6 space-y-4 flex flex-col text-left">
+                                {chatMessages.length === 0 ? (
+                                  <div className="my-auto text-center text-gray-600 font-mono text-[9px] uppercase tracking-widest">No messages in room</div>
+                                ) : (
+                                  chatMessages.map((msg, index) => {
+                                    const isMentor = msg.sender === 'mentor';
+                                    const timeStr = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                                    
+                                    return (
+                                      <div key={msg.id || index} className={`flex w-full ${isMentor ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[70%] rounded-2xl px-4 py-3 relative border ${
+                                          isMentor 
+                                            ? 'bg-gradient-to-r from-brand-cyan/20 to-brand-blue/20 border-brand-cyan/25 text-white' 
+                                            : 'bg-white/[0.04] border-white/5 text-gray-200'
+                                        }`}>
+                                          {!isMentor && (
+                                            <span className="text-[8px] font-mono text-brand-cyan/60 uppercase block mb-1 font-bold">{msg.name || 'Student'}</span>
+                                          )}
+
+                                          {/* Message Content */}
+                                          {msg.type === 'text' && (
+                                            <p className="text-xs leading-relaxed break-words">{msg.text}</p>
+                                          )}
+
+                                          {msg.type === 'image' && (
+                                            <div className="space-y-1">
+                                              <img
+                                                src={msg.fileUrl}
+                                                alt="Student attachment"
+                                                onClick={() => setActivePreviewMedia({ type: 'image', url: msg.fileUrl })}
+                                                className="rounded-lg max-h-48 max-w-full object-cover cursor-zoom-in border border-white/5 hover:opacity-90 transition"
+                                              />
+                                              {msg.text && <p className="text-xs mt-1 leading-relaxed">{msg.text}</p>}
+                                            </div>
+                                          )}
+
+                                          {msg.type === 'video' && (
+                                            <div
+                                              onClick={() => setActivePreviewMedia({ type: 'video', url: msg.fileUrl })}
+                                              className="flex items-center gap-3 bg-zinc-950/40 hover:bg-zinc-950/60 p-3 rounded-xl cursor-pointer border border-white/10 transition"
+                                            >
+                                              <div className="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 fill-brand-cyan"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                              </div>
+                                              <div className="min-w-0 text-left">
+                                                <p className="text-[10px] text-white truncate font-bold">{msg.fileName || 'Video Attachment'}</p>
+                                                <span className="text-[8px] text-gray-500 block mt-0.5">Click to view fullscreen video</span>
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {msg.type === 'audio' && (
+                                            <div className="flex items-center gap-3 bg-zinc-950/40 p-2.5 rounded-xl border border-white/10 min-w-[200px]">
+                                              <div className="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                              </div>
+                                              <div className="text-left flex-grow">
+                                                <span className="text-[10px] font-bold block text-white">Voice Message</span>
+                                                <a href={msg.fileUrl} target="_blank" className="text-[8px] text-brand-cyan font-mono hover:underline block mt-0.5">Open Audio Link</a>
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {msg.type === 'document' && (
+                                            <a
+                                              href={msg.fileUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center gap-3 bg-zinc-950/40 hover:bg-zinc-950/60 p-3 rounded-xl border border-white/10 transition text-left text-white"
+                                            >
+                                              <div className="w-8 h-8 rounded-full bg-brand-violet/10 border border-brand-violet/25 flex items-center justify-center text-brand-violet">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                              </div>
+                                              <div className="min-w-0">
+                                                <p className="text-[10px] truncate font-bold">{msg.fileName || 'document.pdf'}</p>
+                                                <span className="text-[8px] text-gray-500 block mt-0.5">Download document resource</span>
+                                              </div>
+                                            </a>
+                                          )}
+
+                                          {/* Time stamp */}
+                                          <span className="text-[7px] font-mono text-gray-500 block text-right mt-1.5 uppercase leading-none">{timeStr}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+
+                              {/* Input panel footer */}
+                              <form onSubmit={handleSendReply} className="p-4 border-t border-white/5 bg-zinc-950/10 flex gap-3 items-center">
+                                <input
+                                  type="text"
+                                  placeholder="Type feedback, suggestions or replies..."
+                                  value={replyInput}
+                                  onChange={(e) => setReplyInput(e.target.value)}
+                                  disabled={sendingReply}
+                                  className="flex-grow px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition duration-300"
+                                />
+                                <button
+                                  type="submit"
+                                  disabled={sendingReply || !replyInput.trim()}
+                                  className="w-10 h-10 rounded-2xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center text-black shadow-[0_0_15px_rgba(0,240,255,0.25)] disabled:opacity-50 disabled:scale-100 disabled:shadow-none"
+                                >
+                                  {sendingReply ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 animate-spin text-black"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-black ml-0.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                  )}
+                                </button>
+                              </form>
+                            </>
+                          )}
+                        </div>
                       </div>
+                    )}
 
-                      {/* Filters */}
-                      <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
-                        {/* Course Filter */}
-                        <div className="flex items-center space-x-2">
-                          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Course:</span>
-                          <select
-                            value={adminFilterCourse}
-                            onChange={(e) => setAdminFilterCourse(e.target.value)}
-                            className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
-                          >
-                            <option value="All">All Items</option>
-                            <option value="All Courses Lifetime Access">All Courses Bundle</option>
-                            {courseList.map(c => (
-                              <option key={c.id} value={c.title}>{c.title}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Status Filter */}
-                        <div className="flex items-center space-x-2">
-                          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status:</span>
-                          <select
-                            value={adminFilterStatus}
-                            onChange={(e) => setAdminFilterStatus(e.target.value)}
-                            className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
-                          >
-                            <option value="All">All Status</option>
-                            <option value="Success">Success (Paid)</option>
-                            <option value="Initiated">Initiated (Lead)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Registrations List Table */}
-                    <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[300px]">
-                      {adminLoading && (
-                        <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                          <div className="flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest">
-                            <i data-lucide="refresh-cw" className="w-5 h-5 animate-spin"></i>
-                            <span>Fetching Live Data...</span>
+                    {adminTab === 'control' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                        {/* Support status controls */}
+                        <div className="p-8 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose" />
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                            </div>
+                            <div>
+                              <h3 className="text-xs font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
+                              <p className="text-[9px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
+                            </div>
                           </div>
-                        </div>
-                      )}
 
-                      {adminError && (
-                        <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center">
-                          <div className="max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center">
-                            <i data-lucide="alert-triangle" className="w-8 h-8 text-rose-500 mb-3"></i>
-                            <h4 className="text-xs font-mono font-bold uppercase text-white tracking-widest mb-1">Retrieval Failed</h4>
-                            <p className="text-[11px] text-gray-500 mb-4 font-mono">{adminError}</p>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Mentor status</label>
+                              <div className="grid grid-cols-2 gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: true }))}
+                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                    supportSettings.isOnline 
+                                      ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  <span className={`w-2.5 h-2.5 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`} />
+                                  ONLINE
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: false }))}
+                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                    !supportSettings.isOnline 
+                                      ? 'bg-rose-500/10 text-rose-500 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                                  OFFLINE
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Average response time</label>
+                              <div className="relative flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 w-4 h-4 text-gray-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. 4 mins, 15 mins"
+                                  value={supportSettings.avgResponseTime || ''}
+                                  onChange={(e) => setSupportSettings(prev => ({ ...prev, avgResponseTime: e.target.value }))}
+                                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-violet/50 transition duration-300"
+                                />
+                              </div>
+                            </div>
+
                             <button
-                              onClick={fetchAdminData}
-                              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200"
+                              type="button"
+                              onClick={() => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime)}
+                              disabled={savingSupport}
+                              className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
                             >
-                              Retry Fetch
+                              {savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'}
                             </button>
                           </div>
                         </div>
-                      )}
 
-                      <div className="overflow-x-auto w-full">
-                        <table className="min-w-full divide-y divide-white/5 text-left text-xs font-mono">
-                          <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px]">
-                            <tr>
-                              <th className="px-6 py-4">Date</th>
-                              <th className="px-6 py-4">Name</th>
-                              <th className="px-6 py-4">Email</th>
-                              <th className="px-6 py-4">Phone</th>
-                              <th className="px-6 py-4">Course</th>
-                              <th className="px-6 py-4 text-center">Price</th>
-                              <th className="px-6 py-4 text-center">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-white/5 text-gray-300">
-                            {(() => {
-                              const filteredRows = adminData.filter(row => {
-                                const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                const searchMatch = nameMatch || emailMatch || phoneMatch;
+                        {/* Whitelister Form */}
+                        <form onSubmit={handleWhitelistSubmit} className="p-8 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                            </div>
+                            <div>
+                              <h3 className="text-xs font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
+                              <p className="text-[9px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
+                            </div>
+                          </div>
 
-                                const courseMatch = adminFilterCourse === 'All' || 
-                                  (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
-                                  (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Student Name</label>
+                                <input
+                                  type="text"
+                                  placeholder="John Doe"
+                                  value={whitelistName}
+                                  onChange={(e) => setWhitelistName(e.target.value)}
+                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number</label>
+                                <input
+                                  type="text"
+                                  placeholder="+91 98765 43210"
+                                  value={whitelistPhone}
+                                  onChange={(e) => setWhitelistPhone(e.target.value)}
+                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                />
+                              </div>
+                            </div>
 
-                                const statusMatch = adminFilterStatus === 'All' || 
-                                  (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Email Address</label>
+                              <input
+                                type="email"
+                                placeholder="student@gmail.com"
+                                value={whitelistEmail}
+                                onChange={(e) => setWhitelistEmail(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                              />
+                            </div>
 
-                                return searchMatch && courseMatch && statusMatch;
-                              });
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Grant Course Access</label>
+                              <div className="grid grid-cols-2 gap-2 bg-white/[0.02] border border-white/5 p-3.5 rounded-xl font-sans text-xs">
+                                {courseList.map(c => {
+                                  const isChecked = whitelistCourses.includes(c.title);
+                                  return (
+                                    <label key={c.id} className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none">
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => {
+                                          if (isChecked) {
+                                            setWhitelistCourses(prev => prev.filter(x => x !== c.title));
+                                          } else {
+                                            setWhitelistCourses(prev => [...prev, c.title]);
+                                          }
+                                        }}
+                                        className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                      />
+                                      <span className="truncate">{c.title}</span>
+                                    </label>
+                                  );
+                                })}
+                                <label className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-1 border-t border-white/5 pt-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={whitelistCourses.includes('All Courses Lifetime Access')}
+                                    onChange={() => {
+                                      if (whitelistCourses.includes('All Courses Lifetime Access')) {
+                                        setWhitelistCourses([]);
+                                      } else {
+                                        setWhitelistCourses(['All Courses Lifetime Access']);
+                                      }
+                                    }}
+                                    className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                  />
+                                  <span className="font-bold text-brand-cyan">All Courses Bundle</span>
+                                </label>
+                              </div>
+                            </div>
 
-                              if (filteredRows.length === 0) {
-                                return (
-                                  <tr>
-                                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">
-                                      No Student Records Found
-                                    </td>
-                                  </tr>
-                                );
-                              }
+                            {whitelistStatus.text && (
+                              <div className={`p-3 rounded-xl border text-[10px] font-mono ${
+                                whitelistStatus.type === 'success'
+                                  ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
+                                  : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                              }`}>
+                                {whitelistStatus.text}
+                              </div>
+                            )}
 
-                              return filteredRows.map((row, index) => {
-                                const isSuccess = (row.status || '').toLowerCase() === 'success';
-                                return (
-                                  <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">{row.date}</td>
-                                    <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
-                                    <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{row.phone}</td>
-                                    <td className="px-6 py-4 text-white uppercase font-bold tracking-tight text-[11px]">{row.course}</td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                                      <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
-                                        isSuccess 
-                                          ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
-                                          : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                      }`}>
-                                        {row.status}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                );
-                              });
-                            })()}
-                          </tbody>
-                        </table>
+                            <button
+                              type="submit"
+                              disabled={whitelistingLoading}
+                              className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                            >
+                              {whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+                  </main>
+
+                  {/* Media Preview Modal Overlay */}
+                  {activePreviewMedia && (
+                    <div 
+                      onClick={() => setActivePreviewMedia(null)}
+                      className="fixed inset-0 z-[100001] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+                    >
+                      <button
+                        onClick={() => setActivePreviewMedia(null)}
+                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                      
+                      <div className="max-w-4xl max-h-[85vh] relative" onClick={e => e.stopPropagation()}>
+                        {activePreviewMedia.type === 'image' ? (
+                          <img 
+                            src={activePreviewMedia.url} 
+                            alt="Fullscreen attachment preview" 
+                            className="max-h-[80vh] max-w-full object-contain rounded-2xl border border-white/15" 
+                          />
+                        ) : (
+                          <video 
+                            src={activePreviewMedia.url} 
+                            controls 
+                            autoPlay 
+                            className="max-h-[80vh] max-w-full rounded-2xl border border-white/15" 
+                          />
+                        )}
                       </div>
                     </div>
-                  </main>
+                  )}
                 </div>
               )}
             </div>
