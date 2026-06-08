@@ -231,7 +231,34 @@
         const scale = Math.max(cw / iw, ch / ih);
         const dw = iw * scale;
         const dh = ih * scale;
-        const dx = (cw - dw) / 2;
+
+        // Calculate dynamic horizontal focus point on mobile to center the active subject
+        let dx;
+        if (cw < 768) {
+          let focusX = 0.5;
+          if (index <= 45) {
+            // Scene 0 (Sofa Guy @ 0.46) to Scene 1 (Laptop Guy @ 0.65)
+            const t = index / 45;
+            focusX = 0.46 + t * (0.65 - 0.46);
+          } else if (index <= 91) {
+            // Scene 1 (Laptop Guy @ 0.65) to Scene 2 (Phone Guy @ 0.83)
+            const t = (index - 45) / (91 - 45);
+            focusX = 0.65 + t * (0.83 - 0.65);
+          } else if (index <= 137) {
+            // Scene 2 (Phone Guy @ 0.83) to Scene 3 (Sofa/Laptop @ 0.65)
+            const t = (index - 91) / (137 - 91);
+            focusX = 0.83 + t * (0.65 - 0.83);
+          } else {
+            // Scene 3 to Scene 4 (Center @ 0.50)
+            const t = Math.min(1, (index - 137) / (183 - 137));
+            focusX = 0.65 + t * (0.50 - 0.65);
+          }
+          dx = cw * focusX - dw * focusX;
+        } else {
+          // Standard centering on desktop
+          dx = (cw - dw) / 2;
+        }
+
         const dy = (ch - dh) / 2;
 
         ctx.clearRect(0, 0, cw, ch);
