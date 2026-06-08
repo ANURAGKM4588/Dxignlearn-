@@ -1935,36 +1935,100 @@
         window.location.hash = '';
       };
 
-      const exportToCSV = () => {
-        if (!adminData || adminData.length === 0) return;
-        
-        const headers = ['Date', 'Name', 'Email', 'Phone', 'Course', 'Price', 'Status'];
-        const csvRows = [headers.join(',')];
+      const exportToPDF = () => {
+        if (!adminData || adminData.length === 0) {
+          alert('No data to export.');
+          return;
+        }
 
-        adminData.forEach(row => {
-          const values = [
-            `"${(row.date || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.name || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.email || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.phone || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.course || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.price || '').toString().replace(/"/g, '""')}"`,
-            `"${(row.status || '').toString().replace(/"/g, '""')}"`
-          ];
-          csvRows.push(values.join(','));
-        });
+        const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-        const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `dxign_learn_students_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const rows = adminData.map((row, i) => `
+          <tr style="background:${i % 2 === 0 ? '#fff' : '#f9fafb'}">
+            <td>${i + 1}</td>
+            <td>${row.date || ''}</td>
+            <td>${row.name || ''}</td>
+            <td>${row.email || ''}</td>
+            <td>${row.phone || ''}</td>
+            <td>${row.course || ''}</td>
+            <td>${row.price || ''}</td>
+            <td style="color:${(row.status||'').toLowerCase()==='success'?'#16a34a':'#dc2626'};font-weight:700">${row.status || ''}</td>
+          </tr>
+        `).join('');
+
+        const html = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8" />
+            <title>Dxign.learn — Student Registrations</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 32px; color: #111; }
+              .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 2px solid #111; padding-bottom: 16px; }
+              .header h1 { font-size: 22px; font-weight: 900; letter-spacing: 2px; }
+              .header .sub { font-size: 11px; color: #555; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+              .header .meta { text-align: right; font-size: 11px; color: #555; }
+              table { width: 100%; border-collapse: collapse; font-size: 11px; }
+              thead tr { background: #111; color: #fff; }
+              thead th { padding: 9px 10px; text-align: left; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-size: 9px; }
+              tbody td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+              .footer { margin-top: 24px; font-size: 9px; color: #aaa; text-align: center; }
+              @media print {
+                body { padding: 16px; }
+                @page { margin: 15mm; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div>
+                <h1>DXIGN.LEARN</h1>
+                <div class="sub">Student Registrations Report</div>
+              </div>
+              <div class="meta">
+                <div>Generated: ${dateStr}</div>
+                <div>Total Records: ${adminData.length}</div>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Course</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div class="footer">Dxign.learn Admin Portal · Confidential</div>
+          </body>
+          </html>
+        `;
+
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.top = '-9999px';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        document.body.appendChild(iframe);
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(html);
+        doc.close();
+        setTimeout(() => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          setTimeout(() => document.body.removeChild(iframe), 1000);
+        }, 300);
       };
+
 
       const saveToGoogleSheet = async (status, paymentId = '', nameVal = '', emailVal = '', phoneVal = '', courseVal = '', priceVal = '') => {
         const webhookUrl = GOOGLE_SHEET_WEBHOOK_URL;
@@ -3674,11 +3738,11 @@
                         Refresh
                       </button>
                       <button
-                        onClick={exportToCSV}
+                        onClick={exportToPDF}
                         className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2"
                       >
-                        <i data-lucide="download" className="w-3.5 h-3.5"></i>
-                        Export CSV
+                        <i data-lucide="file-text" className="w-3.5 h-3.5"></i>
+                        Export PDF
                       </button>
                       <button
                         onClick={handleAdminLogout}
