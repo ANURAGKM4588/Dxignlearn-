@@ -3074,7 +3074,27 @@
                       <button
                         onClick={() => {
                           setTheaterVideo(null);
-                          navigateToSection('courses');
+                          
+                          // Determine the matching course ID based on category and tags
+                          let targetCourseId = 'content-creation';
+                          if (theaterVideo.tags && theaterVideo.tags.includes('Vibe Coding')) {
+                            targetCourseId = 'vibe-coding';
+                          } else if (theaterVideo.cat === 'Film Making') {
+                            targetCourseId = 'film-making';
+                          } else if (theaterVideo.cat === 'Graphic Design') {
+                            targetCourseId = 'graphic-design';
+                          }
+                          
+                          // Scroll to the courses section and highlight the specific course card
+                          navigateToSection('courses', `card-${targetCourseId}`);
+
+                          // Automatically open the enrollment popup modal for the matching course
+                          const courseObj = courseList.find(c => c.id === targetCourseId);
+                          if (courseObj) {
+                            setTimeout(() => {
+                              openEnrollModal(courseObj);
+                            }, 600);
+                          }
                         }}
                         className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-brand-cyan to-brand-blue"
                       >
