@@ -1824,6 +1824,37 @@
         setEnrollModal(null);
       };
 
+      // Lock/Unlock body scroll and Lenis when modal/overlays are open
+      useEffect(() => {
+        const isModalOpen = !!enrollModal || !!theaterVideo || !!isAdminOpen;
+        const header = document.querySelector('header');
+        if (isModalOpen) {
+          const sbWidth = window.innerWidth - document.documentElement.clientWidth;
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+          if (sbWidth > 0) {
+            document.body.style.paddingRight = `${sbWidth}px`;
+            if (header) header.style.right = `${sbWidth}px`;
+          }
+          if (window.lenis) window.lenis.stop();
+        } else {
+          const shouldLock = window.scrollY <= 10;
+          if (shouldLock) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.paddingRight = '';
+            if (header) header.style.right = '';
+            if (window.lenis) window.lenis.stop();
+          } else {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.paddingRight = '';
+            if (header) header.style.right = '';
+            if (window.lenis) window.lenis.start();
+          }
+        }
+      }, [enrollModal, theaterVideo, isAdminOpen]);
+
       // Listen to hash changes for Admin Portal
       useEffect(() => {
         const handleHashChange = () => {
