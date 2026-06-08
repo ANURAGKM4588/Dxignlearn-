@@ -1942,33 +1942,6 @@
         }
 
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
-        const rows = adminData.map((row, i) => `
-          <tr style="background:${i % 2 === 0 ? '#fff' : '#f9fafb'}">
-            <td>${i + 1}</td>
-            <td>${row.date || ''}</td>
-            <td>${row.name || ''}</td>
-            <td>${row.email || ''}</td>
-            <td>${row.phone || ''}</td>
-            <td>${row.course || ''}</td>
-            <td>${row.price || ''}</td>
-            <td style="color:${(row.status||'').toLowerCase()==='success'?'#16a34a':'#dc2626'};font-weight:700">${row.status || ''}</td>
-          </tr>
-        `).join('');
-
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8" />
-            <title>Dxign.learn — Student Registrations</title>
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 32px; color: #111; }
-              .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 2px solid #111; padding-bottom: 16px; }
-              .header h1 { font-size: 22px; font-weight: 900; letter-spacing: 2px; }
-              .header .sub { font-size: 11px; color: #555; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-              .header .meta { text-align: right; font-size: 11px; color: #555; }
         const logoUrl = `${window.location.origin}/public/Images/logo/Dxign%20logo.png`;
 
         const successCount = adminData.filter(r => (r.status||'').toLowerCase() === 'success').length;
