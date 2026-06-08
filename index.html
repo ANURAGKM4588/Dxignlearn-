@@ -1794,6 +1794,7 @@
       const [carouselIndex, setCarouselIndex] = useState(0);
 
       // Customer prefill login details for payment
+      const [nameInput, setNameInput] = useState('');
       const [emailInput, setEmailInput] = useState('');
       const [phoneInput, setPhoneInput] = useState('');
       const [enrollError, setEnrollError] = useState('');
@@ -1813,6 +1814,7 @@
       const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbww2LgUDDxh7nSZy-fmAfeuTDBgPDjjY6xX66N2lmGoR1NCn6Vwx4RNd9WDYOliFyxq/exec'; // Paste your Google Sheet web app URL here
 
       const openEnrollModal = (course) => {
+        setNameInput('');
         setEmailInput('');
         setPhoneInput('');
         setEnrollError('');
@@ -1896,18 +1898,18 @@
       const exportToCSV = () => {
         if (!adminData || adminData.length === 0) return;
         
-        const headers = ['Date', 'Email', 'Phone', 'Course', 'Price', 'Status', 'Payment ID'];
+        const headers = ['Date', 'Name', 'Email', 'Phone', 'Course', 'Price', 'Status'];
         const csvRows = [headers.join(',')];
 
         adminData.forEach(row => {
           const values = [
-            `"${(row.date || '').replace(/"/g, '""')}"`,
-            `"${(row.email || '').replace(/"/g, '""')}"`,
-            `"${(row.phone || '').replace(/"/g, '""')}"`,
-            `"${(row.course || '').replace(/"/g, '""')}"`,
-            `"${(row.price || '').replace(/"/g, '""')}"`,
-            `"${(row.status || '').replace(/"/g, '""')}"`,
-            `"${(row.paymentid || '').replace(/"/g, '""')}"`
+            `"${(row.date || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.name || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.email || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.phone || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.course || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.price || '').toString().replace(/"/g, '""')}"`,
+            `"${(row.status || '').toString().replace(/"/g, '""')}"`
           ];
           csvRows.push(values.join(','));
         });
@@ -1924,7 +1926,7 @@
         document.body.removeChild(link);
       };
 
-      const saveToGoogleSheet = async (status, paymentId = '', emailVal = '', phoneVal = '', courseVal = '', priceVal = '') => {
+      const saveToGoogleSheet = async (status, paymentId = '', nameVal = '', emailVal = '', phoneVal = '', courseVal = '', priceVal = '') => {
         const webhookUrl = GOOGLE_SHEET_WEBHOOK_URL;
         if (!webhookUrl) {
           console.log('Google Sheet Webhook URL not configured');
@@ -1933,6 +1935,7 @@
 
         const data = {
           date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+          name: nameVal,
           email: emailVal,
           phone: phoneVal,
           course: courseVal,
@@ -1960,6 +1963,10 @@
         if (!enrollModal) return;
 
         // Validations
+        if (!nameInput.trim()) {
+          setEnrollError('Please enter your name.');
+          return;
+        }
         if (!emailInput.trim()) {
           setEnrollError('Please enter your email address.');
           return;
@@ -1980,6 +1987,7 @@
 
         setEnrollError('');
 
+        const nameVal = nameInput.trim();
         const emailVal = emailInput.trim();
         const phoneVal = phoneInput.trim();
         const courseVal = enrollModal.title;
@@ -1994,13 +2002,18 @@
           image: 'public/Images/logo/Dxign logo.png',
           handler: function(response) {
             closeEnrollModal();
-            saveToGoogleSheet('Success', response.razorpay_payment_id, emailVal, phoneVal, courseVal, priceVal);
+            saveToGoogleSheet('Success', response.razorpay_payment_id, nameVal, emailVal, phoneVal, courseVal, priceVal);
             alert('🎉 Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nWelcome to ' + courseVal + '! Check your email for course access.');
           },
           prefill: {
-            name: '',
+            name: nameVal,
             email: emailVal,
             contact: phoneVal
+          },
+          readonly: {
+            name: true,
+            email: true,
+            contact: true
           },
           notes: {
             course_id: enrollModal.id,
@@ -2021,7 +2034,7 @@
         });
 
         // Log transaction initiation
-        saveToGoogleSheet('Initiated', '', emailVal, phoneVal, courseVal, priceVal);
+        saveToGoogleSheet('Initiated', '', nameVal, emailVal, phoneVal, courseVal, priceVal);
 
         rzp.open();
       };
@@ -3100,6 +3113,33 @@
                     <div className="space-y-4 mb-6">
                       <div className="text-left">
                         <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
+                          Enter Your Name
+                        </label>
+                        <div className="relative flex items-center">
+                          <i data-lucide="user" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                          <input
+                            type="text"
+                            placeholder="John Doe"
+                            value={nameInput}
+                            onChange={(e) => setNameInput(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                            style={{
+                              fontFamily: 'Outfit, sans-serif',
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = enrollModal.colorCode;
+                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                              e.target.style.boxShadow = 'none';
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-left">
+                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
                           Enter Email Address
                         </label>
                         <div className="relative flex items-center">
@@ -3603,20 +3643,21 @@
                           <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px]">
                             <tr>
                               <th className="px-6 py-4">Date</th>
+                              <th className="px-6 py-4">Name</th>
                               <th className="px-6 py-4">Email</th>
                               <th className="px-6 py-4">Phone</th>
                               <th className="px-6 py-4">Course</th>
                               <th className="px-6 py-4 text-center">Price</th>
                               <th className="px-6 py-4 text-center">Status</th>
-                              <th className="px-6 py-4">Payment ID</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5 text-gray-300">
                             {(() => {
                               const filteredRows = adminData.filter(row => {
-                                const emailMatch = (row.email || '').toLowerCase().includes(adminSearch.toLowerCase());
-                                const phoneMatch = (row.phone || '').toLowerCase().includes(adminSearch.toLowerCase());
-                                const searchMatch = emailMatch || phoneMatch;
+                                const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const searchMatch = nameMatch || emailMatch || phoneMatch;
 
                                 const courseMatch = adminFilterCourse === 'All' || 
                                   (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
@@ -3643,6 +3684,7 @@
                                 return (
                                   <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-500">{row.date}</td>
+                                    <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
                                     <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{row.phone}</td>
                                     <td className="px-6 py-4 text-white uppercase font-bold tracking-tight text-[11px]">{row.course}</td>
@@ -3656,7 +3698,6 @@
                                         {row.status}
                                       </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-[10px] text-gray-500 selection:bg-brand-cyan/30">{row.paymentid || '—'}</td>
                                   </tr>
                                 );
                               });
