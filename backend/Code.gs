@@ -291,3 +291,13 @@ function cleanupOldMessages() {
     Logger.log("Error during Firestore cleanup: " + error.toString());
   }
 }
+
+/**
+ * Helper function to explicitly trigger Google Drive permissions.
+ * Run this function once in the Apps Script editor to authorize Google Drive access.
+ */
+function authorizeDrive() {
+  Logger.log("Triggering Google Drive access authorization...");
+  var folders = DriveApp.getFoldersByName("Dxignlearn Doubt Attachments");
+  Logger.log("Access status: authorized. Found folders count: " + (folders.hasNext() ? "yes" : "no"));
+}
