@@ -2068,7 +2068,7 @@
           name: 'Anurag KM (Mentor)',
           text: text,
           type: 'text',
-          timestamp: isFirebaseMock ? { seconds: Date.now() / 1000 } : firebase.firestore.FieldValue.serverTimestamp()
+          timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
         };
 
         if (isFirebaseMock) {
@@ -2087,7 +2087,7 @@
               return {
                 ...c,
                 lastMessage: text,
-                lastActive: { seconds: Date.now() / 1000 },
+                lastActive: new Date(),
                 unread: false
               };
             }
@@ -2120,7 +2120,7 @@
               name: studentName,
               text: replyText,
               type: 'text',
-              timestamp: { seconds: Date.now() / 1000 }
+              timestamp: new Date()
             };
 
             const followUpMessages = { ...updatedMessages };
@@ -2143,7 +2143,7 @@
                 return {
                   ...c,
                   lastMessage: replyText,
-                  lastActive: { seconds: Date.now() / 1000 },
+                  lastActive: new Date(),
                   unread: true
                 };
               }
@@ -4546,12 +4546,32 @@
 
                               {/* Message Timeline */}
                               <div className="flex-grow overflow-y-auto p-6 space-y-4 flex flex-col text-left">
-                                {chatMessages.length === 0 ? (
-                                  <div className="my-auto text-center text-gray-600 font-mono text-[9px] uppercase tracking-widest">No messages in room</div>
-                                ) : (
-                                  chatMessages.map((msg, index) => {
+                                {(() => {
+                                  const sortedMessages = [...chatMessages].sort((a, b) => {
+                                    const getSeconds = (ts) => {
+                                      if (!ts) return Date.now() / 1000;
+                                      if (typeof ts.seconds === 'number') return ts.seconds;
+                                      if (ts instanceof Date) return ts.getTime() / 1000;
+                                      if (typeof ts.toMillis === 'function') return ts.toMillis() / 1000;
+                                      if (ts.seconds) return ts.seconds;
+                                      return 0;
+                                    };
+                                    return getSeconds(a.timestamp) - getSeconds(b.timestamp);
+                                  });
+
+                                  if (sortedMessages.length === 0) {
+                                    return <div className="my-auto text-center text-gray-600 font-mono text-[9px] uppercase tracking-widest">No messages in room</div>;
+                                  }
+
+                                  return sortedMessages.map((msg, index) => {
                                     const isMentor = msg.sender === 'mentor';
-                                    const timeStr = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                                    let seconds = Date.now() / 1000;
+                                    if (msg.timestamp) {
+                                      if (typeof msg.timestamp.seconds === 'number') seconds = msg.timestamp.seconds;
+                                      else if (typeof msg.timestamp.toMillis === 'function') seconds = msg.timestamp.toMillis() / 1000;
+                                      else if (msg.timestamp.seconds) seconds = msg.timestamp.seconds;
+                                    }
+                                    const timeStr = new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                     
                                     return (
                                       <div key={msg.id || index} className={`flex w-full ${isMentor ? 'justify-end' : 'justify-start'}`}>
@@ -4597,14 +4617,17 @@
                                           )}
 
                                           {msg.type === 'audio' && (
-                                            <div className="flex items-center gap-3 bg-zinc-950/40 p-2.5 rounded-xl border border-white/10 min-w-[200px]">
-                                              <div className="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                            <div className="flex flex-col gap-1.5 bg-zinc-950/40 p-3 rounded-xl border border-white/10 min-w-[240px]">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                                </div>
+                                                <div className="text-left">
+                                                  <span className="text-[10px] font-bold block text-white">Voice Message</span>
+                                                  <a href={msg.fileUrl} target="_blank" className="text-[8px] text-brand-cyan font-mono hover:underline block mt-0.5">Open in new window</a>
+                                                </div>
                                               </div>
-                                              <div className="text-left flex-grow">
-                                                <span className="text-[10px] font-bold block text-white">Voice Message</span>
-                                                <a href={msg.fileUrl} target="_blank" className="text-[8px] text-brand-cyan font-mono hover:underline block mt-0.5">Open Audio Link</a>
-                                              </div>
+                                              <audio src={msg.fileUrl} controls className="w-full max-w-[220px] mt-1 h-8 filter invert opacity-80" />
                                             </div>
                                           )}
 
@@ -4630,8 +4653,8 @@
                                         </div>
                                       </div>
                                     );
-                                  })
-                                )}
+                                  });
+                                })()}
                               </div>
 
                               {/* Input panel footer */}
