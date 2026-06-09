@@ -3742,15 +3742,15 @@
                 <div className="lg:col-span-7 text-left flex flex-col justify-center">
                   <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                     <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
-                    Mobile Companion App
+                    Mobile Support App
                   </span>
                   
                   <h2 className="text-4xl md:text-6xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                    Learn AI on the Go
+                    Instant Doubt Clearance
                   </h2>
                   
                   <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mb-10 font-light">
-                    Take your AI learning journey anywhere. Chat with mentors, access course files, view assignments, and receive real-time updates directly on your mobile device. Download the companion app today.
+                    Stuck on an assignment? Resolve your learning doubts in real-time. Message mentors directly, send screenshots of your work, upload voice notes, and get instant guidance on your projects.
                   </p>
 
                   {/* Buttons wrapper */}
@@ -3819,7 +3819,7 @@
                             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-brand-emerald border-2 border-zinc-950 rounded-full animate-pulse" />
                           </div>
                           <div>
-                            <span className="font-heading font-black text-white text-[11px] block tracking-tight uppercase leading-none">AI Mentor</span>
+                            <span className="font-heading font-black text-white text-[11px] block tracking-tight uppercase leading-none">Mentor Support</span>
                             <span className="text-[8px] text-brand-cyan font-semibold tracking-wider font-mono uppercase mt-0.5 block">Online</span>
                           </div>
                         </div>
@@ -3831,7 +3831,12 @@
                         {/* Student Bubble */}
                         <div className="flex flex-col items-end text-right">
                           <div className="max-w-[85%] rounded-2xl rounded-tr-none px-3.5 py-2.5 bg-brand-blue text-white text-[10px] leading-relaxed font-light">
-                            Hey Mentor, I'm working on the Midjourney prompt assignment. How can I make lighting more cinematic?
+                            {/* Visual Screenshot Attachment */}
+                            <div className="w-full h-24 rounded-lg overflow-hidden mb-2 bg-black/20 border border-white/10 relative">
+                              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('public/Images/workimage/Post 6_3.jpg')" }} />
+                              <div className="absolute bottom-1 right-1 bg-black/60 px-1.5 py-0.5 rounded text-[7px] font-mono">Attachment.png</div>
+                            </div>
+                            Hey Mentor, here's my current prompt output. How can I make the volumetric lighting look more dramatic?
                           </div>
                           <span className="text-[7px] text-gray-500 mt-1 flex items-center space-x-1 justify-end">
                             <span>10:32 AM</span>
@@ -4458,7 +4463,7 @@
                       Run on iOS (Expo Go)
                     </h2>
                     <p className="text-gray-500 text-xs leading-relaxed mb-6">
-                      Since the official App Store build is coming soon, you can run the live production build instantly on iOS via the Expo Go development client.
+                      Since the official App Store build is coming soon, you can run the live doubt support app instantly on iOS via the Expo Go development client.
                     </p>
 
                     {/* QR Code Container */}
@@ -4493,7 +4498,7 @@
                           3
                         </span>
                         <p className="leading-relaxed">
-                          Tap the pop-up notification link to launch the companion application.
+                          Tap the pop-up notification link to launch the support application.
                         </p>
                       </div>
                     </div>
