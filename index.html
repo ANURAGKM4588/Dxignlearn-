@@ -77,6 +77,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
+  <!-- YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <!-- Babel Standalone for transpilation -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
 </head>
@@ -2277,6 +2280,14 @@
 
     // --- MAIN REACT APPLICATION APP ---
 
+    const COURSE_PAYMENT_LINKS = {
+      'Graphic Design': 'https://rzp.io/l/dxign-graphic-design',
+      'Film Making': 'https://rzp.io/l/dxign-film-making',
+      'Content Creation': 'https://rzp.io/l/dxign-content-creation',
+      'Vibe Coding': 'https://rzp.io/l/dxign-vibe-coding',
+      'Business Automation': 'https://rzp.io/l/dxign-business-automation',
+    };
+
     const App = () => {
       const [showcaseFilter, setShowcaseFilter] = useState('All');
       const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -2438,6 +2449,9 @@
       const [customLectures, setCustomLectures] = useState({});
       const [deletedDefaultIds, setDeletedDefaultIds] = useState([]);
 
+      // Student Resumable Video Support
+      const studentNativeVideoRef = useRef(null);
+
       // Student Chat Room States
       const [studentChatMessages, setStudentChatMessages] = useState([]);
       const [studentChatInput, setStudentChatInput] = useState('');
@@ -2501,6 +2515,9 @@
       const [newLectureTags, setNewLectureTags] = useState('');
       const [newLectureVideoUrl, setNewLectureVideoUrl] = useState('');
       const [newLectureResources, setNewLectureResources] = useState([]);
+      const [newLectureSaving, setNewLectureSaving] = useState(false);
+      const [editingLecture, setEditingLecture] = useState(null);
+      const [newLectureDuration, setNewLectureDuration] = useState('1 min');
 
       const getAttachmentUrl = (url, type) => {
         if (!url) return '';
@@ -2515,6 +2532,77 @@
           }
         }
         return url;
+      };
+
+      const getYoutubeEmbedUrl = (url) => {
+        if (!url) return null;
+        const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : null;
+      };
+
+      const YouTubeCustomPlayer = ({ videoId, onPrev, onNext, resumePosition }) => {
+        const containerRef = useRef(null);
+        const playerRef = useRef(null);
+        const saveIntervalRef = useRef(null);
+        const [ready, setReady] = useState(false);
+
+        useEffect(() => {
+          if (!containerRef.current || !videoId) return;
+          const player = new YT.Player(containerRef.current, {
+            videoId,
+            playerVars: {
+              controls: 1, rel: 0, modestbranding: 1,
+              iv_load_policy: 3,
+              playsinline: 1, enablejsapi: 1, autoplay: 0,
+            },
+            events: {
+              onReady: () => {
+                playerRef.current = player;
+                setReady(true);
+                if (resumePosition > 0) player.seekTo(resumePosition, true);
+              },
+              onStateChange: (e) => {
+                if (e.data === YT.PlayerState.PLAYING) {
+                  clearInterval(saveIntervalRef.current);
+                  saveIntervalRef.current = setInterval(() => {
+                    if (playerRef.current && videoId) saveVideoProgress(videoId, playerRef.current.getCurrentTime());
+                  }, 3000);
+                } else {
+                  clearInterval(saveIntervalRef.current);
+                }
+              },
+            },
+          });
+          return () => {
+            clearInterval(saveIntervalRef.current);
+            if (playerRef.current) {
+              if (videoId) saveVideoProgress(videoId, playerRef.current.getCurrentTime());
+              playerRef.current.destroy();
+              playerRef.current = null;
+            }
+          };
+        }, [videoId]);
+
+        return (
+          <div className="relative w-full h-full bg-black overflow-hidden">
+            <div ref={containerRef} className="w-full h-full" />
+            {!ready && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="w-8 h-8 border-2 border-brand-cyan/50 border-t-brand-cyan rounded-full animate-spin" />
+              </div>
+            )}
+            {ready && onPrev && (
+              <button type="button" onClick={onPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/80 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+              </button>
+            )}
+            {ready && onNext && (
+              <button type="button" onClick={onNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/80 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+              </button>
+            )}
+          </div>
+        );
       };
 
       const renderParsedTextWeb = (text) => {
@@ -2585,6 +2673,38 @@
           }
         }
       }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen]);
+
+      // Resume data helpers
+      const getResumeData = () => {
+        try { return JSON.parse(localStorage.getItem('dxign_resume_data') || '{}'); } catch { return {}; }
+      };
+      const saveResumeData = (data) => {
+        localStorage.setItem('dxign_resume_data', JSON.stringify(data));
+      };
+      const saveVideoProgress = (videoId, seconds) => {
+        if (!videoId) return;
+        const data = getResumeData();
+        data.resumePositions = data.resumePositions || {};
+        data.resumePositions[videoId] = seconds;
+        saveResumeData(data);
+      };
+      const getVideoProgress = (videoId) => {
+        if (!videoId) return 0;
+        const data = getResumeData();
+        return (data.resumePositions && data.resumePositions[videoId]) || 0;
+      };
+      const saveLastWatchedVideo = (courseName, videoObj) => {
+        if (!courseName || !videoObj) return;
+        const data = getResumeData();
+        data.lastWatchedVideo = data.lastWatchedVideo || {};
+        data.lastWatchedVideo[courseName] = videoObj;
+        saveResumeData(data);
+      };
+      const getLastWatchedVideo = (courseName) => {
+        if (!courseName) return null;
+        const data = getResumeData();
+        return (data.lastWatchedVideo && data.lastWatchedVideo[courseName]) || null;
+      };
 
       // Combine default, db, and custom lectures, filtering out deleted default ones
       const getMergedLectures = () => {
@@ -2673,6 +2793,42 @@
         }
       };
 
+      const handleUpdateLecture = async (courseName, oldLecture, updatedData) => {
+        const lecId = oldLecture.id;
+        if (isFirebaseMock || !firebaseDb) {
+          if (lecId.startsWith('custom_')) {
+            const list = customLectures[courseName] || [];
+            const updated = {
+              ...customLectures,
+              [courseName]: list.map(l => l.id === lecId ? { ...l, ...updatedData } : l)
+            };
+            setCustomLectures(updated);
+            localStorage.setItem('dxign_custom_lectures', JSON.stringify(updated));
+          } else {
+            const newDeleted = [...deletedDefaultIds, lecId];
+            setDeletedDefaultIds(newDeleted);
+            localStorage.setItem('dxign_deleted_lectures', JSON.stringify(newDeleted));
+            const newId = `custom_${Date.now()}`;
+            const customEntry = { id: newId, ...updatedData, createdAt: new Date() };
+            const updated = {
+              ...customLectures,
+              [courseName]: [...(customLectures[courseName] || []), customEntry]
+            };
+            setCustomLectures(updated);
+            localStorage.setItem('dxign_custom_lectures', JSON.stringify(updated));
+          }
+          return true;
+        } else {
+          if (!lecId.startsWith('custom_') && lecId.includes('-')) {
+            await firebaseDb.collection('deleted_default_lectures').doc(lecId).set({ deleted: true });
+            await firebaseDb.collection('lectures').add({ ...updatedData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          } else {
+            await firebaseDb.collection('lectures').doc(lecId).update(updatedData);
+          }
+          return true;
+        }
+      };
+
       // Listen to database lectures
       useEffect(() => {
         if (isFirebaseMock || !firebaseDb) return;
@@ -2717,11 +2873,39 @@
             setStudentUser(parsed);
             setIsStudentAuthenticated(true);
             setStudentSelectedCourse(parsed.courses[0] || 'Graphic Design');
+            const saved = getLastWatchedVideo(parsed.courses[0] || 'Graphic Design');
+            if (saved) setStudentActiveVideo(saved);
           } catch (e) {
             console.error("Error loading cached student session", e);
           }
         }
       }, []);
+
+      // Save last-watched video whenever active video changes
+      useEffect(() => {
+        if (studentActiveVideo && studentSelectedCourse) {
+          saveLastWatchedVideo(studentSelectedCourse, studentActiveVideo);
+        }
+      }, [studentActiveVideo, studentSelectedCourse]);
+
+      // Save/restore playback position for native videos
+      useEffect(() => {
+        if (!studentActiveVideo) return;
+        const isNative = !getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
+        if (!isNative) return;
+        const vid = studentActiveVideo.id;
+        const interval = setInterval(() => {
+          if (studentNativeVideoRef.current) {
+            saveVideoProgress(vid, studentNativeVideoRef.current.currentTime);
+          }
+        }, 3000);
+        return () => {
+          clearInterval(interval);
+          if (studentNativeVideoRef.current) {
+            saveVideoProgress(vid, studentNativeVideoRef.current.currentTime);
+          }
+        };
+      }, [studentActiveVideo]);
 
       const handleStudentRequestOTP = async (e) => {
         if (e) e.preventDefault();
@@ -2777,6 +2961,8 @@
           setStudentUser(user);
           setIsStudentAuthenticated(true);
           setStudentSelectedCourse(user.courses[0] || 'Graphic Design');
+          const saved1 = getLastWatchedVideo(user.courses[0] || 'Graphic Design');
+          if (saved1) setStudentActiveVideo(saved1);
           setStudentLoading(false);
           setStudentOtpInput('');
           setStudentEmailInput('');
@@ -2797,6 +2983,8 @@
             setStudentUser(user);
             setIsStudentAuthenticated(true);
             setStudentSelectedCourse(user.courses[0] || 'Graphic Design');
+            const saved2 = getLastWatchedVideo(user.courses[0] || 'Graphic Design');
+            if (saved2) setStudentActiveVideo(saved2);
             setStudentOtpInput('');
             setStudentEmailInput('');
             setStudentMessage('');
@@ -2813,8 +3001,10 @@
 
       const handleStudentLogout = () => {
         localStorage.removeItem('dxign_student_session');
+        localStorage.removeItem('dxign_resume_data');
         setStudentUser(null);
         setIsStudentAuthenticated(false);
+        setStudentActiveVideo(null);
         setStudentLoginStep(1);
         setStudentEmailInput('');
         setStudentOtpInput('');
@@ -2948,100 +3138,49 @@
         if (!file || !studentUser) return;
         e.target.value = '';
         setStudentChatSending(true);
-        setStudentUploadingProgress(0);
 
         const chatRoomId = studentUser.email.replace(/[@.]/g, '_');
 
+        let type = 'document';
+        if (file.type.startsWith('image/')) type = 'image';
+        else if (file.type.startsWith('video/')) type = 'video';
+        else if (file.type.startsWith('audio/')) type = 'audio';
+
         try {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            try {
-              const base64Data = reader.result.split(',')[1];
-              let type = 'document';
-              if (file.type.startsWith('image/')) type = 'image';
-              else if (file.type.startsWith('video/')) type = 'video';
-              else if (file.type.startsWith('audio/')) type = 'audio';
+          const fileUrl = URL.createObjectURL(file);
 
-              const payload = {
-                action: 'upload_file',
-                fileName: file.name,
-                mimeType: file.type,
-                base64Data: base64Data
-              };
-
-              // Try Google Drive upload first, fallback to base64 inline
-              let fileUrl = '';
-              try {
-                const result = await uploadWithProgressXHR(GOOGLE_SHEET_WEBHOOK_URL, payload, setStudentUploadingProgress);
-                if (result && result.status === 'success' && result.fileUrl) {
-                  fileUrl = result.fileUrl;
-                } else {
-                  throw new Error(result.message || 'Server upload failed');
-                }
-              } catch (uploadErr) {
-                console.warn("Google Drive upload failed, falling back to base64 inline:", uploadErr);
-                const isPermissionError = uploadErr.message && (
-                  uploadErr.message.includes("permission") || 
-                  uploadErr.message.includes("DriveApp") ||
-                  uploadErr.message.includes("authorization") ||
-                  uploadErr.message.includes("Authorization is required")
-                );
-                
-                if (isPermissionError) {
-                  console.warn("Drive permission missing — using base64 fallback for student upload.");
-                }
-                
-                // For large files, we cannot use base64 inline
-                if (file.size > 800 * 1024) {
-                  throw new Error(isPermissionError 
-                    ? "Google Drive authorization is missing, and the file is too large (>800KB) for inline storage. Please contact admin to authorize Drive permissions in Apps Script." 
-                    : "File is too large (>800KB) for inline storage fallback: " + uploadErr.message
-                  );
-                }
-                // Use the full base64 data URI as the fileUrl fallback
-                fileUrl = reader.result;
-              } finally {
-                setStudentUploadingProgress(null);
-              }
-
-              const msgData = {
-                sender: studentUser.email,
-                name: studentUser.name,
-                fileUrl: fileUrl,
-                fileName: file.name,
-                type: type,
-                status: 'sent',
-                timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
-              };
-
-              if (isFirebaseMock) {
-                const updatedMessages = { ...mockMessages };
-                if (!updatedMessages[chatRoomId]) updatedMessages[chatRoomId] = [];
-                updatedMessages[chatRoomId].push({ id: `student_${Date.now()}`, ...msgData });
-                setMockMessages(updatedMessages);
-                setStudentChatMessages(updatedMessages[chatRoomId]);
-              } else if (firebaseDb) {
-                await firebaseDb.collection('chats').doc(chatRoomId).collection('messages').add(msgData);
-                await firebaseDb.collection('chats').doc(chatRoomId).set({
-                  id: chatRoomId,
-                  email: studentUser.email,
-                  name: studentUser.name,
-                  lastMessage: `[Sent ${type}]`,
-                  lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                  courses: studentUser.courses || [],
-                  unread: true
-                }, { merge: true });
-              }
-            } catch (err) {
-              console.error("Upload process error:", err);
-              alert("File upload failed: " + err.message);
-            } finally {
-              setStudentChatSending(false);
-            }
+          const msgData = {
+            sender: studentUser.email,
+            name: studentUser.name,
+            fileUrl: fileUrl,
+            fileName: file.name,
+            type: type,
+            status: 'sent',
+            timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
           };
-          reader.readAsDataURL(file);
+
+          if (isFirebaseMock) {
+            const updatedMessages = { ...mockMessages };
+            if (!updatedMessages[chatRoomId]) updatedMessages[chatRoomId] = [];
+            updatedMessages[chatRoomId].push({ id: `student_${Date.now()}`, ...msgData });
+            setMockMessages(updatedMessages);
+            setStudentChatMessages(updatedMessages[chatRoomId]);
+          } else if (firebaseDb) {
+            await firebaseDb.collection('chats').doc(chatRoomId).collection('messages').add(msgData);
+            await firebaseDb.collection('chats').doc(chatRoomId).set({
+              id: chatRoomId,
+              email: studentUser.email,
+              name: studentUser.name,
+              lastMessage: `[Sent ${type}]`,
+              lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+              courses: studentUser.courses || [],
+              unread: true
+            }, { merge: true });
+          }
         } catch (err) {
-          console.error("FileReader error:", err);
+          console.error("File upload error:", err);
+          alert("File upload failed: " + err.message);
+        } finally {
           setStudentChatSending(false);
         }
       };
@@ -3063,75 +3202,44 @@
             if (studentAudioChunksRef.current.length === 0) return;
             const audioBlob = new Blob(studentAudioChunksRef.current, { type: 'audio/webm' });
             setStudentChatSending(true);
-            setStudentUploadingProgress(0);
-            
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-              try {
-                const base64Data = reader.result.split(',')[1];
-                const chatRoomId = studentUser.email.replace(/[@.]/g, '_');
-                
-                const payload = {
-                  action: 'upload_file',
-                  fileName: `voice_note_${Date.now()}.webm`,
-                  mimeType: 'audio/webm',
-                  base64Data: base64Data
-                };
 
-                // Try Google Drive upload first, fallback to base64 inline
-                let fileUrl = '';
-                try {
-                  const result = await uploadWithProgressXHR(GOOGLE_SHEET_WEBHOOK_URL, payload, setStudentUploadingProgress);
-                  if (result && result.status === 'success' && result.fileUrl) {
-                    fileUrl = result.fileUrl;
-                  } else {
-                    throw new Error(result.message || 'Server upload failed');
-                  }
-                } catch (uploadErr) {
-                  console.warn("Voice note Drive upload failed, falling back to base64 inline:", uploadErr);
-                  // Voice notes are usually small, so base64 inline is fine
-                  if (audioBlob.size > 800 * 1024) {
-                    throw new Error("Voice note is too long (>800KB) for inline storage. Please try a shorter recording.");
-                  }
-                  fileUrl = reader.result;
-                } finally {
-                  setStudentUploadingProgress(null);
-                }
+            const chatRoomId = studentUser.email.replace(/[@.]/g, '_');
 
-                const msgData = {
-                  sender: studentUser.email,
+            try {
+              const fileUrl = URL.createObjectURL(audioBlob);
+
+              const msgData = {
+                sender: studentUser.email,
+                name: studentUser.name,
+                fileUrl: fileUrl,
+                type: 'audio',
+                status: 'sent',
+                timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
+              };
+
+              if (isFirebaseMock) {
+                const updatedMessages = { ...mockMessages };
+                if (!updatedMessages[chatRoomId]) updatedMessages[chatRoomId] = [];
+                updatedMessages[chatRoomId].push({ id: `student_${Date.now()}`, ...msgData });
+                setMockMessages(updatedMessages);
+                setStudentChatMessages(updatedMessages[chatRoomId]);
+              } else if (firebaseDb) {
+                await firebaseDb.collection('chats').doc(chatRoomId).collection('messages').add(msgData);
+                await firebaseDb.collection('chats').doc(chatRoomId).set({
+                  id: chatRoomId,
+                  email: studentUser.email,
                   name: studentUser.name,
-                  fileUrl: fileUrl,
-                  type: 'audio',
-                  status: 'sent',
-                  timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                if (isFirebaseMock) {
-                  const updatedMessages = { ...mockMessages };
-                  if (!updatedMessages[chatRoomId]) updatedMessages[chatRoomId] = [];
-                  updatedMessages[chatRoomId].push({ id: `student_${Date.now()}`, ...msgData });
-                  setMockMessages(updatedMessages);
-                  setStudentChatMessages(updatedMessages[chatRoomId]);
-                } else if (firebaseDb) {
-                  await firebaseDb.collection('chats').doc(chatRoomId).collection('messages').add(msgData);
-                  await firebaseDb.collection('chats').doc(chatRoomId).set({
-                    id: chatRoomId,
-                    email: studentUser.email,
-                    name: studentUser.name,
-                    lastMessage: `[Sent voice note]`,
-                    lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                    courses: studentUser.courses || [],
-                    unread: true
-                  }, { merge: true });
-                }
-              } catch (err) {
-                console.error("Audio save error:", err);
-              } finally {
-                setStudentChatSending(false);
+                  lastMessage: `[Sent voice note]`,
+                  lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+                  courses: studentUser.courses || [],
+                  unread: true
+                }, { merge: true });
               }
-            };
-            reader.readAsDataURL(audioBlob);
+            } catch (err) {
+              console.error("Audio save error:", err);
+            } finally {
+              setStudentChatSending(false);
+            }
 
             stream.getTracks().forEach(track => track.stop());
           };
@@ -3175,32 +3283,10 @@
         setLectureUploadingProgress(0);
 
         try {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            try {
-              const base64Data = reader.result.split(',')[1];
-              const payload = {
-                action: 'upload_file',
-                fileName: file.name,
-                mimeType: file.type,
-                base64Data: base64Data
-              };
-
-              const result = await uploadWithProgressXHR(GOOGLE_SHEET_WEBHOOK_URL, payload, setLectureUploadingProgress);
-              if (result && result.status === 'success' && result.fileUrl) {
-                setNewLectureVideoUrl(result.fileUrl);
-                setLectureUploadingProgress(100);
-                setTimeout(() => setLectureUploadingProgress(null), 1500);
-              } else {
-                throw new Error(result.message || 'Drive upload failed');
-              }
-            } catch (err) {
-              console.error("Admin lecture upload failed:", err);
-              alert("Video upload failed: " + err.message);
-              setLectureUploadingProgress(null);
-            }
-          };
-          reader.readAsDataURL(file);
+          const fileUrl = URL.createObjectURL(file);
+          setNewLectureVideoUrl(fileUrl);
+          setLectureUploadingProgress(100);
+          setTimeout(() => setLectureUploadingProgress(null), 1500);
         } catch (err) {
           console.error(err);
           setLectureUploadingProgress(null);
@@ -3213,37 +3299,15 @@
         setResourceUploadingProgress(0);
 
         try {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            try {
-              const base64Data = reader.result.split(',')[1];
-              const payload = {
-                action: 'upload_file',
-                fileName: file.name,
-                mimeType: file.type,
-                base64Data: base64Data
-              };
-
-              const result = await uploadWithProgressXHR(GOOGLE_SHEET_WEBHOOK_URL, payload, setResourceUploadingProgress);
-              if (result && result.status === 'success' && result.fileUrl) {
-                const newRes = {
-                  name: file.name,
-                  size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-                  url: result.fileUrl
-                };
-                setNewLectureResources(prev => [...prev, newRes]);
-                setResourceUploadingProgress(100);
-                setTimeout(() => setResourceUploadingProgress(null), 1500);
-              } else {
-                throw new Error(result.message || 'Resource upload failed');
-              }
-            } catch (err) {
-              console.error(err);
-              alert("Resource upload failed: " + err.message);
-              setResourceUploadingProgress(null);
-            }
+          const fileUrl = URL.createObjectURL(file);
+          const newRes = {
+            name: file.name,
+            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            url: fileUrl
           };
-          reader.readAsDataURL(file);
+          setNewLectureResources(prev => [...prev, newRes]);
+          setResourceUploadingProgress(100);
+          setTimeout(() => setResourceUploadingProgress(null), 1500);
         } catch (err) {
           console.error(err);
           setResourceUploadingProgress(null);
@@ -3257,24 +3321,34 @@
           return;
         }
 
+        setNewLectureSaving(true);
         const lecture = {
           title: newLectureTitle.trim(),
           description: newLectureDesc.trim(),
           difficulty: newLectureDifficulty,
+          duration: newLectureDuration.trim(),
           tags: newLectureTags.split(',').map(t => t.trim()).filter(Boolean),
           videoUrl: newLectureVideoUrl.trim(),
           resources: newLectureResources,
           course: adminSelectedLectureCourse,
         };
 
-        const success = await handleAddLecture(lecture);
+        let success;
+        if (editingLecture) {
+          success = await handleUpdateLecture(adminSelectedLectureCourse, editingLecture, lecture);
+        } else {
+          success = await handleAddLecture(lecture);
+        }
+        setNewLectureSaving(false);
         if (success) {
           setNewLectureTitle('');
           setNewLectureDesc('');
           setNewLectureDifficulty('Beginner');
+          setNewLectureDuration('1 min');
           setNewLectureTags('');
           setNewLectureVideoUrl('');
           setNewLectureResources([]);
+          setEditingLecture(null);
           setShowAddLectureModal(false);
         }
       };
@@ -3533,116 +3607,58 @@
         const file = e.target.files[0];
         if (!file || !selectedChatId) return;
 
-        // Reset the file input value immediately so the onChange fires next time
         e.target.value = '';
 
+        let type = 'document';
+        if (file.type.startsWith('image/')) type = 'image';
+        else if (file.type.startsWith('video/')) type = 'video';
+        else if (file.type.startsWith('audio/')) type = 'audio';
+
         setSendingReply(true);
-        setAdminChatUploadingProgress(0);
 
         try {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            try {
-              const base64Data = reader.result.split(',')[1];
-              
-              let type = 'document';
-              if (file.type.startsWith('image/')) type = 'image';
-              else if (file.type.startsWith('video/')) type = 'video';
-              else if (file.type.startsWith('audio/')) type = 'audio';
+          const fileUrl = URL.createObjectURL(file);
 
-              const payload = {
-                action: 'upload_file',
-                fileName: file.name,
-                mimeType: file.type,
-                base64Data: base64Data
-              };
-
-              let fileUrl = '';
-              try {
-                const result = await uploadWithProgressXHR(GOOGLE_SHEET_WEBHOOK_URL, payload, setAdminChatUploadingProgress);
-                if (result && result.status === 'success' && result.fileUrl) {
-                  fileUrl = result.fileUrl;
-                } else {
-                  throw new Error(result.message || 'Server upload failed');
-                }
-              } catch (uploadErr) {
-                console.warn("Google Drive upload failed, falling back to base64 inline:", uploadErr);
-                const isPermissionError = uploadErr.message && (
-                  uploadErr.message.includes("permission") || 
-                  uploadErr.message.includes("DriveApp") ||
-                  uploadErr.message.includes("authorization") ||
-                  uploadErr.message.includes("Authorization is required")
-                );
-                
-                if (isPermissionError) {
-                  alert("IMPORTANT: Google Drive Upload Authorization Required!\n\n" +
-                        "To upload files, you must authorize Google Drive permissions in your Apps Script Web App.\n\n" +
-                        "How to fix:\n" +
-                        "1. Open your Google Sheet -> Extensions -> Apps Script.\n" +
-                        "2. In Code.gs, select the 'authorizeDrive' function from the dropdown at the top.\n" +
-                        "3. Click 'Run' to trigger the Google Drive permission prompt and accept permissions.\n" +
-                        "4. Re-deploy the web app as a new version.\n\n" +
-                        "Details: " + uploadErr.message);
-                }
-                
-                if (file.size > 800 * 1024) {
-                  throw new Error(isPermissionError 
-                    ? "Google Drive authorization is missing, and the file is too large (>800KB) to store inline as a fallback. Please authorize the Apps Script as described in the prompt." 
-                    : "File is too large (>800KB) for database inline storage fallback. Please authorize Apps Script Drive permissions: " + uploadErr.message
-                  );
-                }
-                fileUrl = reader.result;
-              } finally {
-                setAdminChatUploadingProgress(null);
-              }
-
-              const msgData = {
-                sender: 'mentor',
-                name: 'Anurag KM (Mentor)',
-                fileUrl: fileUrl,
-                fileName: file.name,
-                type: type,
-                timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
-              };
-
-              if (isFirebaseMock) {
-                const updatedMessages = { ...mockMessages };
-                if (!updatedMessages[selectedChatId]) updatedMessages[selectedChatId] = [];
-                updatedMessages[selectedChatId].push({ id: `mentor_${Date.now()}`, ...msgData });
-                setMockMessages(updatedMessages);
-                setChatMessages(updatedMessages[selectedChatId]);
-                
-                const updatedChats = mockChats.map(c => {
-                  if (c.id === selectedChatId) {
-                    return {
-                      ...c,
-                      lastMessage: `[${type.toUpperCase()}]`,
-                      lastActive: new Date(),
-                      unread: false
-                    };
-                  }
-                  return c;
-                });
-                setMockChats(updatedChats);
-              } else {
-                await firebaseDb.collection('chats').doc(selectedChatId).collection('messages').add(msgData);
-                await firebaseDb.collection('chats').doc(selectedChatId).set({
-                  lastMessage: `[${type.toUpperCase()}]`,
-                  lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                  unread: false
-                }, { merge: true });
-              }
-            } catch (err) {
-              console.error("Error inside FileReader onload:", err);
-              alert("Error processing file upload: " + err.message);
-            } finally {
-              setSendingReply(false);
-            }
+          const msgData = {
+            sender: 'mentor',
+            name: 'Anurag KM (Mentor)',
+            fileUrl: fileUrl,
+            fileName: file.name,
+            type: type,
+            timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
           };
-          reader.readAsDataURL(file);
+
+          if (isFirebaseMock) {
+            const updatedMessages = { ...mockMessages };
+            if (!updatedMessages[selectedChatId]) updatedMessages[selectedChatId] = [];
+            updatedMessages[selectedChatId].push({ id: `mentor_${Date.now()}`, ...msgData });
+            setMockMessages(updatedMessages);
+            setChatMessages(updatedMessages[selectedChatId]);
+
+            const updatedChats = mockChats.map(c => {
+              if (c.id === selectedChatId) {
+                return {
+                  ...c,
+                  lastMessage: `[${type.toUpperCase()}]`,
+                  lastActive: new Date(),
+                  unread: false
+                };
+              }
+              return c;
+            });
+            setMockChats(updatedChats);
+          } else {
+            await firebaseDb.collection('chats').doc(selectedChatId).collection('messages').add(msgData);
+            await firebaseDb.collection('chats').doc(selectedChatId).set({
+              lastMessage: `[${type.toUpperCase()}]`,
+              lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+              unread: false
+            }, { merge: true });
+          }
         } catch (err) {
           console.error("Error uploading file:", err);
-          alert("Failed to upload file: " + err.message);
+          alert("File upload failed: " + err.message);
+        } finally {
           setSendingReply(false);
         }
       };
@@ -4339,7 +4355,7 @@
         : showcaseProjects.filter(p => p.cat === showcaseFilter);
 
       return (
-        <div className="relative min-h-screen bg-brand-bg text-gray-200 select-none overflow-hidden pb-1">
+          <div className="relative min-h-screen bg-brand-bg text-gray-200 select-none overflow-x-hidden pb-1">
           
           {/* Ambient background glows */}
           <div className="glow-blur-cyan w-[400px] h-[400px] top-[10%] left-[-10%]" />
@@ -4350,7 +4366,7 @@
           <div className="absolute inset-0 cyber-grid pointer-events-none z-0" />
 
           {/* Floating Sticky Glass Navbar */}
-          <header className="fixed top-0 left-0 right-0 h-20 glass-nav z-50 px-6 md:px-12 lg:px-24 flex items-center">
+          <header className="fixed top-0 left-0 right-0 h-16 md:h-20 glass-nav z-50 px-6 md:px-12 lg:px-24 flex items-center">
             <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
             {/* Logo */}
             <div 
@@ -5951,9 +5967,8 @@
           {/* ===== STUDENT PORTAL OVERLAY ===== */}
           {isStudentOpen && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text overflow-hidden text-left"
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left"
               onWheel={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
             >
               {!isStudentAuthenticated ? (
                 /* Student Login View */
@@ -6092,7 +6107,7 @@
                 </div>
               ) : (
                 /* Student Dashboard View */
-                <div className="flex-grow flex flex-col min-h-screen text-gray-300 overflow-hidden">
+                <div className="flex-grow flex flex-col text-gray-300">
                   {/* Top Header Navigation */}
                   <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col xl:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
                     <div className="flex items-center space-x-3 text-left">
@@ -6154,10 +6169,10 @@
                   {/* Main Work Area */}
                   {studentTab === 'courses' ? (
                     /* Dashboard View 1: Video Lectures */
-                    <main className="flex-grow flex flex-col lg:flex-row overflow-hidden max-h-[calc(100vh-76px)]">
+                    <main className="flex-grow flex flex-col lg:flex-row max-h-[calc(100vh-76px)]">
                       
                       {/* Left Course Tabs Column */}
-                      <aside className="w-full lg:w-64 border-r border-white/5 bg-zinc-950/20 p-4 space-y-2 overflow-y-auto shrink-0 flex lg:flex-col flex-row gap-2 lg:gap-0">
+                      <aside className="w-full lg:w-64 border-r border-white/5 bg-zinc-950/20 p-4 space-y-2 overflow-x-auto shrink-0 flex lg:flex-col flex-row gap-2 lg:gap-0">
                         <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold hidden lg:block">My Programs</h3>
                         {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
                           const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
@@ -6167,8 +6182,9 @@
                               key={courseName}
                               onClick={() => {
                                 setStudentSelectedCourse(courseName);
-                                const currentList = getMergedLectures()[courseName] || [];
-                                setStudentActiveVideo(currentList[0] || null);
+                                const saved = getLastWatchedVideo(courseName);
+                                if (saved) setStudentActiveVideo(saved);
+                                else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
                               }}
                               className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between text-xs font-semibold border transition-all shrink-0 ${
                                 active 
@@ -6220,11 +6236,28 @@
                               );
                             }
 
+                            const videoId = getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
+                            if (videoId) {
+                              const lectureList = getMergedLectures()[studentSelectedCourse] || [];
+                              const curIdx = lectureList.findIndex(l => l.id === studentActiveVideo.id);
+                              return <YouTubeCustomPlayer
+                                key={studentActiveVideo.id}
+                                videoId={videoId}
+                                resumePosition={getVideoProgress(studentActiveVideo.id)}
+                                onPrev={curIdx > 0 ? () => setStudentActiveVideo(lectureList[curIdx - 1]) : null}
+                                onNext={curIdx < lectureList.length - 1 ? () => setStudentActiveVideo(lectureList[curIdx + 1]) : null}
+                              />;
+                            }
                             return (
                               <video 
                                 key={studentActiveVideo.id}
+                                ref={studentNativeVideoRef}
                                 src={getAttachmentUrl(studentActiveVideo.videoUrl)}
                                 controls
+                                onLoadedMetadata={() => {
+                                  const pos = getVideoProgress(studentActiveVideo.id);
+                                  if (pos > 0 && studentNativeVideoRef.current) studentNativeVideoRef.current.currentTime = pos;
+                                }}
                                 className="w-full h-full object-contain"
                                 style={{ display: 'block' }}
                               />
@@ -6296,7 +6329,7 @@
                       </section>
 
                       {/* Right Syllabus Sidebar Column */}
-                      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 bg-zinc-950/10 p-6 overflow-y-auto shrink-0 max-h-[50vh] lg:max-h-full flex flex-col text-left">
+                      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 bg-zinc-950/10 p-6 overflow-y-auto shrink-0 lg:max-h-full flex flex-col text-left">
                         <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4 font-bold">Course Syllabus</h3>
                         <div className="space-y-2.5 flex-grow">
                           {(() => {
@@ -6600,9 +6633,8 @@
           {/* ===== ADMIN PORTAL OVERLAY ===== */}
           {isAdminOpen && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text overflow-hidden text-left"
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left"
               onWheel={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
             >
               {!isAdminAuthenticated ? (
                 /* Admin Login View */
@@ -6615,7 +6647,7 @@
                     <i data-lucide="x" className="w-5 h-5"></i>
                   </button>
 
-                  <form onSubmit={handleAdminLogin} className="max-w-md w-full p-8 liquid-glass border border-white/10 rounded-3xl text-center shadow-[0_20px_60px_rgba(0,240,255,0.05)] relative overflow-hidden">
+                  <form onSubmit={handleAdminLogin} className="max-w-md lg:max-w-lg w-full p-8 lg:p-10 liquid-glass border border-white/10 rounded-3xl text-center shadow-[0_20px_60px_rgba(0,240,255,0.05)] relative overflow-hidden">
                     {/* Top cyan bar */}
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
                     
@@ -6669,9 +6701,9 @@
                 </div>
               ) : (
                 /* Admin Dashboard View */
-                <div className="flex-grow flex flex-col min-h-screen text-gray-300 overflow-hidden">
+                <div className="flex-grow flex flex-col text-gray-300">
                   {/* Top Bar Header */}
-                  <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col xl:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
+                  <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
                     <div className="flex items-center space-x-3 text-left">
                       <div className="w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
                         <i data-lucide="layout-dashboard" className="w-5 h-5"></i>
@@ -6685,27 +6717,27 @@
                     </div>
 
                     {/* Secondary Navigation Tabs */}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] font-bold">
+                    <div className="flex flex-wrap lg:flex-nowrap items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] lg:text-xs font-bold">
                       <button
                         onClick={() => setAdminTab('registrations')}
-                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                        className={`px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
                           adminTab === 'registrations' 
                             ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
                         Web Registrations
                       </button>
                       <button
                         onClick={() => setAdminTab('chat')}
-                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 relative ${
+                        className={`px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 relative ${
                           adminTab === 'chat' 
                             ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         Student Doubt Chat
                         {studentChats.some(c => c.unread) && (
                           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse border border-zinc-950"></span>
@@ -6713,24 +6745,24 @@
                       </button>
                       <button
                         onClick={() => setAdminTab('control')}
-                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                        className={`px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
                           adminTab === 'control' 
                             ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                         App Control Panel
                       </button>
                       <button
                         onClick={() => setAdminTab('lectures')}
-                        className={`px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                        className={`px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
                           adminTab === 'lectures' 
                             ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                         Course Lectures
                       </button>
                     </div>
@@ -6762,7 +6794,7 @@
                   </header>
 
                   {/* Main Scrollable Content */}
-                  <main className="flex-grow p-6 md:p-12 max-w-7xl mx-auto w-full flex flex-col space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                  <main className="flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 overflow-y-auto max-h-[calc(100vh-80px)]">
                     {adminTab === 'registrations' && (
                       <>
                         {/* Metrics/KPI Cards */}
@@ -6776,73 +6808,73 @@
                           const conversionRate = adminData.length > 0 ? ((totalSales / adminData.length) * 100).toFixed(1) : 0;
 
                           return (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                               {/* KPI Leads */}
-                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300">
+                              <div className="liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-cyan">
-                                  <i data-lucide="users" className="w-12 h-12"></i>
+                                  <i data-lucide="users" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
-                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
-                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
-                                <p className="text-[9px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
+                                <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
+                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
                               </div>
 
                               {/* KPI Sales */}
-                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300">
+                              <div className="liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-emerald">
-                                  <i data-lucide="shopping-bag" className="w-12 h-12"></i>
+                                  <i data-lucide="shopping-bag" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
-                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
-                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
-                                <p className="text-[9px] font-mono text-gray-600 mt-2">Completed course orders</p>
+                                <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
+                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Completed course orders</p>
                               </div>
 
                               {/* KPI Revenue */}
-                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300">
+                              <div className="liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-violet">
-                                  <i data-lucide="indian-rupee" className="w-12 h-12"></i>
+                                  <i data-lucide="indian-rupee" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
-                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
-                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
-                                <p className="text-[9px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
+                                <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
+                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
                               </div>
 
                               {/* KPI Conversion */}
-                              <div className="liquid-glass border border-white/5 p-6 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300">
+                              <div className="liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-rose">
-                                  <i data-lucide="trending-up" className="w-12 h-12"></i>
+                                  <i data-lucide="trending-up" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
-                                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
-                                <h3 className="text-3xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
-                                <p className="text-[9px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
+                                <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
+                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
                               </div>
                             </div>
                           );
                         })()}
 
                         {/* Filter & Search Panel */}
-                        <div className="p-6 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 justify-between items-center text-left">
+                        <div className="p-6 lg:p-8 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 lg:gap-6 justify-between items-center text-left">
                           {/* Search */}
                           <div className="relative flex items-center w-full md:w-5/12">
-                            <i data-lucide="search" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                            <i data-lucide="search" className="absolute left-4 w-4 h-4 lg:w-5 lg:h-5 text-gray-500"></i>
                             <input
                               type="text"
                               placeholder="Search by student email or phone..."
                               value={adminSearch}
                               onChange={(e) => setAdminSearch(e.target.value)}
-                              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
+                              className="w-full pl-11 pr-4 py-2.5 lg:py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs lg:text-sm placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
                             />
                           </div>
 
                           {/* Filters */}
-                          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto justify-end">
+                          <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 w-full md:w-auto justify-end">
                             {/* Course Filter */}
-                            <div className="flex items-center space-x-2">
-                              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Course:</span>
+                            <div className="flex items-center space-x-2 lg:space-x-3">
+                              <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-wider">Course:</span>
                               <select
                                 value={adminFilterCourse}
                                 onChange={(e) => setAdminFilterCourse(e.target.value)}
-                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 text-xs lg:text-sm text-white focus:outline-none focus:border-brand-cyan"
                               >
                                 <option value="All">All Items</option>
                                 <option value="All Courses Lifetime Access">All Courses Bundle</option>
@@ -6853,12 +6885,12 @@
                             </div>
 
                             {/* Status Filter */}
-                            <div className="flex items-center space-x-2">
-                              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status:</span>
+                            <div className="flex items-center space-x-2 lg:space-x-3">
+                              <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-wider">Status:</span>
                               <select
                                 value={adminFilterStatus}
                                 onChange={(e) => setAdminFilterStatus(e.target.value)}
-                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-cyan"
+                                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 text-xs lg:text-sm text-white focus:outline-none focus:border-brand-cyan"
                               >
                                 <option value="All">All Status</option>
                                 <option value="Success">Success (Paid)</option>
@@ -6896,16 +6928,16 @@
                           )}
 
                           <div className="overflow-x-auto w-full">
-                            <table className="min-w-full divide-y divide-white/5 text-left text-xs font-mono">
-                              <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px]">
+                            <table className="min-w-full divide-y divide-white/5 text-left text-xs lg:text-sm font-mono">
+                              <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px] lg:text-xs">
                                 <tr>
-                                  <th className="px-6 py-4">Date</th>
-                                  <th className="px-6 py-4">Name</th>
-                                  <th className="px-6 py-4">Email</th>
-                                  <th className="px-6 py-4">Phone</th>
-                                  <th className="px-6 py-4">Course</th>
-                                  <th className="px-6 py-4 text-center">Price</th>
-                                  <th className="px-6 py-4 text-center">Status</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Date</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Name</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Email</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Phone</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Course</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Price</th>
+                                  <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Status</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-white/5 text-gray-300">
@@ -6940,13 +6972,13 @@
                                     const isSuccess = (row.status || '').toLowerCase() === 'success';
                                     return (
                                       <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
-                                        <td className="px-6 py-4 whitespace-nowrap text-gray-500">{row.date}</td>
-                                        <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
-                                        <td className="px-6 py-4 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{row.phone}</td>
-                                        <td className="px-6 py-4 text-white uppercase font-bold tracking-tight text-[11px]">{row.course}</td>
-                                        <td className="px-6 py-4 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
-                                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap text-gray-500">{row.date}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">{row.phone}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-white uppercase font-bold tracking-tight text-[11px] lg:text-xs">{row.course}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
+                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap">
                                           <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
                                             isSuccess 
                                               ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
@@ -6967,24 +6999,24 @@
                     )}
 
                     {adminTab === 'chat' && (
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-190px)] min-h-[500px]">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 h-[calc(100vh-190px)] min-h-[500px]">
                         {/* Left sidebar - Chats list */}
-                        <div className="lg:col-span-4 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl">
-                          <div className="p-4 border-b border-white/5">
-                            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold block mb-3">Doubt Rooms ({studentChats.length})</span>
+                        <div className="lg:col-span-3 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl">
+                          <div className="p-4 lg:p-5 border-b border-white/5">
+                            <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold block mb-3">Doubt Rooms ({studentChats.length})</span>
                             <div className="relative flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 w-3.5 h-3.5 text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 w-3.5 h-3.5 lg:w-4 lg:h-4 text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                               <input
                                 type="text"
                                 placeholder="Filter active doubts..."
                                 value={chatSearch}
                                 onChange={(e) => setChatSearch(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition-all duration-300"
+                                className="w-full pl-9 pr-4 py-2 lg:py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] lg:text-sm placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition-all duration-300"
                               />
                             </div>
                           </div>
 
-                          <div className="flex-grow overflow-y-auto p-2 space-y-1">
+                          <div className="flex-grow overflow-y-auto p-2 lg:p-3 space-y-1">
                             {studentChats.filter(chat => {
                               const searchVal = chatSearch.toLowerCase();
                               return (chat.name || '').toLowerCase().includes(searchVal) || (chat.email || '').toLowerCase().includes(searchVal);
@@ -7001,38 +7033,38 @@
                                 const timeStr = activeDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                                 return (
-                                  <button
-                                    key={chat.id}
-                                    onClick={() => setSelectedChatId(chat.id)}
-                                    className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-3 transition-all duration-300 ${
-                                      isSelected 
-                                        ? 'bg-white/[0.06] border border-white/10 shadow-[0_4px_20px_rgba(0,240,255,0.03)]' 
-                                        : 'bg-transparent border border-transparent hover:bg-white/[0.02]'
-                                    }`}
-                                  >
-                                    {/* Initials Avatar */}
-                                    <div className="relative shrink-0 select-none">
-                                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs border ${
-                                        isSelected
-                                          ? 'bg-brand-cyan/20 border-brand-cyan/40 text-brand-cyan'
-                                          : 'bg-white/5 border-white/10 text-white'
-                                      }`}>
-                                        {((chat.name || chat.email || 'S').charAt(0)).toUpperCase()}
+                                    <button
+                                      key={chat.id}
+                                      onClick={() => setSelectedChatId(chat.id)}
+                                      className={`w-full text-left p-3.5 lg:p-4 rounded-2xl flex items-center gap-3 lg:gap-4 transition-all duration-300 ${
+                                        isSelected 
+                                          ? 'bg-white/[0.06] border border-white/10 shadow-[0_4px_20px_rgba(0,240,255,0.03)]' 
+                                          : 'bg-transparent border border-transparent hover:bg-white/[0.02]'
+                                      }`}
+                                    >
+                                      {/* Initials Avatar */}
+                                      <div className="relative shrink-0 select-none">
+                                        <div className={`w-9 h-9 lg:w-11 lg:h-11 rounded-full flex items-center justify-center font-bold text-xs lg:text-sm border ${
+                                          isSelected
+                                            ? 'bg-brand-cyan/20 border-brand-cyan/40 text-brand-cyan'
+                                            : 'bg-white/5 border-white/10 text-white'
+                                        }`}>
+                                          {((chat.name || chat.email || 'S').charAt(0)).toUpperCase()}
+                                        </div>
+                                        {/* Unread Indicator */}
+                                        {isUnread && (
+                                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border border-zinc-950"></span>
+                                        )}
                                       </div>
-                                      {/* Unread Indicator */}
-                                      {isUnread && (
-                                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border border-zinc-950"></span>
-                                      )}
-                                    </div>
 
-                                    <div className="flex-grow min-w-0">
-                                      <div className="flex justify-between items-baseline mb-0.5">
-                                        <h4 className="text-xs font-bold text-white truncate font-heading">{chat.name || 'Student'}</h4>
-                                        <span className="text-[8px] font-mono text-gray-500 shrink-0">{timeStr}</span>
+                                      <div className="flex-grow min-w-0">
+                                        <div className="flex justify-between items-baseline mb-0.5">
+                                          <h4 className="text-xs lg:text-sm font-bold text-white truncate font-heading">{chat.name || 'Student'}</h4>
+                                          <span className="text-[8px] lg:text-[10px] font-mono text-gray-500 shrink-0">{timeStr}</span>
+                                        </div>
+                                        <p className="text-[10px] lg:text-xs text-gray-400 truncate font-sans">{chat.lastMessage || 'No messages yet'}</p>
                                       </div>
-                                      <p className="text-[10px] text-gray-400 truncate font-sans">{chat.lastMessage || 'No messages yet'}</p>
-                                    </div>
-                                  </button>
+                                    </button>
                                 );
                               })
                             )}
@@ -7040,7 +7072,7 @@
                         </div>
 
                         {/* Right active chat pane */}
-                        <div className="lg:col-span-8 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative">
+                        <div className="lg:col-span-9 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative">
                           {!selectedChatId ? (
                             // Empty state
                             <div className="flex-grow flex flex-col items-center justify-center p-8 text-center">
@@ -7400,6 +7432,7 @@
                                       >
                                         Cancel
                                       </button>
+                                    </div>
                                   ) : adminChatUploadingProgress !== null ? (
                                     <div className="w-full flex items-center justify-between py-1.5 px-2.5">
                                       <div className="flex items-center space-x-3 flex-grow pr-4">
@@ -7502,15 +7535,15 @@
                     {adminTab === 'control' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                         {/* Support status controls */}
-                        <div className="p-8 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6">
+                        <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose" />
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                             </div>
                             <div>
-                              <h3 className="text-xs font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
-                              <p className="text-[9px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
+                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
+                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
                             </div>
                           </div>
 
@@ -7563,7 +7596,7 @@
                               type="button"
                               onClick={() => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime)}
                               disabled={savingSupport}
-                              className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
                             >
                               {savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'}
                             </button>
@@ -7571,15 +7604,15 @@
                         </div>
 
                         {/* Whitelister Form */}
-                        <form onSubmit={handleWhitelistSubmit} className="p-8 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6">
+                        <form onSubmit={handleWhitelistSubmit} className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
                             </div>
                             <div>
-                              <h3 className="text-xs font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
-                              <p className="text-[9px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
+                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
+                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
                             </div>
                           </div>
 
@@ -7672,7 +7705,7 @@
                             <button
                               type="submit"
                               disabled={whitelistingLoading}
-                              className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
                             >
                               {whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'}
                             </button>
@@ -7682,31 +7715,31 @@
                     )}
 
                     {adminTab === 'lectures' && (
-                      <div className="flex flex-col space-y-6 text-left">
+                      <div className="flex flex-col space-y-6 lg:space-y-8 text-left">
                         {/* Title and Add Button */}
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div>
-                            <h2 className="text-xl font-black uppercase text-white font-heading">Course Video Lectures Manager</h2>
-                            <p className="text-xs text-gray-500 font-mono mt-0.5">Filter, upload, and control streaming content lists</p>
+                            <h2 className="text-xl lg:text-2xl font-black uppercase text-white font-heading">Course Video Lectures Manager</h2>
+                            <p className="text-xs lg:text-sm text-gray-500 font-mono mt-0.5">Filter, upload, and control streaming content lists</p>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => setShowAddLectureModal(true)}
-                            className="px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_0_20px_rgba(0,240,255,0.15)] flex items-center gap-2"
+                            className="px-5 py-3 lg:px-7 lg:py-3.5 rounded-2xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_0_20px_rgba(0,240,255,0.15)] flex items-center gap-2"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lg:w-4 lg:h-4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             Add New Lecture
                           </button>
                         </div>
 
                         {/* Filters and Course tabs */}
-                        <div className="flex flex-wrap items-center gap-1.5 bg-white/[0.02] border border-white/5 p-1.5 rounded-2xl font-mono text-[10px] font-bold">
+                        <div className="flex flex-wrap items-center gap-1.5 bg-white/[0.02] border border-white/5 p-1.5 lg:p-2 rounded-2xl font-mono text-[10px] lg:text-xs font-bold">
                           {Object.keys(DEFAULT_COURSE_CURRICULUM).map(course => (
                             <button
                               key={course}
                               onClick={() => setAdminSelectedLectureCourse(course)}
-                              className={`px-4 py-2 rounded-xl transition ${
+                              className={`px-4 py-2 lg:px-5 lg:py-2.5 rounded-xl transition ${
                                 adminSelectedLectureCourse === course
                                   ? 'bg-brand-violet text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]'
                                   : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -7718,12 +7751,12 @@
                         </div>
 
                         {/* List display */}
-                        <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden p-6">
+                        <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden p-6 lg:p-8">
                           {(() => {
                             const list = getMergedLectures()[adminSelectedLectureCourse] || [];
                             if (list.length === 0) {
                               return (
-                                <div className="py-12 text-center text-gray-600 font-mono text-xs italic">
+                                <div className="py-12 text-center text-gray-600 font-mono text-xs lg:text-sm italic">
                                   No lectures uploaded for this course yet. Click 'Add New Lecture' above.
                                 </div>
                               );
@@ -7731,36 +7764,54 @@
 
                             return (
                               <div className="overflow-x-auto">
-                                <table className="w-full font-mono text-xs border-collapse">
+                                <table className="w-full font-mono text-xs lg:text-sm border-collapse">
                                   <thead>
-                                    <tr className="border-b border-white/5 text-gray-500 uppercase tracking-widest text-[9px] font-bold">
-                                      <th className="py-3.5 text-left pl-2">#</th>
-                                      <th className="py-3.5 text-left">Lecture Title</th>
-                                      <th className="py-3.5 text-left">Difficulty</th>
-                                      <th className="py-3.5 text-left">Duration</th>
-                                      <th className="py-3.5 text-left">Resources</th>
-                                      <th className="py-3.5 text-center pr-2">Actions</th>
+                                    <tr className="border-b border-white/5 text-gray-500 uppercase tracking-widest text-[9px] lg:text-xs font-bold">
+                                      <th className="py-3.5 lg:py-4 text-left pl-2 lg:pl-4">#</th>
+                                      <th className="py-3.5 lg:py-4 text-left">Lecture Title</th>
+                                      <th className="py-3.5 lg:py-4 text-left">Difficulty</th>
+                                      <th className="py-3.5 lg:py-4 text-left">Duration</th>
+                                      <th className="py-3.5 lg:py-4 text-left">Resources</th>
+                                      <th className="py-3.5 lg:py-4 text-center pr-2 lg:pr-4">Actions</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     {list.map((lec, idx) => (
                                       <tr key={lec.id} className="border-b border-white/[0.02] hover:bg-white/[0.01] transition-all">
-                                        <td className="py-4 text-gray-600 pl-2">{idx + 1}</td>
-                                        <td className="py-4">
+                                        <td className="py-4 lg:py-5 text-gray-600 pl-2 lg:pl-4">{idx + 1}</td>
+                                        <td className="py-4 lg:py-5">
                                           <p className="font-bold text-gray-200">{lec.title}</p>
-                                          <p className="text-[10px] text-gray-500 truncate max-w-sm mt-0.5">{lec.description}</p>
+                                          <p className="text-[10px] lg:text-xs text-gray-500 truncate max-w-sm mt-0.5">{lec.description}</p>
                                         </td>
-                                        <td className="py-4">
-                                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${
+                                        <td className="py-4 lg:py-5">
+                                          <span className={`px-2 py-0.5 rounded text-[9px] lg:text-xs font-bold border ${
                                             lec.difficulty === 'Beginner' ? 'bg-brand-emerald/10 border-brand-emerald/25 text-brand-emerald' :
                                             lec.difficulty === 'Intermediate' ? 'bg-brand-cyan/10 border-brand-cyan/25 text-brand-cyan' : 'bg-rose-500/10 border-rose-500/25 text-rose-500'
                                           }`}>
                                             {lec.difficulty}
                                           </span>
                                         </td>
-                                        <td className="py-4 text-gray-400">{lec.duration}</td>
-                                        <td className="py-4 text-gray-400">{(lec.resources || []).length} items</td>
-                                        <td className="py-4 text-center pr-2">
+                                        <td className="py-4 lg:py-5 text-gray-400">{lec.duration}</td>
+                                        <td className="py-4 lg:py-5 text-gray-400">{(lec.resources || []).length} items</td>
+                                        <td className="py-4 lg:py-5 text-center pr-2 lg:pr-4 whitespace-nowrap">
+                                          <div className="inline-flex items-center gap-1.5">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setEditingLecture(lec);
+                                              setNewLectureTitle(lec.title || '');
+                                              setNewLectureDesc(lec.description || '');
+                                              setNewLectureDifficulty(lec.difficulty || 'Beginner');
+                                              setNewLectureDuration(lec.duration || '1 min');
+                                              setNewLectureTags((lec.tags || []).join(', '));
+                                              setNewLectureVideoUrl(lec.videoUrl || '');
+                                              setNewLectureResources(lec.resources || []);
+                                              setShowAddLectureModal(true);
+                                            }}
+                                            className="px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan border border-brand-cyan/20 text-brand-cyan hover:text-black transition"
+                                          >
+                                            Edit
+                                          </button>
                                           <button
                                             type="button"
                                             onClick={() => {
@@ -7768,10 +7819,11 @@
                                                 handleDeleteLecture(adminSelectedLectureCourse, lec.id);
                                               }
                                             }}
-                                            className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-500 hover:text-white transition"
+                                            className="px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-500 hover:text-white transition"
                                           >
                                             Delete
                                           </button>
+                                          </div>
                                         </td>
                                       </tr>
                                     ))}
@@ -7784,11 +7836,11 @@
                       </div>
                     )}
 
-                    {/* Add Lecture Modal Dialog */}
+                    {/* Add/Edit Lecture Modal Dialog */}
                     {showAddLectureModal && (
                       <div className="fixed inset-0 z-[100002] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
                         <div 
-                          className="relative w-full max-w-lg rounded-3xl border border-white/10 overflow-hidden text-left"
+                          className="relative w-full max-w-lg lg:max-w-5xl rounded-3xl border border-white/10 text-left"
                           style={{
                             background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
                             boxShadow: '0 0 60px rgba(0,240,255,0.15), 0 30px 80px rgba(0,0,0,0.8)',
@@ -7802,166 +7854,182 @@
                               setShowAddLectureModal(false);
                               setNewLectureTitle('');
                               setNewLectureDesc('');
+                              setNewLectureDifficulty('Beginner');
+                              setNewLectureDuration('1 min');
+                              setNewLectureTags('');
                               setNewLectureVideoUrl('');
                               setNewLectureResources([]);
+                              setEditingLecture(null);
                             }}
                             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition z-10"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                           </button>
 
-                          <form onSubmit={handleSaveNewLecture} className="p-8 space-y-4 max-h-[85vh] overflow-y-auto">
-                            <h3 className="text-lg font-black uppercase text-white font-heading tracking-wide mb-1">Add Lecture to Syllabus</h3>
-                            <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Target: {adminSelectedLectureCourse}</p>
+                          <form onSubmit={handleSaveNewLecture} className="p-8 lg:p-10 max-h-[85vh] overflow-y-auto">
+                            <h3 className="text-lg lg:text-xl font-black uppercase text-white font-heading tracking-wide mb-1 pr-8">{editingLecture ? 'Edit Lecture' : 'Add Lecture to Syllabus'}</h3>
+                            <p className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest mb-6">
+                              {editingLecture ? `Editing: ${editingLecture.title}` : `Target: ${adminSelectedLectureCourse}`}
+                            </p>
 
-                            <div className="space-y-3 pt-2">
-                              <div>
-                                <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Lecture Title</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g. Photoshop Layout Design Masterclass"
-                                  value={newLectureTitle}
-                                  onChange={e => setNewLectureTitle(e.target.value)}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
-                                  style={{ outline: 'none' }}
-                                />
-                              </div>
+                            {/* Horizontal split: left (info) + right (media) on desktop, stacked on mobile */}
+                            <div className="lg:grid lg:grid-cols-2 lg:gap-10 space-y-4 lg:space-y-0">
 
-                              <div>
-                                <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Summary / Description</label>
-                                <textarea
-                                  placeholder="Provide student reference overview details..."
-                                  value={newLectureDesc}
-                                  onChange={e => setNewLectureDesc(e.target.value)}
-                                  rows={3}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition resize-none"
-                                  style={{ outline: 'none' }}
-                                />
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
+                              {/* ─── Left Column: Basic Info ─── */}
+                              <div className="space-y-4">
                                 <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Difficulty level</label>
-                                  <select
-                                    value={newLectureDifficulty}
-                                    onChange={e => setNewLectureDifficulty(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-[#111] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
-                                    style={{ outline: 'none' }}
-                                  >
-                                    <option value="Beginner">Beginner</option>
-                                    <option value="Intermediate">Intermediate</option>
-                                    <option value="Advanced">Advanced</option>
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Duration</label>
+                                  <label className="text-[9px] lg:text-[11px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Lecture Title</label>
                                   <input
                                     type="text"
-                                    placeholder="e.g. 15 mins, 2 mins"
-                                    defaultValue="1 min"
-                                    onChange={e => {}}
+                                    placeholder="e.g. Photoshop Layout Design Masterclass"
+                                    value={newLectureTitle}
+                                    onChange={e => setNewLectureTitle(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
+                                    style={{ outline: 'none' }}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Summary / Description</label>
+                                  <textarea
+                                    placeholder="Provide student reference overview details..."
+                                    value={newLectureDesc}
+                                    onChange={e => setNewLectureDesc(e.target.value)}
+                                    rows={4}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition resize-none"
+                                    style={{ outline: 'none' }}
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Difficulty level</label>
+                                    <select
+                                      value={newLectureDifficulty}
+                                      onChange={e => setNewLectureDifficulty(e.target.value)}
+                                      className="w-full px-4 py-2.5 rounded-xl bg-[#111] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
+                                      style={{ outline: 'none' }}
+                                    >
+                                      <option value="Beginner">Beginner</option>
+                                      <option value="Intermediate">Intermediate</option>
+                                      <option value="Advanced">Advanced</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Duration</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. 15 mins, 2 mins"
+                                      value={newLectureDuration}
+                                      onChange={e => setNewLectureDuration(e.target.value)}
+                                      className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
+                                      style={{ outline: 'none' }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Tags (Comma Separated)</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. CGI, Composition, Photoshop"
+                                    value={newLectureTags}
+                                    onChange={e => setNewLectureTags(e.target.value)}
                                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
                                     style={{ outline: 'none' }}
                                   />
                                 </div>
                               </div>
 
-                              <div>
-                                <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Tags (Comma Separated)</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g. CGI, Composition, Photoshop"
-                                  value={newLectureTags}
-                                  onChange={e => setNewLectureTags(e.target.value)}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
-                                  style={{ outline: 'none' }}
-                                />
-                              </div>
-
-                              {/* Video Uploader / URL paste */}
-                              <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <label className="text-[9px] font-mono text-brand-cyan uppercase tracking-widest font-bold">Lecture Video VideoUrl</label>
-                                  <span className="text-[8px] font-mono text-gray-500">PASTE DIRECT LINK OR UPLOAD</span>
-                                </div>
-                                <input
-                                  type="text"
-                                  placeholder="Paste direct .mp4 video link..."
-                                  value={newLectureVideoUrl}
-                                  onChange={e => setNewLectureVideoUrl(e.target.value)}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] focus:outline-none focus:border-brand-cyan/50 transition"
-                                  style={{ outline: 'none' }}
-                                />
-                                <div className="flex items-center space-x-3">
-                                  <label className="px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition shrink-0">
-                                    <input 
-                                      type="file" 
-                                      className="hidden" 
-                                      accept="video/*" 
-                                      onChange={handleAdminLectureUpload}
-                                    />
-                                    Choose Video File 🎥
-                                  </label>
-                                  {lectureUploadingProgress !== null && (
-                                    <div className="flex-grow flex items-center space-x-2">
-                                      <div className="flex-grow h-1.5 rounded bg-white/5 overflow-hidden">
-                                        <div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${lectureUploadingProgress}%` }} />
-                                      </div>
-                                      <span className="text-[9px] font-mono text-brand-cyan font-bold">{lectureUploadingProgress}%</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Resources List Creator */}
-                              <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3">
-                                <label className="text-[9px] font-mono text-brand-violet uppercase tracking-widest block font-bold">Downloadable Student Resource Folder</label>
-                                
-                                {newLectureResources.length > 0 && (
-                                  <div className="space-y-1.5 max-h-24 overflow-y-auto mb-2">
-                                    {newLectureResources.map((res, i) => (
-                                      <div key={i} className="flex items-center justify-between text-[10px] bg-white/5 px-3 py-1.5 rounded-lg border border-white/5 font-mono">
-                                        <span className="truncate max-w-[200px] text-gray-300">{res.name} ({res.size})</span>
-                                        <button 
-                                          type="button" 
-                                          onClick={() => setNewLectureResources(prev => prev.filter((_, idx) => idx !== i))}
-                                          className="text-rose-500 hover:text-white transition"
-                                        >
-                                          Remove
-                                        </button>
-                                      </div>
-                                    ))}
+                              {/* ─── Right Column: Media & Resources ─── */}
+                              <div className="space-y-5">
+                                {/* Video Uploader / URL paste */}
+                                <div className="p-4 lg:p-6 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3 lg:space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[9px] font-mono text-brand-cyan uppercase tracking-widest font-bold">Lecture Video</label>
+                                    <span className="text-[8px] font-mono text-gray-500">PASTE DIRECT LINK OR UPLOAD</span>
                                   </div>
-                                )}
-
-                                <div className="flex items-center space-x-3">
-                                  <label className="px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition">
-                                    <input 
-                                      type="file" 
-                                      className="hidden" 
-                                      onChange={handleAdminResourceUpload}
-                                    />
-                                    Upload Template File 📁
-                                  </label>
-                                  {resourceUploadingProgress !== null && (
-                                    <div className="flex-grow flex items-center space-x-2">
-                                      <div className="flex-grow h-1.5 rounded bg-white/5 overflow-hidden">
-                                        <div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${resourceUploadingProgress}%` }} />
+                                  <input
+                                    type="text"
+                                    placeholder="Paste .mp4 link or YouTube URL..."
+                                    value={newLectureVideoUrl}
+                                    onChange={e => setNewLectureVideoUrl(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition"
+                                    style={{ outline: 'none' }}
+                                  />
+                                  <div className="flex items-center space-x-3">
+                                    <label className="px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition shrink-0">
+                                      <input 
+                                        type="file" 
+                                        className="hidden" 
+                                        accept="video/*" 
+                                        onChange={handleAdminLectureUpload}
+                                      />
+                                      Choose Video File 🎥
+                                    </label>
+                                    {lectureUploadingProgress !== null && (
+                                      <div className="flex-grow flex items-center space-x-2">
+                                        <div className="flex-grow h-1.5 rounded bg-white/5 overflow-hidden">
+                                          <div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${lectureUploadingProgress}%` }} />
+                                        </div>
+                                        <span className="text-[9px] font-mono text-brand-cyan font-bold">{lectureUploadingProgress}%</span>
                                       </div>
-                                      <span className="text-[9px] font-mono text-brand-cyan font-bold">{resourceUploadingProgress}%</span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Resources List Creator */}
+                                <div className="p-4 lg:p-6 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3 lg:space-y-4">
+                                  <label className="text-[9px] lg:text-[11px] font-mono text-brand-violet uppercase tracking-widest block font-bold">Downloadable Resources</label>
+                                  
+                                  {newLectureResources.length > 0 && (
+                                    <div className="space-y-1.5 max-h-28 overflow-y-auto mb-2">
+                                      {newLectureResources.map((res, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[10px] lg:text-xs bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg border border-white/5 font-mono">
+                                          <span className="truncate max-w-[160px] text-gray-300">{res.name} ({res.size})</span>
+                                          <button 
+                                            type="button" 
+                                            onClick={() => setNewLectureResources(prev => prev.filter((_, idx) => idx !== i))}
+                                            className="text-rose-500 hover:text-white transition shrink-0"
+                                          >
+                                            Remove
+                                          </button>
+                                        </div>
+                                      ))}
                                     </div>
                                   )}
-                                </div>
-                              </div>
-                            </div>
 
-                            <button
-                              type="submit"
-                              disabled={lectureUploadingProgress !== null || resourceUploadingProgress !== null}
-                              className="w-full py-3.5 mt-2 rounded-xl text-xs font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
-                            >
-                              Save Lecture & Sync
-                            </button>
+                                  <div className="flex items-center space-x-3">
+                                    <label className="px-4 py-2 lg:px-5 lg:py-2.5 bg-white/5 border border-white/10 text-[10px] lg:text-xs font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition">
+                                      <input 
+                                        type="file" 
+                                        className="hidden" 
+                                        onChange={handleAdminResourceUpload}
+                                      />
+                                      Upload Template File 📁
+                                    </label>
+                                    {resourceUploadingProgress !== null && (
+                                      <div className="flex-grow flex items-center space-x-2">
+                                        <div className="flex-grow h-1.5 rounded bg-white/5 overflow-hidden">
+                                          <div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${resourceUploadingProgress}%` }} />
+                                        </div>
+                                        <span className="text-[9px] lg:text-xs font-mono text-brand-cyan font-bold">{resourceUploadingProgress}%</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Save button — inside right column so it sits at bottom on desktop */}
+                                <button
+                                  type="submit"
+                                  disabled={newLectureSaving}
+                                  className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                                >
+                                  {newLectureSaving ? 'Saving...' : editingLecture ? 'Update Lecture & Sync' : 'Save Lecture & Sync'}
+                                </button>
+                              </div>
+
+                            </div>
                           </form>
                         </div>
                       </div>
