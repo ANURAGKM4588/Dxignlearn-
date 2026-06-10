@@ -2657,20 +2657,11 @@
           if (window.lenis) window.lenis.stop();
         } else {
           document.body.removeAttribute('data-modal-active');
-          const shouldLock = window.scrollY <= 10;
-          if (shouldLock) {
-            document.body.style.overflow = 'hidden';
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.paddingRight = '';
-            if (header) header.style.right = '';
-            if (window.lenis) window.lenis.stop();
-          } else {
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-            document.body.style.paddingRight = '';
-            if (header) header.style.right = '';
-            if (window.lenis) window.lenis.start();
-          }
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          document.body.style.paddingRight = '';
+          if (header) header.style.right = '';
+          if (window.lenis) window.lenis.start();
         }
       }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen]);
 
@@ -4458,12 +4449,6 @@
                 >
                   Contact
                 </button>
-                <button 
-                  onClick={() => setIsStudentOpen(true)}
-                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-brand-cyan hover:text-white transition-colors duration-300"
-                >
-                  Portal
-                </button>
               </nav>
 
               {/* Navbar CTA button + Mobile Hamburger */}
@@ -5966,7 +5951,7 @@
           {/* ===== STUDENT PORTAL OVERLAY ===== */}
           {isStudentOpen && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left"
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-y-auto lg:overflow-y-hidden"
               onWheel={(e) => { if (window.innerWidth >= 1024) e.stopPropagation(); }}
             >
               {!isStudentAuthenticated ? (
@@ -6108,21 +6093,33 @@
                 /* Student Dashboard View */
                 <div className="flex-grow flex flex-col text-gray-300">
                   {/* Top Header Navigation */}
-                  <header className="px-3 md:px-12 py-3 md:py-4 border-b border-white/5 flex flex-col xl:flex-row justify-between items-center gap-3 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
-                    <div className="flex items-center space-x-3 text-left">
-                      <div className="w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                  <header className="px-3 md:px-12 py-3 md:py-4 border-b border-white/5 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
+                    {/* Row 1: Logo + Sign Out + Close (always horizontal) */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center space-x-3 text-left">
+                        <div className="w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                        </div>
+                        <div>
+                          <h1 className="text-sm font-black tracking-widest font-mono text-white flex items-center">
+                            DXIGN.LEARN <span className="ml-2 px-2 py-0.5 rounded text-[8px] tracking-normal font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/25">STUDENT HUB</span>
+                          </h1>
+                          <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Welcome back, {studentUser.name || 'Student'}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h1 className="text-sm font-black tracking-widest font-mono text-white flex items-center">
-                          DXIGN.LEARN <span className="ml-2 px-2 py-0.5 rounded text-[8px] tracking-normal font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/25">STUDENT HUB</span>
-                        </h1>
-                        <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">Welcome back, {studentUser.name || 'Student'}</p>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <span className="text-[10px] text-gray-500 font-mono hidden md:inline">{studentUser.email}</span>
+                        <button
+                          onClick={handleStudentLogout}
+                          className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10px] md:text-xs font-mono font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-200 flex items-center gap-1.5"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                          Sign Out
+                        </button>
                       </div>
                     </div>
-
-                    {/* Navigation Tabs */}
-                    <div className="flex items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] font-bold">
+                    {/* Row 2: Navigation Tabs */}
+                    <div className="flex items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] font-bold mt-3">
                       <button
                         onClick={() => setStudentTab('courses')}
                         className={`px-5 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
@@ -6144,23 +6141,6 @@
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         Clear Doubts (Chat)
-                      </button>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <span className="text-[10px] text-gray-500 font-mono hidden md:inline">{studentUser.email}</span>
-                      <button
-                        onClick={handleStudentLogout}
-                        className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-mono font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-200 flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        Sign Out
-                      </button>
-                      <button 
-                        onClick={() => setIsStudentOpen(false)}
-                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                       </button>
                     </div>
                   </header>
@@ -6632,7 +6612,7 @@
           {/* ===== ADMIN PORTAL OVERLAY ===== */}
           {isAdminOpen && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left"
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-y-auto lg:overflow-y-hidden"
               onWheel={(e) => { if (window.innerWidth >= 1024) e.stopPropagation(); }}
             >
               {!isAdminAuthenticated ? (
