@@ -121,6 +121,20 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
 
+.text-emerald-glow {
+  background: linear-gradient(135deg, #ffffff 40%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(52, 211, 153, 0.15);
+}
+
+.text-rose-glow {
+  background: linear-gradient(135deg, #ffffff 40%, #fb7185 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(251, 113, 133, 0.15);
+}
+
 /* Ambient glows */
 .glow-blur-cyan {
   position: absolute;
@@ -542,6 +556,16 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(to bottom, transparent, #050505);
   pointer-events: none;
   z-index: 1;
+}
+
+/* Fade-in animation */
+@keyframes animate-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: animate-fade-in 0.6s ease forwards;
 }
 
 /* Loading screen animations */

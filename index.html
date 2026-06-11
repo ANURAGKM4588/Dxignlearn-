@@ -149,7 +149,7 @@
       const currentFrameRef = useRef(0);
       const frameTweenRef = useRef(null);
       const isAnimatingRef = useRef(false);
-      const touchStartY = useRef(0);
+
 
       const [activeScene, setActiveScene] = useState(0);
       const [isLoading, setIsLoading] = useState(true);
@@ -486,90 +486,40 @@
         };
       }, [activeScene]);
 
-      // Wheel and touch lock handlers
+      // Wheel and touch lock handlers using GSAP Observer (unifies wheel + touch)
       useEffect(() => {
-        // Handle scroll locking
         if (activeScene < 4) {
           setScrollLock(true);
-          if (window.lenis) window.lenis.stop();
+          if (window.lenis && window.innerWidth >= 1024) window.lenis.stop();
         } else {
           setScrollLock(false);
-          if (window.lenis) window.lenis.start();
+          if (window.lenis && window.innerWidth >= 1024) window.lenis.start();
         }
 
-        const handleGlobalWheel = (e) => {
-          if (document.body.getAttribute('data-modal-active') === 'true') return;
-          if (activeScene < 4) {
-            e.preventDefault();
+        const observer = ScrollTrigger.observe({
+          target: window,
+          type: ['wheel', 'touch'],
+          onUp: () => {
+            if (document.body.getAttribute('data-modal-active') === 'true') return;
             if (isAnimatingRef.current) return;
- 
-            if (e.deltaY > 0) {
-              goToScene(activeScene + 1);
-            } else if (e.deltaY < 0 && activeScene > 0) {
+            if (activeScene >= 4) {
+              if (window.scrollY <= 5) goToScene(3);
+            } else if (activeScene > 0) {
               goToScene(activeScene - 1);
             }
-          } else {
-            // Re-pin if we scroll up at the top
-            if (window.scrollY <= 5 && e.deltaY < 0) {
-              e.preventDefault();
-              if (isAnimatingRef.current) return;
-              goToScene(3);
-            }
-          }
-        };
-
-        const handleTouchMove = (e) => {
-          if (document.body.getAttribute('data-modal-active') === 'true') return;
-          if (activeScene < 4) {
-            e.preventDefault();
-          }
-        };
-
-        window.addEventListener('wheel', handleGlobalWheel, { passive: false });
-        window.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-        return () => {
-          window.removeEventListener('wheel', handleGlobalWheel);
-          window.removeEventListener('touchmove', handleTouchMove);
-        };
-      }, [activeScene]);
-
-      // Touch swipe detection handlers
-      useEffect(() => {
-        const handleTouchStart = (e) => {
-          if (document.body.getAttribute('data-modal-active') === 'true') return;
-          touchStartY.current = e.touches[0].clientY;
-        };
-
-        const handleTouchEnd = (e) => {
-          if (document.body.getAttribute('data-modal-active') === 'true') return;
-          const touchEndY = e.changedTouches[0].clientY;
-          const diffY = touchStartY.current - touchEndY;
-
-          if (Math.abs(diffY) > 50) {
+          },
+          onDown: () => {
+            if (document.body.getAttribute('data-modal-active') === 'true') return;
+            if (isAnimatingRef.current) return;
             if (activeScene < 4) {
-              if (isAnimatingRef.current) return;
-              if (diffY > 0) {
-                goToScene(activeScene + 1);
-              } else if (activeScene > 0) {
-                goToScene(activeScene - 1);
-              }
-            } else {
-              // Re-pin on mobile
-              if (window.scrollY <= 5 && diffY < -50) {
-                if (isAnimatingRef.current) return;
-                goToScene(3);
-              }
+              goToScene(activeScene + 1);
             }
-          }
-        };
-
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchend', handleTouchEnd);
+          },
+          preventDefault: () => activeScene < 4,
+        });
 
         return () => {
-          window.removeEventListener('touchstart', handleTouchStart);
-          window.removeEventListener('touchend', handleTouchEnd);
+          observer.kill();
         };
       }, [activeScene]);
 
@@ -2319,7 +2269,7 @@
       const [adminFilterStatus, setAdminFilterStatus] = useState('All');
 
       // --- App Admin Panel States ---
-      const [adminTab, setAdminTab] = useState('registrations'); // 'registrations' | 'chat' | 'lectures'
+      const [adminTab, setAdminTab] = useState('registrations'); // 'registrations' | 'chat' | 'lectures' | 'controls'
       
       // Firebase Config (Replace these placeholder values with actual Firebase keys if connecting a live Firestore db)
       const firebaseConfig = {
@@ -2443,6 +2393,7 @@
 
       // Student Portal Course/Video Navigation States
       const [studentTab, setStudentTab] = useState('courses'); // 'courses' | 'chat'
+      const [studentMobileTab, setStudentMobileTab] = useState('syllabus'); // 'syllabus' | 'about' | 'programs' (mobile only)
       const [studentSelectedCourse, setStudentSelectedCourse] = useState('');
       const [studentActiveVideo, setStudentActiveVideo] = useState(null);
       const [lecturesData, setLecturesData] = useState(DEFAULT_COURSE_CURRICULUM);
@@ -2647,9 +2598,12 @@
         
         if (isModalOpen) {
           document.body.setAttribute('data-modal-active', 'true');
+          document.body.setAttribute('data-scroll-y', window.scrollY);
           const sbWidth = window.innerWidth - document.documentElement.clientWidth;
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = ''; // Clear html overflow so overlay scrolling works on mobile
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${window.scrollY}px`;
+          document.body.style.left = '0';
+          document.body.style.width = '100%';
           if (sbWidth > 0) {
             document.body.style.paddingRight = `${sbWidth}px`;
             if (header) header.style.right = `${sbWidth}px`;
@@ -2657,11 +2611,16 @@
           if (window.lenis) window.lenis.stop();
         } else {
           document.body.removeAttribute('data-modal-active');
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
+          const scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0');
+          document.body.removeAttribute('data-scroll-y');
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.width = '';
           document.body.style.paddingRight = '';
           if (header) header.style.right = '';
           if (window.lenis) window.lenis.start();
+          window.scrollTo(0, scrollY);
         }
       }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen]);
 
@@ -4216,6 +4175,8 @@
       // Initialize Lenis smooth scroll
       useEffect(() => {
         if (!window.Lenis) return;
+        // Disable Lenis on mobile to allow native scrolling/touch
+        if (window.innerWidth < 1024) return;
 
         const lenis = new window.Lenis({
           duration: 1.2,
@@ -4448,6 +4409,12 @@
                   className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   Contact
+                </button>
+                <button 
+                  onClick={() => { setIsStudentOpen(true); }}
+                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-white hover:text-brand-cyan transition-colors duration-300 border border-white/10 bg-white/5 rounded-lg"
+                >
+                  Student Portal
                 </button>
               </nav>
 
@@ -4771,7 +4738,7 @@
                             {/* Top row: Icon and badge/details */}
                             <div className="flex justify-between items-start mb-8">
                               <div className={`w-12 h-12 rounded-2xl border flex justify-center items-center ${theme.bgIcon} transition-all duration-500`}>
-                                <i data-lucide={course.icon} className="w-5.5 h-5.5"></i>
+                                <i data-lucide={course.icon} className="w-5 h-5"></i>
                               </div>
                               <div className="flex flex-col items-end space-y-1">
                                 <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[9px] font-mono text-gray-400 uppercase tracking-wider">
@@ -4851,7 +4818,7 @@
                           {/* Title & Icon Column */}
                           <div className="flex items-center space-x-6 w-full md:w-5/12 text-left">
                             <div className={`w-12 h-12 rounded-2xl border flex justify-center items-center flex-shrink-0 ${theme.bgIcon} transition-all duration-500`}>
-                              <i data-lucide={course.icon} className="w-5.5 h-5.5"></i>
+                              <i data-lucide={course.icon} className="w-5 h-5"></i>
                             </div>
                             <div className="min-w-0 pr-4">
                               <h3 className="course-title-minimal text-lg font-heading font-black text-white uppercase tracking-tight">
@@ -5164,7 +5131,7 @@
                 {/* Left Column: Headings & Details */}
                 <div className="lg:col-span-7 text-left flex flex-col justify-center">
                   <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
                     Mobile Support App
                   </span>
                   
@@ -5330,7 +5297,7 @@
             <div className="max-w-4xl mx-auto w-full relative z-10 flex flex-col items-center justify-center text-center">
               
               <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-2 bg-brand-cyan/10 border border-brand-cyan/20 px-3.5 py-1.5 rounded-full">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 text-glow-accent animate-pulse" />
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
                 Launch Offer &middot; Lifetime Access
               </span>
 
@@ -5484,7 +5451,6 @@
                 style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
                 onClick={closeEnrollModal}
                 onWheel={(e) => e.stopPropagation()}
-                onTouchMove={(e) => e.stopPropagation()}
               >
                 <div className="min-h-full flex items-center justify-center py-8" onClick={closeEnrollModal}>
                   <div
@@ -5689,7 +5655,6 @@
               style={{ backgroundColor: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(20px)' }}
               onClick={() => setTheaterVideo(null)}
               onWheel={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
@@ -5858,7 +5823,6 @@
               style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
               onClick={() => setShowIosModal(false)}
               onWheel={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
             >
               <div className="min-h-full flex items-center justify-center py-8" onClick={() => setShowIosModal(false)}>
                 <div
@@ -6146,214 +6110,384 @@
                   </header>
 
                   {/* Main Work Area */}
-                  {studentTab === 'courses' ? (
+                    {studentTab === 'courses' ? (
                     /* Dashboard View 1: Video Lectures */
                     <main className="flex-grow flex flex-col lg:flex-row lg:max-h-[calc(100vh-76px)]">
-                      
-                      {/* Left Course Tabs Column */}
-                      <aside className="w-full lg:w-64 border-r border-white/5 bg-zinc-950/20 p-4 space-y-2 overflow-x-auto shrink-0 flex lg:flex-col flex-row gap-2 lg:gap-0">
-                        <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold hidden lg:block">My Programs</h3>
-                        {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
-                          const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
-                          const active = studentSelectedCourse === courseName;
-                          return (
-                            <button
-                              key={courseName}
-                              onClick={() => {
-                                setStudentSelectedCourse(courseName);
-                                const saved = getLastWatchedVideo(courseName);
-                                if (saved) setStudentActiveVideo(saved);
-                                else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
-                              }}
-                              className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between text-xs font-semibold border transition-all shrink-0 ${
-                                active 
-                                  ? 'bg-brand-cyan/10 text-brand-cyan border-brand-cyan/35 shadow-[0_0_15px_rgba(0,240,255,0.05)]' 
-                                  : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:bg-white/5'
-                              }`}
-                            >
-                              <span className="truncate">{courseName}</span>
-                              {!enrolled && <span className="text-[10px] shrink-0 ml-1.5 text-rose-500">🔒</span>}
-                            </button>
-                          );
-                        })}
-                      </aside>
+                       
+                       {/* Left Course Tabs Column (hidden on mobile, shown on lg) */}
+                       <aside className="hidden lg:block lg:w-64 border-r border-white/5 bg-zinc-950/20 p-4 space-y-2 overflow-x-auto shrink-0 flex lg:flex-col flex-row gap-2 lg:gap-0">
+                         <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold hidden lg:block">My Programs</h3>
+                         {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
+                           const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
+                           const active = studentSelectedCourse === courseName;
+                           return (
+                             <button
+                               key={courseName}
+                               onClick={() => {
+                                 setStudentSelectedCourse(courseName);
+                                 const saved = getLastWatchedVideo(courseName);
+                                 if (saved) setStudentActiveVideo(saved);
+                                 else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
+                               }}
+                               className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between text-xs font-semibold border transition-all shrink-0 ${
+                                 active 
+                                   ? 'bg-brand-cyan/10 text-brand-cyan border-brand-cyan/35 shadow-[0_0_15px_rgba(0,240,255,0.05)]' 
+                                   : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:bg-white/5'
+                               }`}
+                             >
+                               <span className="truncate">{courseName}</span>
+                               {!enrolled && <span className="text-[10px] shrink-0 ml-1.5 text-rose-500">🔒</span>}
+                             </button>
+                           );
+                         })}
+                       </aside>
 
-                      {/* Center Column: Video Viewer */}
-                      <section className="flex-grow p-4 md:p-8 flex flex-col space-y-6 lg:overflow-y-auto lg:max-h-full">
-                        
-                        {/* Video Player Display Container */}
-                        <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-2xl relative">
-                          {(() => {
-                            const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                            if (!enrolled) {
-                              const payUrl = COURSE_PAYMENT_LINKS[studentSelectedCourse] || 'https://rzp.io/l/dxign-graphic-design';
-                              return (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm">
-                                  <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 animate-pulse">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                  </div>
-                                  <h2 className="text-xl font-black uppercase text-white font-heading tracking-wide mb-2">COURSE LOCKED</h2>
-                                  <p className="text-xs text-gray-500 max-w-sm mb-6">You are not currently enrolled in the <span className="text-white font-bold">{studentSelectedCourse}</span> training program.</p>
-                                  <a 
-                                    href={payUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
-                                  >
-                                    UNLOCK & BUY PROGRAM (₹499)
-                                  </a>
-                                </div>
-                              );
-                            }
+                       {/* Center Column: Video Viewer */}
+                       <section className="flex-grow p-4 md:p-8 flex flex-col space-y-6 overflow-y-auto lg:max-h-full">
+                         
+                         {/* Video Player Display Container */}
+                         <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-2xl relative">
+                           {(() => {
+                             const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                             if (!enrolled) {
+                               const payUrl = COURSE_PAYMENT_LINKS[studentSelectedCourse] || 'https://rzp.io/l/dxign-graphic-design';
+                               return (
+                                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm">
+                                   <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 animate-pulse">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                   </div>
+                                   <h2 className="text-xl font-black uppercase text-white font-heading tracking-wide mb-2">COURSE LOCKED</h2>
+                                   <p className="text-xs text-gray-500 max-w-sm mb-6">You are not currently enrolled in the <span className="text-white font-bold">{studentSelectedCourse}</span> training program.</p>
+                                   <a 
+                                     href={payUrl}
+                                     target="_blank"
+                                     rel="noreferrer"
+                                     className="px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
+                                   >
+                                     UNLOCK & BUY PROGRAM (₹499)
+                                   </a>
+                                 </div>
+                               );
+                             }
 
-                            if (!studentActiveVideo) {
-                              return (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-4 animate-bounce"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                                  <p className="text-xs text-gray-500">Select a lesson from the syllabus sidebar to start streaming</p>
-                                </div>
-                              );
-                            }
+                             if (!studentActiveVideo) {
+                               return (
+                                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-4 animate-bounce"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                   <p className="text-xs text-gray-500">Select a lesson from the syllabus sidebar to start streaming</p>
+                                 </div>
+                               );
+                             }
 
-                            const videoId = getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
-                            if (videoId) {
-                              const lectureList = getMergedLectures()[studentSelectedCourse] || [];
-                              const curIdx = lectureList.findIndex(l => l.id === studentActiveVideo.id);
-                              return <YouTubeCustomPlayer
-                                key={studentActiveVideo.id}
-                                videoId={videoId}
-                                resumePosition={getVideoProgress(studentActiveVideo.id)}
-                                onPrev={curIdx > 0 ? () => setStudentActiveVideo(lectureList[curIdx - 1]) : null}
-                                onNext={curIdx < lectureList.length - 1 ? () => setStudentActiveVideo(lectureList[curIdx + 1]) : null}
-                              />;
-                            }
-                            return (
-                              <video 
-                                key={studentActiveVideo.id}
-                                ref={studentNativeVideoRef}
-                                src={getAttachmentUrl(studentActiveVideo.videoUrl)}
-                                controls
-                                onLoadedMetadata={() => {
-                                  const pos = getVideoProgress(studentActiveVideo.id);
-                                  if (pos > 0 && studentNativeVideoRef.current) studentNativeVideoRef.current.currentTime = pos;
-                                }}
-                                className="w-full h-full object-contain"
-                                style={{ display: 'block' }}
-                              />
-                            );
-                          })()}
-                        </div>
+                             const videoId = getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
+                             if (videoId) {
+                               const lectureList = getMergedLectures()[studentSelectedCourse] || [];
+                               const curIdx = lectureList.findIndex(l => l.id === studentActiveVideo.id);
+                               return <YouTubeCustomPlayer
+                                 key={studentActiveVideo.id}
+                                 videoId={videoId}
+                                 resumePosition={getVideoProgress(studentActiveVideo.id)}
+                                 onPrev={curIdx > 0 ? () => setStudentActiveVideo(lectureList[curIdx - 1]) : null}
+                                 onNext={curIdx < lectureList.length - 1 ? () => setStudentActiveVideo(lectureList[curIdx + 1]) : null}
+                               />;
+                             }
+                             return (
+                               <video 
+                                 key={studentActiveVideo.id}
+                                 ref={studentNativeVideoRef}
+                                 src={getAttachmentUrl(studentActiveVideo.videoUrl)}
+                                 controls
+                                 onLoadedMetadata={() => {
+                                   const pos = getVideoProgress(studentActiveVideo.id);
+                                   if (pos > 0 && studentNativeVideoRef.current) studentNativeVideoRef.current.currentTime = pos;
+                                 }}
+                                 className="w-full h-full object-contain"
+                                 style={{ display: 'block' }}
+                               />
+                             );
+                           })()}
+                         </div>
 
-                        {/* Video metadata description */}
-                        {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
-                          <div className="space-y-6 text-left">
-                            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
-                              <div>
-                                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-cyan">{studentSelectedCourse}</span>
-                                <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight mt-1">{studentActiveVideo.title}</h2>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <span className="px-3 py-1 text-[8px] font-mono font-bold rounded-lg border border-brand-violet/25 bg-brand-violet/10 text-brand-violet uppercase">
-                                  {studentActiveVideo.difficulty || 'Intermediate'}
-                                </span>
-                                <span className="text-xs text-gray-500 font-mono">🕒 {studentActiveVideo.duration}</span>
-                              </div>
-                            </div>
+                         {/* ── MOBILE TAB BAR (below lg screens) ── */}
+                         <div className="lg:hidden flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] font-bold">
+                           <button
+                             onClick={() => setStudentMobileTab('syllabus')}
+                             className={`flex-1 py-2.5 rounded-xl transition-all duration-200 ${
+                               studentMobileTab === 'syllabus'
+                                 ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
+                             }`}
+                           >
+                             Syllabus
+                           </button>
+                           <button
+                             onClick={() => setStudentMobileTab('about')}
+                             className={`flex-1 py-2.5 rounded-xl transition-all duration-200 ${
+                               studentMobileTab === 'about'
+                                 ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
+                             }`}
+                           >
+                             About Lesson
+                           </button>
+                           <button
+                             onClick={() => setStudentMobileTab('programs')}
+                             className={`flex-1 py-2.5 rounded-xl transition-all duration-200 ${
+                               studentMobileTab === 'programs'
+                                 ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
+                             }`}
+                           >
+                             My Programs
+                           </button>
+                         </div>
 
-                            <div className="space-y-2">
-                              <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
-                              <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed max-w-4xl">{studentActiveVideo.description}</p>
-                            </div>
+                         {/* ── MOBILE TAB CONTENT (below lg screens) ── */}
+                         <div className="lg:hidden">
+                           {/* Syllabus Tab: Course Syllabus lecture list */}
+                           {studentMobileTab === 'syllabus' && (
+                             <div className="text-left space-y-2.5">
+                               <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">Course Syllabus</h3>
+                               {(() => {
+                                 const list = getMergedLectures()[studentSelectedCourse] || [];
+                                 const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                                 if (list.length === 0) {
+                                   return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
+                                 }
+                                 return list.map((item, index) => {
+                                   const active = studentActiveVideo && studentActiveVideo.id === item.id;
+                                   return (
+                                     <button
+                                       key={item.id}
+                                       onClick={() => enrolled && setStudentActiveVideo(item)}
+                                       className={`w-full p-4 rounded-2xl border text-left flex items-start space-x-3 transition-all ${
+                                         !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/5' :
+                                         active
+                                           ? 'bg-brand-cyan/5 border-brand-cyan/25 text-white'
+                                           : 'bg-white/[0.01] hover:bg-white/[0.04] border-white/5 text-gray-400 hover:text-white'
+                                       }`}
+                                     >
+                                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-mono font-bold border ${
+                                         active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/5 border-white/10 text-gray-400'
+                                       }`}>
+                                         {index + 1}
+                                       </div>
+                                       <div className="truncate">
+                                         <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
+                                         <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-500">
+                                           <span>{item.duration}</span>
+                                           <span>•</span>
+                                           <span className="uppercase text-brand-violet">{item.difficulty || 'Beginner'}</span>
+                                         </div>
+                                       </div>
+                                     </button>
+                                   );
+                                 });
+                               })()}
+                             </div>
+                           )}
 
-                            {/* Tags */}
-                            {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-2 pt-2">
-                                {studentActiveVideo.tags.map(tag => (
-                                  <span key={tag} className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-medium text-gray-500 font-mono">#{tag}</span>
-                                ))}
-                              </div>
-                            )}
+                           {/* About Lesson Tab: Title, metadata, description, tags, resources */}
+                           {studentMobileTab === 'about' && studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
+                             <div className="space-y-6 text-left">
+                               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                 <div>
+                                   <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-cyan">{studentSelectedCourse}</span>
+                                   <h2 className="text-xl font-black text-white uppercase tracking-tight mt-1">{studentActiveVideo.title}</h2>
+                                 </div>
+                                 <div className="flex items-center gap-3">
+                                   <span className="px-3 py-1 text-[8px] font-mono font-bold rounded-lg border border-brand-violet/25 bg-brand-violet/10 text-brand-violet uppercase">
+                                     {studentActiveVideo.difficulty || 'Intermediate'}
+                                   </span>
+                                   <span className="text-xs text-gray-500 font-mono">{studentActiveVideo.duration}</span>
+                                 </div>
+                               </div>
+                               <div className="space-y-2">
+                                 <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
+                                 <p className="text-gray-400 text-xs font-light leading-relaxed">{studentActiveVideo.description}</p>
+                               </div>
+                               {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
+                                 <div className="flex flex-wrap gap-2 pt-2">
+                                   {studentActiveVideo.tags.map(tag => (
+                                     <span key={tag} className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-medium text-gray-500 font-mono">#{tag}</span>
+                                   ))}
+                                 </div>
+                               )}
+                               {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
+                                 <div className="pt-4 border-t border-white/5">
+                                   <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-4">Downloadable Templates & Source Files</h4>
+                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                     {studentActiveVideo.resources.map((res, idx) => (
+                                       <a 
+                                         key={idx}
+                                         href={getAttachmentUrl(res.url)}
+                                         target="_blank"
+                                         rel="noreferrer"
+                                         className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-brand-cyan/20 flex items-center justify-between transition-all group"
+                                       >
+                                         <div className="flex items-center space-x-3 truncate">
+                                           <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                           </div>
+                                           <div className="truncate text-left">
+                                             <p className="text-xs font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
+                                             <p className="text-[9px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                           </div>
+                                         </div>
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+                                       </a>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+                             </div>
+                           )}
 
-                            {/* Resources */}
-                            {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
-                              <div className="pt-4 border-t border-white/5">
-                                <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-4">Downloadable Templates & Source Files</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  {studentActiveVideo.resources.map((res, idx) => (
-                                    <a 
-                                      key={idx}
-                                      href={getAttachmentUrl(res.url)}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-brand-cyan/20 flex items-center justify-between transition-all group"
-                                    >
-                                      <div className="flex items-center space-x-3 truncate">
-                                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
-                                        </div>
-                                        <div className="truncate text-left">
-                                          <p className="text-xs font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
-                                          <p className="text-[9px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
-                                        </div>
-                                      </div>
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </section>
+                           {/* My Programs Tab: Course switching buttons */}
+                           {studentMobileTab === 'programs' && (
+                             <div className="text-left">
+                               <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">My Programs</h3>
+                               <div className="space-y-2">
+                                 {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
+                                   const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
+                                   const active = studentSelectedCourse === courseName;
+                                   return (
+                                     <button
+                                       key={courseName}
+                                       onClick={() => {
+                                         setStudentSelectedCourse(courseName);
+                                         const saved = getLastWatchedVideo(courseName);
+                                         if (saved) setStudentActiveVideo(saved);
+                                         else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
+                                       }}
+                                       className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center justify-between text-xs font-semibold border transition-all ${
+                                         active 
+                                           ? 'bg-brand-cyan/10 text-brand-cyan border-brand-cyan/35 shadow-[0_0_15px_rgba(0,240,255,0.05)]' 
+                                           : 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-white hover:bg-white/5'
+                                       }`}
+                                     >
+                                       <span className="truncate">{courseName}</span>
+                                       {!enrolled && <span className="text-[10px] shrink-0 ml-1.5 text-rose-500">🔒</span>}
+                                     </button>
+                                   );
+                                 })}
+                               </div>
+                             </div>
+                           )}
+                         </div>
 
-                      {/* Right Syllabus Sidebar Column */}
-                      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 bg-zinc-950/10 p-4 lg:p-6 lg:overflow-y-auto shrink-0 flex flex-col text-left">
-                        <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4 font-bold">Course Syllabus</h3>
-                        <div className="space-y-2.5 flex-grow">
-                          {(() => {
-                            const list = getMergedLectures()[studentSelectedCourse] || [];
-                            const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                            
-                            if (list.length === 0) {
-                              return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
-                            }
+                         {/* Desktop-only video metadata description (hidden on mobile) */}
+                         <div className="hidden lg:block">
+                           {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
+                             <div className="space-y-6 text-left">
+                               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                 <div>
+                                   <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-cyan">{studentSelectedCourse}</span>
+                                   <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight mt-1">{studentActiveVideo.title}</h2>
+                                 </div>
+                                 
+                                 <div className="flex items-center gap-3">
+                                   <span className="px-3 py-1 text-[8px] font-mono font-bold rounded-lg border border-brand-violet/25 bg-brand-violet/10 text-brand-violet uppercase">
+                                     {studentActiveVideo.difficulty || 'Intermediate'}
+                                   </span>
+                                   <span className="text-xs text-gray-500 font-mono">🕒 {studentActiveVideo.duration}</span>
+                                 </div>
+                               </div>
 
-                            return list.map((item, index) => {
-                              const active = studentActiveVideo && studentActiveVideo.id === item.id;
-                              return (
-                                <button
-                                  key={item.id}
-                                  onClick={() => enrolled && setStudentActiveVideo(item)}
-                                  className={`w-full p-4 rounded-2xl border text-left flex items-start space-x-3 transition-all ${
-                                    !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/5' :
-                                    active
-                                      ? 'bg-brand-cyan/5 border-brand-cyan/25 text-white'
-                                      : 'bg-white/[0.01] hover:bg-white/[0.04] border-white/5 text-gray-400 hover:text-white'
-                                  }`}
-                                >
-                                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-mono font-bold border ${
-                                    active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/5 border-white/10 text-gray-400'
-                                  }`}>
-                                    {index + 1}
-                                  </div>
-                                  <div className="truncate">
-                                    <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
-                                    <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-500">
-                                      <span>{item.duration}</span>
-                                      <span>•</span>
-                                      <span className="uppercase text-brand-violet">{item.difficulty || 'Beginner'}</span>
-                                    </div>
-                                  </div>
-                                </button>
-                              );
-                            });
-                          })()}
-                        </div>
-                      </aside>
-                    </main>
-                  ) : (
-                    /* Dashboard View 2: Live Chat Support */
+                               <div className="space-y-2">
+                                 <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
+                                 <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed max-w-4xl">{studentActiveVideo.description}</p>
+                               </div>
+
+                               {/* Tags */}
+                               {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
+                                 <div className="flex flex-wrap gap-2 pt-2">
+                                   {studentActiveVideo.tags.map(tag => (
+                                     <span key={tag} className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-medium text-gray-500 font-mono">#{tag}</span>
+                                   ))}
+                                 </div>
+                               )}
+
+                               {/* Resources */}
+                               {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
+                                 <div className="pt-4 border-t border-white/5">
+                                   <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-4">Downloadable Templates & Source Files</h4>
+                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                     {studentActiveVideo.resources.map((res, idx) => (
+                                       <a 
+                                         key={idx}
+                                         href={getAttachmentUrl(res.url)}
+                                         target="_blank"
+                                         rel="noreferrer"
+                                         className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-brand-cyan/20 flex items-center justify-between transition-all group"
+                                       >
+                                         <div className="flex items-center space-x-3 truncate">
+                                           <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                           </div>
+                                           <div className="truncate text-left">
+                                             <p className="text-xs font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
+                                             <p className="text-[9px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                           </div>
+                                         </div>
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+                                       </a>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+                             </div>
+                           )}
+                         </div>
+                       </section>
+
+                       {/* Right Syllabus Sidebar Column (hidden on mobile, shown on lg) */}
+                       <aside className="hidden lg:block lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 bg-zinc-950/10 p-4 lg:p-6 lg:overflow-y-auto shrink-0 flex flex-col text-left">
+                         <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4 font-bold">Course Syllabus</h3>
+                         <div className="space-y-2.5 flex-grow">
+                           {(() => {
+                             const list = getMergedLectures()[studentSelectedCourse] || [];
+                             const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                             
+                             if (list.length === 0) {
+                               return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
+                             }
+
+                             return list.map((item, index) => {
+                               const active = studentActiveVideo && studentActiveVideo.id === item.id;
+                               return (
+                                 <button
+                                   key={item.id}
+                                   onClick={() => enrolled && setStudentActiveVideo(item)}
+                                   className={`w-full p-4 rounded-2xl border text-left flex items-start space-x-3 transition-all ${
+                                     !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/5' :
+                                     active
+                                       ? 'bg-brand-cyan/5 border-brand-cyan/25 text-white'
+                                       : 'bg-white/[0.01] hover:bg-white/[0.04] border-white/5 text-gray-400 hover:text-white'
+                                   }`}
+                                 >
+                                   <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-mono font-bold border ${
+                                     active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/5 border-white/10 text-gray-400'
+                                   }`}>
+                                     {index + 1}
+                                   </div>
+                                   <div className="truncate">
+                                     <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
+                                     <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-500">
+                                       <span>{item.duration}</span>
+                                       <span>•</span>
+                                       <span className="uppercase text-brand-violet">{item.difficulty || 'Beginner'}</span>
+                                     </div>
+                                   </div>
+                                 </button>
+                               );
+                             });
+                           })()}
+                         </div>
+                       </aside>
+                     </main>
+                   ) : (
+                     /* Dashboard View 2: Live Chat Support */
                     <main className="flex-grow flex flex-col lg:flex-row lg:max-h-[calc(100vh-76px)]">
                       {/* Full-width Doubt Clearing Window */}
                       <section className="flex-grow flex flex-col bg-zinc-950/20 lg:overflow-hidden relative">
@@ -6733,6 +6867,17 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                         Course Lectures
                       </button>
+                      <button
+                        onClick={() => setAdminTab('controls')}
+                        className={`px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                          adminTab === 'controls' 
+                            ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 lg:w-4 lg:h-4"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        App Controls
+                      </button>
                     </div>
 
                     <div className="flex items-center space-x-3">
@@ -6762,10 +6907,9 @@
                   </header>
 
                   {/* Main Scrollable Content */}
-                  <main className="flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 overflow-y-auto max-h-[calc(100vh-80px)]">
+                  <main className="flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 overflow-y-auto lg:max-h-[calc(100vh-80px)]">
                     {adminTab === 'registrations' && (
-                      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 text-left">
-                        {/* Left: Registrations */}
+                      <div className="flex flex-col gap-6 lg:gap-8 text-left">
                         <div className="flex-1 min-w-0 flex flex-col space-y-6 lg:space-y-8">
                       <>
                         {/* Metrics/KPI Cards */}
@@ -6786,7 +6930,7 @@
                                   <i data-lucide="users" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
                                 <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
-                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-cyan">{adminLoading ? '...' : adminData.length}</h3>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-cyan-glow">{adminLoading ? '...' : adminData.length}</h3>
                                 <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
                               </div>
 
@@ -6796,7 +6940,7 @@
                                   <i data-lucide="shopping-bag" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
                                 <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Successful Sales</span>
-                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-emerald">{adminLoading ? '...' : totalSales}</h3>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-emerald-glow">{adminLoading ? '...' : totalSales}</h3>
                                 <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Completed course orders</p>
                               </div>
 
@@ -6806,7 +6950,7 @@
                                   <i data-lucide="indian-rupee" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
                                 <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Total Revenue</span>
-                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-violet">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-violet-glow">{adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')}</h3>
                                 <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Total gross payment volume</p>
                               </div>
 
@@ -6816,7 +6960,7 @@
                                   <i data-lucide="trending-up" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
                                 <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Conversion Rate</span>
-                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-glow-rose">{adminLoading ? '...' : conversionRate + '%'}</h3>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-rose-glow">{adminLoading ? '...' : conversionRate + '%'}</h3>
                                 <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Paid checkouts out of total leads</p>
                               </div>
                             </div>
@@ -6898,257 +7042,284 @@
                             </div>
                           )}
 
-                          <div className="overflow-x-auto w-full">
-                            <table className="min-w-full divide-y divide-white/5 text-left text-xs lg:text-sm font-mono">
-                              <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px] lg:text-xs">
-                                <tr>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Date</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Name</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Email</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Phone</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5">Course</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Price</th>
-                                  <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-white/5 text-gray-300">
-                                {(() => {
-                                  const filteredRows = adminData.filter(row => {
-                                    const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                    const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                    const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                                    const searchMatch = nameMatch || emailMatch || phoneMatch;
+                          {(() => {
+                            const filteredRows = adminData.filter(row => {
+                              const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                              const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                              const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                              const searchMatch = nameMatch || emailMatch || phoneMatch;
+                              const courseMatch = adminFilterCourse === 'All' || 
+                                (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
+                                (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+                              const statusMatch = adminFilterStatus === 'All' || 
+                                (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+                              return searchMatch && courseMatch && statusMatch;
+                            });
 
-                                    const courseMatch = adminFilterCourse === 'All' || 
-                                      (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
-                                      (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+                            const noDataBlock = (
+                              <div className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">No Student Records Found</div>
+                            );
 
-                                    const statusMatch = adminFilterStatus === 'All' || 
-                                      (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+                            if (filteredRows.length === 0) {
+                              return <>{noDataBlock}</>;
+                            }
 
-                                    return searchMatch && courseMatch && statusMatch;
-                                  });
-
-                                  if (filteredRows.length === 0) {
-                                    return (
-                                      <tr>
-                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">
-                                          No Student Records Found
-                                        </td>
-                                      </tr>
-                                    );
-                                  }
-
-                                  return filteredRows.map((row, index) => {
+                            return (
+                              <>
+                                {/* Mobile card view (hidden on md+) */}
+                                <div className="block md:hidden p-4 space-y-3">
+                                  {filteredRows.map((row, index) => {
                                     const isSuccess = (row.status || '').toLowerCase() === 'success';
                                     return (
-                                      <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap text-gray-500">{row.date}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">{row.phone}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-white uppercase font-bold tracking-tight text-[11px] lg:text-xs">{row.course}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap text-glow-cyan font-bold">{row.price}</td>
-                                        <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap">
-                                          <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                      <div key={index} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-left space-y-2">
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-sans font-bold text-white text-sm">{row.name || '—'}</span>
+                                          <span className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
                                             isSuccess 
-                                              ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                                              ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' 
                                               : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                          }`}>
-                                            {row.status}
-                                          </span>
-                                        </td>
-                                      </tr>
+                                          }`}>{row.status}</span>
+                                        </div>
+                                        <div className="text-[10px] font-mono text-gray-500 space-y-1">
+                                          <div className="flex justify-between"><span>Email</span><span className="text-gray-300">{row.email}</span></div>
+                                          <div className="flex justify-between"><span>Phone</span><span className="text-gray-300">{row.phone}</span></div>
+                                          <div className="flex justify-between"><span>Course</span><span className="text-white uppercase font-bold text-[10px]">{row.course}</span></div>
+                                          <div className="flex justify-between"><span>Price</span><span className="text-cyan-glow font-bold">{row.price}</span></div>
+                                          <div className="flex justify-between"><span>Date</span><span className="text-gray-400">{row.date}</span></div>
+                                        </div>
+                                      </div>
                                     );
-                                  });
-                                })()}
-                              </tbody>
-                            </table>
-                          </div>
+                                  })}
+                                </div>
+
+                                {/* Desktop table view (hidden below md) */}
+                                <div className="hidden md:block overflow-x-auto w-full">
+                                  <table className="min-w-full divide-y divide-white/5 text-left text-xs lg:text-sm font-mono">
+                                    <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px] lg:text-xs">
+                                      <tr>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Date</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Name</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Email</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Phone</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Course</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Price</th>
+                                        <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Status</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5 text-gray-300">
+                                      {filteredRows.map((row, index) => {
+                                        const isSuccess = (row.status || '').toLowerCase() === 'success';
+                                        return (
+                                          <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap text-gray-500">{row.date}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">{row.phone}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-white uppercase font-bold tracking-tight text-[11px] lg:text-xs">{row.course}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap text-cyan-glow font-bold">{row.price}</td>
+                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap">
+                                              <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                                isSuccess 
+                                                  ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                                                  : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                              }`}>
+                                                {row.status}
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </>
+                        </div>
                       </div>
+                    )}
 
-                        {/* Right: App Control Panel */}
-                        <div className="w-full lg:w-96 flex-shrink-0 flex flex-col space-y-6 lg:space-y-8">
-                          {/* Support status controls */}
-                          <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose" />
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                              </div>
-                              <div>
-                                <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
-                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
-                              </div>
+                    {adminTab === 'controls' && (
+                      <div className="max-w-2xl mx-auto w-full flex flex-col space-y-6 lg:space-y-8">
+                        {/* Support status controls */}
+                        <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose" />
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                             </div>
-
-                            <div className="space-y-4">
-                              <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Mentor status</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                  <button
-                                    type="button"
-                                    onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: true }))}
-                                    className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
-                                      supportSettings.isOnline 
-                                        ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                        : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
-                                    }`}
-                                  >
-                                    <span className={`w-2.5 h-2.5 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`} />
-                                    ONLINE
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: false }))}
-                                    className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
-                                      !supportSettings.isOnline 
-                                        ? 'bg-rose-500/10 text-rose-500 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                                        : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
-                                    }`}
-                                  >
-                                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                                    OFFLINE
-                                  </button>
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Average response time</label>
-                                <div className="relative flex items-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 w-4 h-4 text-gray-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                  <input
-                                    type="text"
-                                    placeholder="e.g. 4 mins, 15 mins"
-                                    value={supportSettings.avgResponseTime || ''}
-                                    onChange={(e) => setSupportSettings(prev => ({ ...prev, avgResponseTime: e.target.value }))}
-                                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-violet/50 transition duration-300"
-                                  />
-                                </div>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime)}
-                                disabled={savingSupport}
-                                className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
-                              >
-                                {savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'}
-                              </button>
+                            <div>
+                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
+                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
                             </div>
                           </div>
 
-                          {/* Whitelister Form */}
-                          <form onSubmit={handleWhitelistSubmit} className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
-                              </div>
-                              <div>
-                                <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
-                                <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Mentor status</label>
+                              <div className="grid grid-cols-2 gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: true }))}
+                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                    supportSettings.isOnline 
+                                      ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  <span className={`w-2.5 h-2.5 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`} />
+                                  ONLINE
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: false }))}
+                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                    !supportSettings.isOnline 
+                                      ? 'bg-rose-500/10 text-rose-500 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                                  OFFLINE
+                                </button>
                               </div>
                             </div>
 
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Student Name</label>
-                                  <input
-                                    type="text"
-                                    placeholder="John Doe"
-                                    value={whitelistName}
-                                    onChange={(e) => setWhitelistName(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number</label>
-                                  <input
-                                    type="text"
-                                    placeholder="+91 98765 43210"
-                                    value={whitelistPhone}
-                                    onChange={(e) => setWhitelistPhone(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
-                                  />
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Email Address</label>
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Average response time</label>
+                              <div className="relative flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 w-4 h-4 text-gray-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 <input
-                                  type="email"
-                                  placeholder="student@gmail.com"
-                                  value={whitelistEmail}
-                                  onChange={(e) => setWhitelistEmail(e.target.value)}
+                                  type="text"
+                                  placeholder="e.g. 4 mins, 15 mins"
+                                  value={supportSettings.avgResponseTime || ''}
+                                  onChange={(e) => setSupportSettings(prev => ({ ...prev, avgResponseTime: e.target.value }))}
+                                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-violet/50 transition duration-300"
+                                />
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime)}
+                              disabled={savingSupport}
+                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+                            >
+                              {savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Whitelister Form */}
+                        <form onSubmit={handleWhitelistSubmit} className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                            </div>
+                            <div>
+                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
+                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Student Name</label>
+                                <input
+                                  type="text"
+                                  placeholder="John Doe"
+                                  value={whitelistName}
+                                  onChange={(e) => setWhitelistName(e.target.value)}
                                   className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
                                 />
                               </div>
-
                               <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Grant Course Access</label>
-                                <div className="grid grid-cols-2 gap-2 bg-white/[0.02] border border-white/5 p-3.5 rounded-xl font-sans text-xs">
-                                  {courseList.map(c => {
-                                    const isChecked = whitelistCourses.includes(c.title);
-                                    return (
-                                      <label key={c.id} className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none">
-                                        <input
-                                          type="checkbox"
-                                          checked={isChecked}
-                                          onChange={() => {
-                                            if (isChecked) {
-                                              setWhitelistCourses(prev => prev.filter(x => x !== c.title));
-                                            } else {
-                                              setWhitelistCourses(prev => [...prev, c.title]);
-                                            }
-                                          }}
-                                          className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
-                                        />
-                                        <span className="truncate">{c.title}</span>
-                                      </label>
-                                    );
-                                  })}
-                                  <label className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-1 border-t border-white/5 pt-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={whitelistCourses.includes('All Courses Lifetime Access')}
-                                      onChange={() => {
-                                        if (whitelistCourses.includes('All Courses Lifetime Access')) {
-                                          setWhitelistCourses([]);
-                                        } else {
-                                          setWhitelistCourses(['All Courses Lifetime Access']);
-                                        }
-                                      }}
-                                      className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
-                                    />
-                                    <span className="font-bold text-brand-cyan">All Courses Bundle</span>
-                                  </label>
-                                </div>
+                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number</label>
+                                <input
+                                  type="text"
+                                  placeholder="+91 98765 43210"
+                                  value={whitelistPhone}
+                                  onChange={(e) => setWhitelistPhone(e.target.value)}
+                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                />
                               </div>
-
-                              {whitelistStatus.text && (
-                                <div className={`p-3 rounded-xl border text-[10px] font-mono ${
-                                  whitelistStatus.type === 'success'
-                                    ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
-                                    : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
-                                }`}>
-                                  {whitelistStatus.text}
-                                </div>
-                              )}
-
-                              <button
-                                type="submit"
-                                disabled={whitelistingLoading}
-                                className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
-                              >
-                                {whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'}
-                              </button>
                             </div>
-                          </form>
-                        </div>
+
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Email Address</label>
+                              <input
+                                type="email"
+                                placeholder="student@gmail.com"
+                                value={whitelistEmail}
+                                onChange={(e) => setWhitelistEmail(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Grant Course Access</label>
+                              <div className="grid grid-cols-2 gap-2 bg-white/[0.02] border border-white/5 p-3.5 rounded-xl font-sans text-xs">
+                                {courseList.map(c => {
+                                  const isChecked = whitelistCourses.includes(c.title);
+                                  return (
+                                    <label key={c.id} className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none">
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => {
+                                          if (isChecked) {
+                                            setWhitelistCourses(prev => prev.filter(x => x !== c.title));
+                                          } else {
+                                            setWhitelistCourses(prev => [...prev, c.title]);
+                                          }
+                                        }}
+                                        className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                      />
+                                      <span className="truncate">{c.title}</span>
+                                    </label>
+                                  );
+                                })}
+                                <label className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-1 border-t border-white/5 pt-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={whitelistCourses.includes('All Courses Lifetime Access')}
+                                    onChange={() => {
+                                      if (whitelistCourses.includes('All Courses Lifetime Access')) {
+                                        setWhitelistCourses([]);
+                                      } else {
+                                        setWhitelistCourses(['All Courses Lifetime Access']);
+                                      }
+                                    }}
+                                    className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                  />
+                                  <span className="font-bold text-brand-cyan">All Courses Bundle</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {whitelistStatus.text && (
+                              <div className={`p-3 rounded-xl border text-[10px] font-mono ${
+                                whitelistStatus.type === 'success'
+                                  ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
+                                  : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                              }`}>
+                                {whitelistStatus.text}
+                              </div>
+                            )}
+
+                            <button
+                              type="submit"
+                              disabled={whitelistingLoading}
+                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                            >
+                              {whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'}
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     )}
 
@@ -7542,7 +7713,6 @@
                               </div>
 
                               {/* Input panel footer */}
-                              {/* Input panel footer */}
                               <form onSubmit={handleSendReply} className="p-4 border-t border-white/5 bg-zinc-950/10 flex gap-3 items-center relative">
                                 {showEmojiPicker && (
                                   <div className="absolute bottom-20 left-4 bg-[#0d0d10]/95 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-wrap gap-2 w-64 backdrop-blur-xl z-50 select-none">
@@ -7616,7 +7786,7 @@
                                         title="Attach document, image, or video"
                                         className="p-1.5 mr-2 text-gray-500 hover:text-white transition shrink-0"
                                       >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                                       </button>
 
                                       {/* Smiley / Emoji Button */}
