@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dxign.learn | Master Generative AI for Creation & Business</title>
-  <meta name="description" content="Unlock the future of design, film, content, and code with the next generation of AI tools. Luxury Apple-inspired UI with immersive 3D WebGL visuals.">
+  <title>DXIGN Learn | AI Graphic Design, Filmmaking, UI/UX & No-Code Website Courses</title>
+  <meta name="description" content="Master AI-powered Graphic Design, Filmmaking, UI/UX Design, Website Creation, and Content Marketing with practical online courses. Learn industry-leading AI tools and build real-world projects at your own pace.">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,6 +17,10 @@
 
   <!-- Soundwave Animation Styles for Web Audio Recording -->
   <style>
+    @keyframes toolFadeIn {
+      0% { opacity: 0; transform: translateY(24px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
     @keyframes soundwave {
       0%, 100% { transform: scaleY(0.4); }
       50% { transform: scaleY(1); }
@@ -105,43 +109,43 @@
     const HERO_SCENES_DATA = [
       {
         badge: '🚀 Future-Ready AI Education',
-        line1: 'MASTER',
-        line2: 'AI.',
-        sub: 'Learn practical AI skills for design, filmmaking, content creation, and business growth — built for the future.',
+        line1: 'MASTER AI-POWERED',
+        line2: 'CREATIVE SKILLS.',
+        sub: 'Learn Graphic Design, Filmmaking, Website Creation, UI/UX Design, and Content Production using the latest AI tools. Industry-focused pre-recorded courses designed for students, freelancers, entrepreneurs, and professionals.',
       },
       {
-        badge: '🎨 AI Design & Creation',
-        line1: 'CREATE WITH',
+        badge: '🎨 AI Graphic Design Mastery',
+        line1: 'DESIGN WITH',
         line2: 'AI.',
-        sub: 'Generate stunning visuals, videos, graphics, and content using the latest AI tools and workflows.',
-        tags: ['Midjourney', 'Adobe Firefly', 'Runway Gen-2', 'Sora AI'],
-        courseName: 'AI Design & Creation',
+        sub: 'Create professional logos, branding, social media creatives, advertisements, and marketing assets using modern AI design workflows.',
+        tags: ['Midjourney', 'Adobe Firefly', 'Photoshop AI', 'Canva AI'],
+        courseName: 'AI Graphic Design Mastery',
         duration: '6 Weeks',
         price: '₹4,999',
         themeColor: '#10b981',
         themeGrad: 'linear-gradient(90deg, #10b981, #a855f7)'
       },
       {
-        badge: '💼 AI Business Automation',
-        line1: 'AUTOMATE',
-        line2: 'BUSINESS.',
-        sub: 'Learn automation systems, AI agents, marketing workflows, and productivity tools that save time and scale growth.',
-        tags: ['Make.com', 'Zapier AI', 'ChatGPT', 'AI Agents'],
-        courseName: 'AI Business Automation',
+        badge: '🎬 AI Filmmaking & Video',
+        line1: 'CREATE CINEMATIC',
+        line2: 'VIDEOS.',
+        sub: 'Learn cinematic storytelling, AI video generation, editing, voiceovers, visual effects, and content production for social media and business.',
+        tags: ['Runway ML', 'Kling AI', 'HeyGen', 'Premiere Pro'],
+        courseName: 'AI Filmmaking & Video Production',
         duration: '8 Weeks',
-        price: '₹8,999',
-        themeColor: '#f59e0b',
-        themeGrad: 'linear-gradient(90deg, #f59e0b, #00f0ff)'
+        price: '₹7,999',
+        themeColor: '#ec4899',
+        themeGrad: 'linear-gradient(90deg, #ec4899, #a855f7)'
       },
       {
-        badge: '🎯 Join 1000+ Students',
-        line1: 'BUILD THE',
-        line2: 'FUTURE.',
-        sub: 'Master the skills, tools, and strategies needed to lead the next generation of AI-powered businesses and careers.',
+        badge: '🎯 Start Learning Today',
+        line1: 'BUILD A',
+        line2: 'FUTURE-READY CAREER.',
+        sub: 'Get instant access to practical AI courses. Master the skills, tools, and strategies needed to lead the next generation of AI-powered businesses and careers.',
       }
     ];
 
-    const HeroSection = ({ handleGeneralEnroll, navigateToSection }) => {
+    const HeroSection = ({ handleGeneralEnroll, navigateToSection, enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen, mobileMenuOpen }) => {
       const containerRef = useRef(null);
       const canvasRef = useRef(null);
       const textRefs = useRef([]);
@@ -395,6 +399,43 @@
         }
       }, [isLoading]);
 
+      // Save scroll position before page unload
+      useEffect(() => {
+        const savePos = () => {
+          const y = window.scrollY;
+          if (y > 0) sessionStorage.setItem('dxign_scroll_pos', String(y));
+        };
+        window.addEventListener('beforeunload', savePos);
+        window.addEventListener('pagehide', savePos);
+        return () => {
+          window.removeEventListener('beforeunload', savePos);
+          window.removeEventListener('pagehide', savePos);
+        };
+      }, []);
+
+      // Restore scroll position when loading completes
+      useEffect(() => {
+        if (!isLoading) {
+          const saved = sessionStorage.getItem('dxign_scroll_pos');
+          if (saved) {
+            const pos = parseInt(saved, 10);
+            sessionStorage.removeItem('dxign_scroll_pos');
+            if (pos > window.innerHeight * 0.8) {
+              setActiveScene(4);
+              setScrollLock(false);
+              if (window.lenis) window.lenis.start();
+              currentFrameRef.current = SCENE_FRAMES[4];
+              if (canvasRef.current) drawFrame(SCENE_FRAMES[4]);
+              requestAnimationFrame(() => requestAnimationFrame(() => {
+                window.scrollTo(0, pos);
+              }));
+            } else {
+              window.scrollTo(0, pos);
+            }
+          }
+        }
+      }, [isLoading]);
+
       // Register global unpin and reset functions
       useEffect(() => {
         window.unpinHero = () => {
@@ -488,40 +529,73 @@
 
       // Wheel and touch lock handlers using GSAP Observer (unifies wheel + touch)
       useEffect(() => {
-        if (activeScene < 4) {
-          setScrollLock(true);
-          if (window.lenis && window.innerWidth >= 1024) window.lenis.stop();
-        } else {
+        const isModalActive = !!enrollModal || !!theaterVideo || !!isAdminOpen || !!showIosModal || !!isStudentOpen || !!mobileMenuOpen;
+
+        if (isModalActive) {
+          return;
+        }
+
+        // After hero section, release scroll and let native scrolling take over
+        if (activeScene >= 4) {
           setScrollLock(false);
           if (window.lenis && window.innerWidth >= 1024) window.lenis.start();
+          return;
         }
+
+        // Active hero scenes: lock scroll and register observer
+        setScrollLock(true);
+        if (window.lenis && window.innerWidth >= 1024) window.lenis.stop();
 
         const observer = ScrollTrigger.observe({
           target: window,
           type: ['wheel', 'touch'],
-          onUp: () => {
-            if (document.body.getAttribute('data-modal-active') === 'true') return;
+          onUp: (self) => {
             if (isAnimatingRef.current) return;
-            if (activeScene >= 4) {
-              if (window.scrollY <= 5) goToScene(3);
-            } else if (activeScene > 0) {
-              goToScene(activeScene - 1);
+            
+            const isTouch = (self.event && (
+              (self.event.type && self.event.type.startsWith('touch')) || 
+              (self.event.pointerType && self.event.pointerType === 'touch') ||
+              (self.event.pointerType && self.event.pointerType === 'pen') ||
+              (self.event.type && self.event.type.startsWith('pointer') && self.event.pointerType !== 'mouse')
+            )) || (!self.event && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0));
+
+            if (isTouch) {
+              if (activeScene < 4) {
+                goToScene(activeScene + 1);
+              }
+            } else {
+              if (activeScene > 0) {
+                goToScene(activeScene - 1);
+              }
             }
           },
-          onDown: () => {
-            if (document.body.getAttribute('data-modal-active') === 'true') return;
+          onDown: (self) => {
             if (isAnimatingRef.current) return;
-            if (activeScene < 4) {
-              goToScene(activeScene + 1);
+            
+            const isTouch = (self.event && (
+              (self.event.type && self.event.type.startsWith('touch')) || 
+              (self.event.pointerType && self.event.pointerType === 'touch') ||
+              (self.event.pointerType && self.event.pointerType === 'pen') ||
+              (self.event.type && self.event.type.startsWith('pointer') && self.event.pointerType !== 'mouse')
+            )) || (!self.event && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0));
+
+            if (isTouch) {
+              if (activeScene > 0) {
+                goToScene(activeScene - 1);
+              }
+            } else {
+              if (activeScene < 4) {
+                goToScene(activeScene + 1);
+              }
             }
           },
-          preventDefault: () => activeScene < 4,
+          preventDefault: () => true,
         });
 
         return () => {
           observer.kill();
         };
-      }, [activeScene]);
+      }, [activeScene, enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen, mobileMenuOpen]);
 
       // Background drift Ken Burns effect
       useEffect(() => {
@@ -550,6 +624,9 @@
         let ticking = false;
 
         const handleScroll = () => {
+          if (document.body.getAttribute('data-modal-active') === 'true') {
+            return;
+          }
           if (!ticking) {
             window.requestAnimationFrame(() => {
               const sy = window.scrollY;
@@ -1318,94 +1395,179 @@
     const courseList = [
       {
         id: 'graphic-design',
-        title: 'AI in Graphic Design',
-        description: 'Learn AI-powered branding, social media design, advertising creatives, product visualization, image generation, and professional design workflows using the latest AI tools.',
+        title: 'AI Graphic Design Mastery',
+        subtitle: 'Branding & Visual Design with AI',
+        description: 'Create professional logos, branding, social media creatives, advertisements, and marketing assets using modern AI design workflows.',
         icon: 'palette',
         colorName: 'emerald',
         colorCode: '#10b981',
         badge: 'Top Seller',
         category: 'creative',
-        tools: ['Midjourney', 'Photoshop AI', 'Photoroom'],
+        tools: ['Midjourney', 'Adobe Firefly', 'Photoshop AI', 'Canva AI'],
         duration: '6 Weeks',
         price: '₹4,999',
         originalPrice: '₹9,999',
         discount: '50% OFF',
-        priceAmount: 499900
+        priceAmount: 499900,
+        tagline: 'Create Professional Designs 10x Faster Using AI',
+        fullDescription: 'Master the future of graphic design by combining creativity with powerful AI tools. Learn how to create logos, brand identities, social media campaigns, advertising creatives, product mockups, and marketing materials with professional workflows used by modern designers.',
+        whatYouLearn: ['AI Design Fundamentals', 'Prompt Engineering for Designers', 'Brand Identity Design', 'Logo Design & Concept Development', 'Social Media Creative Design', 'Poster & Advertisement Design', 'Product Mockups', 'Packaging Design', 'Marketing Campaign Assets', 'Portfolio Creation'],
+        toolsCovered: ['ChatGPT', 'Midjourney', 'Adobe Firefly', 'Photoshop AI', 'Canva AI', 'Leonardo AI', 'Ideogram', 'Gemini'],
+        projectList: ['Brand Identity Package', 'Social Media Campaign', 'Product Advertisement', 'Promotional Poster Series', 'Logo Design Collection'],
+        perfectFor: ['Students', 'Graphic Designers', 'Freelancers', 'Marketing Professionals', 'Business Owners']
       },
       {
         id: 'film-making',
-        title: 'AI Film Making',
-        description: 'Create cinematic videos, AI advertisements, reels, storytelling content, virtual presenters, and professional productions using modern AI filmmaking tools.',
+        title: 'AI Filmmaking & Video Production',
+        subtitle: 'Cinematic AI Video Creation',
+        description: 'Learn cinematic storytelling, AI video generation, editing, voiceovers, visual effects, and content production for social media and business.',
         icon: 'film',
         colorName: 'rose',
         colorCode: '#ec4899',
         badge: 'Premium',
         category: 'creative',
-        tools: ['Runway Gen-2', 'Sora', 'HeyGen'],
+        tools: ['Runway ML', 'Kling AI', 'HeyGen', 'Premiere Pro'],
         duration: '8 Weeks',
         price: '₹7,999',
         originalPrice: '₹14,999',
         discount: '47% OFF',
-        priceAmount: 799900
+        priceAmount: 799900,
+        tagline: 'Create Cinematic Videos Without a Production Team',
+        fullDescription: 'Learn how to produce professional-quality videos using AI-powered workflows. Create commercials, social media content, explainer videos, cinematic trailers, and business promotions with minimal equipment.',
+        whatYouLearn: ['AI Video Production Workflow', 'Storytelling & Script Writing', 'AI Video Generation', 'Voice Cloning & AI Voiceovers', 'Cinematic Editing', 'Motion Graphics', 'Social Media Video Creation', 'YouTube Content Production', 'Commercial Advertisement Creation', 'Video Marketing Strategies'],
+        toolsCovered: ['Runway', 'Kling AI', 'Veo', 'ChatGPT', 'ElevenLabs', 'CapCut AI', 'Pika Labs', 'Adobe Premiere Pro'],
+        projectList: ['Cinematic Short Film', 'Product Advertisement', 'YouTube Video', 'Instagram Reel Series', 'Business Promo Video'],
+        perfectFor: ['Content Creators', 'Video Editors', 'Agencies', 'Entrepreneurs', 'Social Media Managers']
       },
       {
-        id: 'content-creation',
-        title: 'AI Content Creation',
-        description: 'Generate high-quality content for social media, blogs, YouTube, digital marketing, and personal brands using AI-powered workflows.',
-        icon: 'sparkles',
-        colorName: 'violet',
-        colorCode: '#a855f7',
-        badge: 'Popular',
-        category: 'creative',
-        tools: ['ChatGPT', 'Veed.io', 'ElevenLabs'],
-        duration: '4 Weeks',
-        price: '₹3,499',
-        originalPrice: '₹6,999',
-        discount: '50% OFF',
-        priceAmount: 349900
-      },
-      {
-        id: 'vibe-coding',
-        title: 'Vibe Coding',
-        subtitle: 'Build Websites Without Coding',
-        description: 'Learn how to create beautiful websites, landing pages, portfolios, and business platforms using AI and no-code tools.',
-        icon: 'terminal',
+        id: 'no-code-website',
+        title: 'No-Code AI Website Creation',
+        subtitle: 'Build Websites Without Writing Code',
+        description: 'Build professional websites, landing pages, portfolios, and business websites without writing code using AI-powered website builders.',
+        icon: 'globe',
         colorName: 'cyan',
         colorCode: '#00f0ff',
-        badge: 'Revolutionary',
+        badge: 'Popular',
         category: 'business-tech',
-        tools: ['Claude 3.5', 'Cursor AI', 'Tailwind'],
+        tools: ['Framer AI', 'Claude AI', 'Cursor AI', 'Tailwind'],
         duration: '5 Weeks',
         price: '₹5,499',
         originalPrice: '₹10,999',
         discount: '50% OFF',
-        priceAmount: 549900
+        priceAmount: 549900,
+        tagline: 'Build Professional Websites Without Writing Code',
+        fullDescription: 'Learn how to create modern websites, landing pages, business sites, portfolios, and online stores using AI-powered no-code tools. Perfect for entrepreneurs, freelancers, and designers who want to launch websites quickly.',
+        whatYouLearn: ['Website Planning', 'AI Website Generation', 'Landing Page Design', 'Responsive Design', 'SEO Fundamentals', 'Lead Generation Pages', 'Website Optimization', 'Domain & Hosting Setup', 'Website Publishing', 'Website Maintenance'],
+        toolsCovered: ['Framer AI', 'Relume', 'ChatGPT', 'Claude', 'Gemini', 'Hostinger AI', 'Lovable', 'Bolt'],
+        projectList: ['Business Website', 'Portfolio Website', 'Landing Page', 'Service Website', 'Lead Generation Website'],
+        perfectFor: ['Freelancers', 'Small Business Owners', 'Agencies', 'Startup Founders', 'Students']
       },
       {
-        id: 'business',
-        title: 'AI for Business Owners',
-        description: 'Automate operations, marketing, sales, customer communication, content creation, and business growth using AI systems.',
-        icon: 'briefcase',
+        id: 'ui-ux-design',
+        title: 'AI-Powered UI/UX Design',
+        subtitle: 'Modern Interface & Experience Design',
+        description: 'Design modern websites and mobile app interfaces using AI-assisted research, wireframing, prototyping, and design systems.',
+        icon: 'smartphone',
+        colorName: 'violet',
+        colorCode: '#a855f7',
+        badge: 'New',
+        category: 'creative',
+        tools: ['Figma AI', 'Midjourney', 'Claude AI', 'Gemini AI'],
+        duration: '6 Weeks',
+        price: '₹6,499',
+        originalPrice: '₹12,999',
+        discount: '50% OFF',
+        priceAmount: 649900,
+        tagline: 'Design Modern Digital Experiences Using AI',
+        fullDescription: 'Learn the complete UI/UX design process from research to prototyping while leveraging AI tools to improve productivity and creativity.',
+        whatYouLearn: ['User Experience Fundamentals', 'User Research', 'Wireframing', 'User Journey Mapping', 'Mobile App Design', 'Website UI Design', 'Design Systems', 'Interactive Prototyping', 'Usability Testing', 'Portfolio Creation'],
+        toolsCovered: ['Figma AI', 'ChatGPT', 'Claude', 'Gemini', 'Uizard', 'Relume', 'Galileo AI'],
+        projectList: ['Mobile App Design', 'SaaS Dashboard', 'E-Commerce Website UI', 'Design System', 'Interactive Prototype'],
+        perfectFor: ['Aspiring UI/UX Designers', 'Graphic Designers', 'Product Designers', 'Students', 'Freelancers']
+      },
+      {
+        id: 'content-creation',
+        title: 'AI Content Creation & Marketing',
+        subtitle: 'Bonus Course',
+        description: 'Create engaging content, social media campaigns, ads, and marketing materials faster with AI. Bonus module included with all programs.',
+        icon: 'sparkles',
         colorName: 'amber',
         colorCode: '#f59e0b',
-        badge: 'Enterprise',
+        badge: 'Bonus Included',
         category: 'business-tech',
-        tools: ['Make.com', 'Zapier', 'AI Agents'],
-        duration: '6 Weeks',
-        price: '₹8,999',
-        originalPrice: '₹17,999',
-        discount: '50% OFF',
-        priceAmount: 899900
+        tools: ['ChatGPT', 'Canva AI', 'Leonardo AI', 'Gemini AI'],
+        duration: '4 Weeks',
+        price: 'Free',
+        originalPrice: '₹3,999',
+        discount: 'Bonus',
+        priceAmount: 0,
+        tagline: 'Create Content That Attracts, Engages, and Converts',
+        fullDescription: 'Master AI-driven content creation for social media, blogs, advertisements, email campaigns, and digital marketing.',
+        whatYouLearn: ['Content Strategy', 'AI Copywriting', 'Social Media Marketing', 'Video Marketing', 'SEO Content Creation', 'Email Marketing', 'Ad Copy Creation', 'Personal Branding', 'Content Automation', 'Marketing Analytics'],
+        toolsCovered: ['ChatGPT', 'Claude', 'Gemini', 'Canva AI', 'CapCut AI', 'Notion AI', 'Jasper AI'],
+        projectList: ['Social Media Campaign', 'Content Calendar', 'Marketing Funnel', 'SEO Blog Series', 'Email Campaign'],
+        perfectFor: ['Content Creators', 'Digital Marketers', 'Business Owners', 'Freelancers', 'Students']
       }
     ];
 
+    const toolLogoMap = {
+      'ChatGPT': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg',
+      'Midjourney': 'https://www.google.com/s2/favicons?domain=midjourney.com&sz=64',
+      'Adobe Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
+      'Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
+      'Adobe Firefly': 'https://www.google.com/s2/favicons?domain=firefly.adobe.com&sz=64',
+      'Figma AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/figma.svg',
+      'Framer AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/framer.svg',
+      'Claude AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg',
+      'Claude': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg',
+      'Runway ML': 'https://www.google.com/s2/favicons?domain=runwayml.com&sz=64',
+      'Runway': 'https://www.google.com/s2/favicons?domain=runwayml.com&sz=64',
+      'Kling AI': 'https://www.google.com/s2/favicons?domain=klingai.com&sz=64',
+      'Canva AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/canva.svg',
+      'Leonardo AI': 'https://www.google.com/s2/favicons?domain=leonardo.ai&sz=64',
+      'Gemini AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg',
+      'Gemini': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg',
+      'Adobe Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
+      'Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
+      'HeyGen': 'https://www.google.com/s2/favicons?domain=heygen.com&sz=64',
+      'ElevenLabs': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/elevenlabs.svg',
+      'CapCut AI': 'https://www.google.com/s2/favicons?domain=capcut.com&sz=64',
+      'Pika Labs': 'https://www.google.com/s2/favicons?domain=pika.art&sz=64',
+      'Veo': 'https://www.google.com/s2/favicons?domain=deepmind.google&sz=64',
+      'Relume': 'https://www.google.com/s2/favicons?domain=relume.io&sz=64',
+      'Hostinger AI': 'https://www.google.com/s2/favicons?domain=hostinger.com&sz=64',
+      'Lovable': 'https://www.google.com/s2/favicons?domain=lovable.dev&sz=64',
+      'Bolt': 'https://www.google.com/s2/favicons?domain=bolt.new&sz=64',
+      'Uizard': 'https://www.google.com/s2/favicons?domain=uizard.io&sz=64',
+      'Galileo AI': 'https://www.google.com/s2/favicons?domain=galileo.ai&sz=64',
+      'Notion AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/notion.svg',
+      'Jasper AI': 'https://www.google.com/s2/favicons?domain=jasper.ai&sz=64',
+      'Cursor AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg',
+      'Tailwind': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/tailwindcss.svg',
+    };
+
+    const brandColorMap = {
+      'ChatGPT': '#10A37F',
+      'Midjourney': '#0066FF',
+      'Adobe Photoshop AI': '#31A8FF',
+      'Adobe Firefly': '#FF6B00',
+      'Figma AI': '#A259FF',
+      'Framer AI': '#0055FF',
+      'Claude AI': '#D97706',
+      'Gemini AI': '#4285F4',
+      'Runway ML': '#FFFFFF',
+      'Kling AI': '#FFFFFF',
+      'Canva AI': '#00C4CC',
+      'Leonardo AI': '#FFFFFF',
+    };
+
     const whyChooseUsData = [
-      { title: 'Learn by Building', desc: 'Work on real-world projects and practical implementations.' },
-      { title: 'Industry-Focused Curriculum', desc: 'Master the tools professionals actually use.' },
-      { title: 'Future-Proof Skills', desc: 'Stay ahead in the AI-driven economy.' },
-      { title: 'Expert Mentorship', desc: 'Learn from experienced AI practitioners.' },
-      { title: 'Portfolio Development', desc: 'Create projects that attract employers and clients.' },
-      { title: 'Business Growth', desc: 'Apply AI directly to increase productivity and revenue.' }
+      { title: 'Learn at Your Own Pace', desc: 'Access lessons anytime, anywhere. No strict schedules — learn when it works for you.' },
+      { title: 'Practical Projects', desc: 'Build real-world portfolio projects that demonstrate your skills to employers and clients.' },
+      { title: 'Industry-Relevant Skills', desc: 'Learn tools currently used by businesses and agencies worldwide.' },
+      { title: 'Beginner Friendly', desc: 'No prior experience required. Start from scratch and build up your skills step by step.' },
+      { title: 'Lifetime Access', desc: 'Revisit lessons whenever needed. Your course materials never expire.' },
+      { title: 'Regular Updates', desc: 'Stay current with rapidly evolving AI technologies. Course content is updated regularly.' }
     ];
 
     const showcaseProjects = [
@@ -1604,28 +1766,44 @@
 
     const studentTestimonials = [
       {
-        name: 'Sarah Jenkins',
-        role: 'Creative Director',
+        name: 'Arjun Nair',
+        role: 'Freelance Designer',
         rating: 5,
-        review: 'Dxign.learn transformed my design agency completely. We now produce high-end branding vectors and campaigns in hours instead of days. The liquid glass template systems are beautiful.',
+        review: 'I was able to start freelancing within two months after completing the AI Graphic Design course. The lessons are practical and easy to follow.',
+        avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop',
+        project: 'Started freelancing in 2 months'
+      },
+      {
+        name: 'Sneha Thomas',
+        role: 'Business Owner',
+        rating: 5,
+        review: 'The AI Filmmaking course helped me create professional videos for my business without hiring a production team.',
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop',
-        project: '95% faster agency turnarounds'
+        project: 'Created professional brand videos'
       },
       {
-        name: 'Alex Rivera',
-        role: 'Indie Film Maker',
+        name: 'Muhammed Rafi',
+        role: 'Startup Founder',
         rating: 5,
-        review: 'The filmmaking modules are worth every penny. Learning temporal rendering and audio lip-sync pipelines helped me land my first commercial visual contract fully rendered with GenAI tools.',
+        review: 'I had no coding experience, but the No-Code Website course helped me build my company\'s website in just a few days.',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop',
-        project: 'Award-winning trailer showcase'
+        project: 'Built company website in days'
       },
       {
-        name: 'Derrick Vance',
-        role: 'Founder, Synthetix',
+        name: 'Anjali Menon',
+        role: 'UI/UX Designer',
         rating: 5,
-        review: 'We automated our outbound leads pipeline, proposal layouts, and email copies using the Business Swarms framework. Highly practical templates that directly translate to revenue.',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop',
-        project: '$12k/mo automation margin'
+        review: 'The UI/UX course explained modern design workflows clearly. The AI tools significantly reduced my design time.',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop',
+        project: 'Reduced design time by 60%'
+      },
+      {
+        name: 'Rahul Krishnan',
+        role: 'Content Creator',
+        rating: 5,
+        review: 'Excellent content and well-structured lessons. I especially liked the practical examples and tool demonstrations.',
+        avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=150&auto=format&fit=crop',
+        project: 'Improved content workflow'
       }
     ];
 
@@ -2018,7 +2196,7 @@
           className="relative w-full h-auto max-h-[480px] overflow-hidden cursor-pointer group select-none"
         >
           <img 
-            src={thumbnailUrl || 'placeholder.png'} 
+            src={thumbnailUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop'} 
             className="w-full h-auto max-h-[480px] object-cover block"
             alt="Video preview"
             onError={(e) => {
@@ -2250,6 +2428,7 @@
       const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
       const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
       const [showIosModal, setShowIosModal] = useState(false);
+      const [faqOpenStates, setFaqOpenStates] = useState({});
 
       // Customer prefill login details for payment
       const [nameInput, setNameInput] = useState('');
@@ -2593,7 +2772,7 @@
 
       // Lock/Unlock body scroll and Lenis when modal/overlays are open
       useEffect(() => {
-        const isModalOpen = !!enrollModal || !!theaterVideo || !!isAdminOpen || !!showIosModal || !!isStudentOpen;
+        const isModalOpen = !!enrollModal || !!theaterVideo || !!isAdminOpen || !!showIosModal || !!isStudentOpen || !!mobileMenuOpen;
         const header = document.querySelector('header');
         
         if (isModalOpen) {
@@ -2622,7 +2801,7 @@
           if (window.lenis) window.lenis.start();
           window.scrollTo(0, scrollY);
         }
-      }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen]);
+      }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen, mobileMenuOpen]);
 
       // Resume data helpers
       const getResumeData = () => {
@@ -4227,7 +4406,7 @@
         // About Us section elements
         gsap.from('.reveal-about-item', {
           scrollTrigger: {
-            trigger: '#about-us',
+            trigger: '#why-ai-now',
             start: 'top 75%',
           },
           x: 40,
@@ -4387,7 +4566,7 @@
                 </div>
 
                 <button 
-                  onClick={() => navigateToSection('about-us')}
+                  onClick={() => navigateToSection('why-ai-now')}
                   className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   About Us
@@ -4399,7 +4578,7 @@
                   Showcase
                 </button>
                 <button 
-                  onClick={() => navigateToSection('app-download')}
+                  onClick={() => navigateToSection('final-cta')}
                   className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   App
@@ -4537,7 +4716,7 @@
 
               {/* About Us */}
               <button
-                onClick={() => { setMobileMenuOpen(false); navigateToSection('about-us'); }}
+                onClick={() => { setMobileMenuOpen(false); navigateToSection('why-ai-now'); }}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/6 transition-all duration-300 text-left w-full"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -4555,7 +4734,7 @@
 
               {/* App */}
               <button
-                onClick={() => { setMobileMenuOpen(false); navigateToSection('app-download'); }}
+                onClick={() => { setMobileMenuOpen(false); navigateToSection('final-cta'); }}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/6 transition-all duration-300 text-left w-full"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
@@ -4584,50 +4763,45 @@
           </div>
 
           {/* ========= HERO SECTION ========= */}
-          <HeroSection handleGeneralEnroll={handleGeneralEnroll} navigateToSection={navigateToSection} />
+          <HeroSection handleGeneralEnroll={handleGeneralEnroll} navigateToSection={navigateToSection} enrollModal={enrollModal} theaterVideo={theaterVideo} isAdminOpen={isAdminOpen} showIosModal={showIosModal} isStudentOpen={isStudentOpen} mobileMenuOpen={mobileMenuOpen} />
 
 
-          {/* About us split screen */}
-          <section id="about-us" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
+          {/* ===== WHY AI NOW ===== */}
+          <section id="why-ai-now" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
             <div className="max-w-7xl mx-auto w-full">
-              
-              {/* Header (aligned with other section titles) */}
-              <div className="max-w-xl text-left mb-16 reveal-about-item">
+              <div className="max-w-2xl text-left mb-16 reveal-about-item">
                 <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                   <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                  Mission Objective
+                  Why AI Now
                 </span>
                 <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                  About Dxign.learn
+                  The AI Revolution Is Here. Will You Lead or Follow?
                 </h2>
               </div>
 
-              {/* Split Content layout */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-                {/* Left Side: 3D rotating network globe */}
                 <div className="lg:col-span-5 flex justify-center items-center relative z-10">
                   <div className="absolute w-[250px] md:w-[350px] h-[250px] md:h-[350px] bg-brand-violet/5 filter blur-[80px] rounded-full pointer-events-none z-0" />
                   <div className="w-full relative flex justify-center items-center">
                     <About3DCanvas />
                   </div>
                 </div>
-
-                {/* Right Side: Content description card */}
                 <div className="lg:col-span-7 flex flex-col text-left reveal-about-item">
                   <div className="liquid-glass p-8 md:p-10 rounded-3xl text-left">
                     <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-8">
-                      We help entrepreneurs, professionals, creators, students, and business owners unlock the full potential of Artificial Intelligence through practical, project-driven education. Our mission is to make advanced AI skills accessible, useful, and profitable in real-world applications.
+                      Artificial intelligence is reshaping every industry — from design and marketing to filmmaking and web development. Companies are actively seeking professionals who can leverage AI tools to work faster, smarter, and more creatively.
                     </p>
-
-                    {/* Highlights Grid */}
+                    <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light mb-8">
+                      Whether you're a student, freelancer, business owner, or creative professional, learning AI skills today gives you a massive advantage in tomorrow's job market. DXIGN Learn provides the practical training you need to stay ahead.
+                    </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
                       {[
-                        'Practical Learning',
-                        'Industry Experts',
-                        'Real Projects',
-                        'Latest AI Tools',
-                        'Career-Oriented Training',
-                        'Business Growth Strategies'
+                        'AI Is Transforming Industries',
+                        'High Demand for AI Skills',
+                        'Future-Proof Your Career',
+                        'Work 10x Faster',
+                        'No Coding Required',
+                        'Start Learning Today'
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center space-x-3 text-gray-300 font-semibold font-sans">
                           <div className="w-5 h-5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex justify-center items-center text-brand-cyan flex-shrink-0">
@@ -4640,11 +4814,10 @@
                   </div>
                 </div>
               </div>
-
             </div>
           </section>
 
-          {/* Courses grid section */}
+          {/* ===== FEATURED COURSES ===== */}
           <section id="courses" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
             <div className="max-w-7xl mx-auto w-full">
               
@@ -4655,7 +4828,7 @@
                 <div className="max-w-xl text-left reveal-up">
                   <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                     <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                    Educational Curriculum
+                    Featured Courses
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
                     Explore Dxign.learn Programs
@@ -4884,45 +5057,30 @@
             </div>
           </section>
 
-          {/* Why Choose Us */}
-          <section id="why-choose" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+          {/* ===== AI TOOLS COVERED ===== */}
+          <section id="popular-tools" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
             <div className="max-w-7xl mx-auto w-full">
-              
-              {/* Title */}
               <div className="max-w-xl text-left mb-16">
                 <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                   <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                  Elite Advantages
+                  AI Tools Covered
                 </span>
                 <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                  Why Learn With Us
+                  Master Industry-Leading AI Tools
                 </h2>
               </div>
 
-              {/* Grid structure */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {whyChooseUsData.map((item, idx) => (
-                  <div 
-                    key={idx}
-                    className="liquid-glass rounded-3xl p-8 text-left hover:border-white/15 transition-all duration-300"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex justify-center items-center text-brand-cyan mb-6">
-                      <i data-lucide="shield-check" className="w-5 h-5"></i>
-                    </div>
-                    <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight mb-3">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light">
-                      {item.desc}
-                    </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {['ChatGPT', 'Midjourney', 'Adobe Photoshop AI', 'Adobe Firefly', 'Figma AI', 'Framer AI', 'Claude AI', 'Runway ML', 'Kling AI', 'Canva AI', 'Leonardo AI', 'Gemini AI'].map((tool, idx) => (
+                  <div key={idx} className="group px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-cyan/30 transition-all duration-300">
+                    <span className="text-xs font-mono text-gray-400 group-hover:text-white transition-colors duration-300 text-center leading-tight select-none">{tool}</span>
                   </div>
                 ))}
               </div>
-
             </div>
           </section>
 
-          {/* Student projects showcase */}
+          {/* ===== PROJECTS YOU'LL BUILD ===== */}
           <section id="showcase" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
             <div className="max-w-7xl mx-auto w-full">
               
@@ -4931,10 +5089,10 @@
                 <div className="text-left max-w-xl">
                   <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                     <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                    Student Success showcase
+                    Projects You'll Build
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                    Student Projects & Success Stories
+                    Real Projects, Real Results
                   </h2>
                 </div>
 
@@ -4989,60 +5147,7 @@
             </div>
           </section>
 
-          {/* Timeline steps */}
-          <section id="timeline" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
-            <div className="max-w-7xl mx-auto w-full">
-              
-              {/* Header Title */}
-              <div className="max-w-xl text-left mb-20">
-                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                  Path to Mastery
-                </span>
-                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                  Learning Journey
-                </h2>
-              </div>
-
-              {/* Timeline Horizontal Line Track (Desktop) or Vertical (Mobile) */}
-              <div className="relative">
-                
-
-
-                {/* Nodes container */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-8 relative z-10">
-                  {journeyTimeline.map((item, idx) => (
-                    <div 
-                      key={idx}
-                      className="reveal-timeline-node flex flex-row lg:flex-col items-start lg:items-center text-left lg:text-center group"
-                    >
-                      {/* Round Node circle indicator */}
-                      <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-brand-cyan flex justify-center items-center text-brand-cyan font-mono font-bold text-sm shadow-[0_0_15px_rgba(0,240,255,0.4)] group-hover:scale-110 group-hover:border-brand-violet group-hover:text-brand-violet transition-all duration-300 flex-shrink-0 mr-6 lg:mr-0 lg:mb-6 z-10">
-                        0{idx + 1}
-                      </div>
-
-                      {/* Content block */}
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-mono text-brand-cyan group-hover:text-brand-violet transition-colors duration-300 uppercase tracking-widest mb-1.5 font-bold">
-                          {item.step}
-                        </span>
-                        <h3 className="text-base font-heading font-black text-white uppercase tracking-tight mb-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-gray-400 text-xs leading-relaxed font-light max-w-[200px]">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-              </div>
-
-            </div>
-          </section>
-
-          {/* Testimonial slider carousel */}
+          {/* ===== STUDENT REVIEWS ===== */}
           <section id="testimonials" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
             <div className="max-w-5xl mx-auto w-full">
               
@@ -5050,10 +5155,10 @@
               <div className="text-center mb-16 flex flex-col items-center">
                 <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
                   <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
-                  Verified Reviews
+                  Student Reviews
                 </span>
                 <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
-                  Student Success Stories
+                  What Our Students Say
                 </h2>
               </div>
 
@@ -5119,172 +5224,98 @@
             </div>
           </section>
 
-          {/* App Download Section */}
-          <section id="app-download" className="pt-24 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker overflow-hidden">
-            {/* Background glowing decorations */}
-            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] bg-brand-cyan/5 filter blur-[100px] rounded-full pointer-events-none" />
-            <div className="absolute top-1/3 right-1/4 -translate-y-1/2 w-[300px] h-[300px] bg-brand-violet/5 filter blur-[100px] rounded-full pointer-events-none" />
-
+          {/* ===== WHY CHOOSE DXIGN LEARN ===== */}
+          <section id="why-choose" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
             <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-                
-                {/* Left Column: Headings & Details */}
-                <div className="lg:col-span-7 text-left flex flex-col justify-center">
-                  <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
-                    <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
-                    Mobile Support App
-                  </span>
-                  
-                  <h2 className="text-4xl md:text-6xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                    Instant Doubt Clearance
-                  </h2>
-                  
-                  <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mb-10 font-light">
-                    Stuck on an assignment? Resolve your learning doubts in real-time. Message mentors directly, send screenshots of your work, upload voice notes, and get instant guidance on your projects.
-                  </p>
-
-                  {/* Buttons wrapper */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 max-w-md">
-                    {/* Android APK Button */}
-                    <a
-                      href="public/DxignLearn.apk"
-                      download
-                      className="px-6 py-4 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02] flex items-center justify-center space-x-2.5"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                      <span>Download Android APK</span>
-                    </a>
-
-                    {/* iOS Expo Go Button */}
-                    <button
-                      onClick={() => setShowIosModal(true)}
-                      className="px-6 py-4 rounded-2xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex items-center justify-center space-x-2.5"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                      <span>iOS (Expo Go)</span>
-                    </button>
-                  </div>
-
-                  {/* App Store coming soon label */}
-                  <div className="flex items-center space-x-3 mt-8">
-                    <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">Apple App Store</span>
-                    <span className="px-2.5 py-0.5 rounded text-[8px] font-mono text-gray-500 bg-white/[0.02] border border-white/5 uppercase">Coming Soon</span>
-                  </div>
-                </div>
-
-                {/* Right Column: Smartphone Mockup */}
-                <div className="lg:col-span-5 flex justify-center lg:justify-end relative">
-                  {/* Smartphone Frame Wrapper */}
-                  <div className="relative w-[280px] h-[570px] rounded-[48px] border-[12px] border-zinc-800 bg-[#09090b] shadow-[0_25px_60px_rgba(0,0,0,0.8),_0_0_50px_rgba(0,240,255,0.05)] overflow-hidden flex flex-col">
-                    
-                    {/* Notch / Dynamic Island */}
-                    <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-50 flex items-center justify-between px-4">
-                      {/* Speaker camera notch elements */}
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 border border-zinc-800" />
-                      <span className="w-3 h-1 bg-zinc-900 rounded-full" />
-                    </div>
-
-                    {/* Status Bar */}
-                    <div className="h-10 px-6 pt-3 flex justify-between items-center text-[10px] font-semibold text-gray-400 font-sans z-40 select-none pointer-events-none">
-                      <span>9:41</span>
-                      <div className="flex items-center space-x-1.5">
-                        {/* Signal */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h20V2z"/></svg>
-                        {/* Wifi */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h.01"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></svg>
-                        {/* Battery */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
-                      </div>
-                    </div>
-
-                    {/* Live Preview Screen Container */}
-                    <div className="flex-grow flex flex-col p-4 bg-zinc-950 text-left font-sans select-none overflow-hidden relative">
-                      {/* App Header inside phone preview */}
-                      <div className="flex items-center justify-between pb-3.5 border-b border-white/5 mb-4 mt-1">
-                        <div className="flex items-center space-x-2.5">
-                          <div className="relative">
-                            <div className="w-8 h-8 rounded-full bg-brand-cyan/15 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan font-bold font-heading text-xs">
-                              M
-                            </div>
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-brand-emerald border-2 border-zinc-950 rounded-full animate-pulse" />
-                          </div>
-                          <div>
-                            <span className="font-heading font-black text-white text-[11px] block tracking-tight uppercase leading-none">Mentor Support</span>
-                            <span className="text-[8px] text-brand-cyan font-semibold tracking-wider font-mono uppercase mt-0.5 block">Online</span>
-                          </div>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      </div>
-
-                      {/* Messages Area */}
-                      <div className="flex-grow flex flex-col space-y-4 overflow-y-auto pr-1">
-                        {/* Student Bubble */}
-                        <div className="flex flex-col items-end text-right">
-                          <div className="max-w-[85%] rounded-2xl rounded-tr-none px-3.5 py-2.5 bg-brand-blue text-white text-[10px] leading-relaxed font-light text-left">
-                            {/* Visual Screenshot Attachment */}
-                            <div className="w-full flex items-center space-x-2.5 p-2 rounded-xl bg-white/10 border border-white/10 mb-2 select-none">
-                              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                              </div>
-                              <div className="flex-grow min-w-0 text-left">
-                                <span className="text-[9px] font-semibold text-white block truncate leading-none mb-0.5">screenshot.png</span>
-                                <span className="text-[7px] text-white/50 block leading-none uppercase font-mono">1.2 MB · Image</span>
-                              </div>
-                            </div>
-                            Hey Mentor, here's my current prompt output. How can I make the volumetric lighting look more dramatic?
-                          </div>
-                          <span className="text-[7px] text-gray-500 mt-1 flex items-center space-x-1 justify-end">
-                            <span>10:32 AM</span>
-                            {/* Double ticks */}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><polyline points="20 6 9 17 4 12"/><polyline points="15 6 9 13 4 8"/></svg>
-                          </span>
-                        </div>
-
-                        {/* Mentor Bubble */}
-                        <div className="flex flex-col items-start text-left">
-                          <div className="max-w-[85%] rounded-2xl rounded-tl-none px-3.5 py-2.5 bg-zinc-900 border border-white/5 text-gray-200 text-[10px] leading-relaxed font-light">
-                            Try adding descriptors like <strong className="text-brand-cyan font-bold">"volumetric god rays"</strong> or <strong className="text-brand-cyan font-bold">"chiaroscuro lighting"</strong>, and set a widescreen aspect ratio (e.g. <strong className="text-brand-violet font-bold">--ar 16:9</strong>).
-                          </div>
-                          <span className="text-[7px] text-gray-500 mt-1">10:34 AM</span>
-                        </div>
-
-                        {/* Student Bubble */}
-                        <div className="flex flex-col items-end text-right">
-                          <div className="max-w-[85%] rounded-2xl rounded-tr-none px-3.5 py-2.5 bg-brand-blue text-white text-[10px] leading-relaxed font-light">
-                            Awesome! That worked perfectly.
-                          </div>
-                          <span className="text-[7px] text-gray-500 mt-1 flex items-center space-x-1 justify-end">
-                            <span>10:35 AM</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><polyline points="20 6 9 17 4 12"/><polyline points="15 6 9 13 4 8"/></svg>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Chat Input Area Mock */}
-                      <div className="mt-4 pt-3 border-t border-white/5 flex items-center space-x-2.5">
-                        <div className="flex-grow flex items-center relative">
-                          <input
-                            type="text"
-                            disabled
-                            placeholder="Type a message..."
-                            className="w-full px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-[10px] text-white focus:outline-none"
-                          />
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute right-3 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                        </div>
-                        <div className="w-7 h-7 rounded-xl bg-brand-cyan flex items-center justify-center text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-
+               
+              {/* Title */}
+              <div className="max-w-xl text-left mb-16">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Why Choose DXIGN Learn
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Learn Smarter, Build Faster
+                </h2>
               </div>
+
+              {/* Grid structure */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {whyChooseUsData.map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className="liquid-glass rounded-3xl p-8 text-left hover:border-white/15 transition-all duration-300"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex justify-center items-center text-brand-cyan mb-6">
+                      <i data-lucide="shield-check" className="w-5 h-5"></i>
+                    </div>
+                    <h3 className="text-lg font-heading font-black text-white uppercase tracking-tight mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </section>
 
-          {/* Immersive CTA with warp particle canvas */}
+          {/* ===== LEARNING ROADMAP ===== */}
+          <section id="timeline" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+            <div className="max-w-7xl mx-auto w-full">
+              
+              {/* Header Title */}
+              <div className="max-w-xl text-left mb-20">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  Learning Roadmap
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Learning Journey
+                </h2>
+              </div>
+
+              {/* Timeline Horizontal Line Track (Desktop) or Vertical (Mobile) */}
+              <div className="relative">
+                
+
+
+                {/* Nodes container */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-8 relative z-10">
+                  {journeyTimeline.map((item, idx) => (
+                    <div 
+                      key={idx}
+                      className="reveal-timeline-node flex flex-row lg:flex-col items-start lg:items-center text-left lg:text-center group"
+                    >
+                      {/* Round Node circle indicator */}
+                      <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-brand-cyan flex justify-center items-center text-brand-cyan font-mono font-bold text-sm shadow-[0_0_15px_rgba(0,240,255,0.4)] group-hover:scale-110 group-hover:border-brand-violet group-hover:text-brand-violet transition-all duration-300 flex-shrink-0 mr-6 lg:mr-0 lg:mb-6 z-10">
+                        0{idx + 1}
+                      </div>
+
+                      {/* Content block */}
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-brand-cyan group-hover:text-brand-violet transition-colors duration-300 uppercase tracking-widest mb-1.5 font-bold">
+                          {item.step}
+                        </span>
+                        <h3 className="text-base font-heading font-black text-white uppercase tracking-tight mb-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-400 text-xs leading-relaxed font-light max-w-[200px]">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          {/* ===== PRICING ===== */}
           <section id="pricing-cta" className="relative pt-4 pb-4 px-6 md:px-12 lg:px-24 border-t border-white/5 select-none bg-brand-bg flex items-center justify-center min-h-[calc(100vh-85px)]">
             
             {/* Warp particles Canvas */}
@@ -5333,13 +5364,90 @@
                   Enroll Now
                 </button>
                 <a
-                  href="mailto:contact@aimastery.academy?subject=General%20Inquiry"
+                  href="mailto:dxignlearn@gmail.com?subject=General%20Inquiry"
                   className="px-8 py-3 rounded-xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300 flex-grow"
                 >
                   Contact Us
                 </a>
               </div>
 
+            </div>
+          </section>
+
+          {/* ===== FAQ ===== */}
+          <section id="faq" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bg">
+            <div className="max-w-3xl mx-auto w-full">
+              <div className="text-center mb-16">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center justify-center mb-3">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
+                  FAQ
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none">
+                  Frequently Asked Questions
+                </h2>
+              </div>
+
+              <div className="flex flex-col space-y-3">
+                {[
+                  { q: 'Do I need any prior experience to join?', a: 'No, all courses are designed for beginners. We start from the basics and gradually build up to advanced concepts.' },
+                  { q: 'How long do I have access to the course?', a: 'You get lifetime access to all course materials, including future updates.' },
+                  { q: 'Will I get a certificate after completing?', a: 'Yes, you will receive a certificate of completion for each course you finish.' },
+                  { q: 'Can I learn at my own pace?', a: 'Absolutely! All lessons are pre-recorded so you can learn whenever and wherever works best for you.' },
+                  { q: 'What kind of projects will I build?', a: 'You\'ll create real-world portfolio projects like logos, brand identities, videos, websites, and UI designs.' },
+                  { q: 'Is there a money-back guarantee?', a: 'Yes, we offer a 7-day money-back guarantee if you\'re not satisfied with the course.' },
+                ].map((faq, idx) => {
+                  const open = faqOpenStates[idx] || false;
+                  return (
+                    <div key={idx} className="liquid-glass rounded-2xl overflow-hidden">
+                      <button
+                        onClick={() => setFaqOpenStates(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                        className="w-full flex justify-between items-center p-5 text-left text-white font-bold font-heading uppercase tracking-tight text-sm hover:bg-white/[0.02] transition-all duration-300"
+                      >
+                        <span>{faq.q}</span>
+                        <i data-lucide={open ? 'chevron-up' : 'chevron-down'} className="w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-300" />
+                      </button>
+                      {open && (
+                        <div className="px-5 pb-5 text-gray-400 text-xs leading-relaxed font-light">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* ===== FINAL CTA ===== */}
+          <section id="final-cta" className="pt-24 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker overflow-hidden text-center">
+            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] bg-brand-cyan/5 filter blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/3 right-1/4 -translate-y-1/2 w-[300px] h-[300px] bg-brand-violet/5 filter blur-[100px] rounded-full pointer-events-none" />
+            <div className="max-w-3xl mx-auto w-full relative z-10">
+              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center justify-center mb-4">
+                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
+                Start Your Journey Today
+              </span>
+              <h2 className="text-4xl md:text-6xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                Ready to Master AI?
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-10 font-light">
+                Join hundreds of learners already using AI to build better careers, businesses, and creative portfolios. Get lifetime access to all courses and future updates.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={handleGeneralEnroll}
+                  className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02]"
+                >
+                  Enroll Now &mdash; &#8377;5 Only
+                </button>
+                <a
+                  href="mailto:dxignlearn@gmail.com"
+                  className="px-10 py-4 rounded-2xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300"
+                >
+                  Contact Us
+                </a>
+              </div>
+              <p className="text-gray-600 text-[10px] font-mono mt-6">Limited launch offer &middot; Lifetime access &middot; 7-day money-back guarantee</p>
             </div>
           </section>
 
@@ -5452,201 +5560,219 @@
                 onClick={closeEnrollModal}
                 onWheel={(e) => e.stopPropagation()}
               >
-                <div className="min-h-full flex items-center justify-center py-8" onClick={closeEnrollModal}>
+                <div className="min-h-full flex items-center justify-center p-4 md:p-8" onClick={closeEnrollModal}>
                   <div
-                    className="relative w-full max-w-md mx-4 rounded-3xl border border-white/10"
+                    className="relative w-full max-w-5xl mx-auto rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12"
                     style={{
                       background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
                       boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                  {/* Gradient top accent bar */}
-                  <div className="h-1 w-full" style={{ background: theme.grad }} />
+                    {/* Gradient top accent bar - full width */}
+                    <div className="h-1 w-full col-span-12" style={{ background: theme.grad }} />
 
-                  {/* Close button */}
-                  <button
-                    onClick={closeEnrollModal}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 z-10"
-                  >
-                    <i data-lucide="x" className="w-4 h-4"></i>
-                  </button>
+                    {/* Close button */}
+                    <button
+                      onClick={closeEnrollModal}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 z-10"
+                    >
+                      <i data-lucide="x" className="w-4 h-4"></i>
+                    </button>
 
-                  <div className="p-8">
-
-                    {/* Course Icon + Badge Row */}
-                    <div className="flex items-center justify-between mb-6">
-                      <div className={`w-14 h-14 rounded-2xl border flex justify-center items-center ${theme.bgIcon}`}>
-                        <i data-lucide={enrollModal.icon} className="w-6 h-6"></i>
-                      </div>
-                      <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border border-white/10 text-gray-400" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                        {enrollModal.badge}
-                      </span>
-                    </div>
-
-                    {/* Course Title */}
-                    <h2 className="text-2xl font-black uppercase tracking-tight text-white font-heading mb-1">
-                      {enrollModal.title}
-                    </h2>
-                    {enrollModal.subtitle && (
-                      <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3">{enrollModal.subtitle}</p>
-                    )}
-                    <p className="text-gray-500 text-xs leading-relaxed mb-6">{enrollModal.description}</p>
-
-                    {/* Meta row */}
-                    <div className="flex items-center space-x-4 mb-6">
-                      <span className="flex items-center text-[10px] font-mono text-gray-500">
-                        <i data-lucide="clock" className="w-3 h-3 mr-1.5"></i>
-                        {enrollModal.duration}
-                      </span>
-                      <span className="w-px h-4 bg-white/5"></span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {enrollModal.tools.map((t, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded text-[9px] font-mono text-gray-500 bg-white/[0.03] border border-white/5">{t}</span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="border-t border-white/5 mb-6" />
-
-                    {/* Pricing */}
-                    <div className="flex items-end justify-between mb-6">
-                      <div>
-                        <div className="flex items-baseline space-x-2">
-                          <span className="text-3xl font-black font-heading" style={{ color: enrollModal.colorCode }}>{enrollModal.price}</span>
-                          <span className="text-sm font-mono text-gray-600 line-through">{enrollModal.originalPrice}</span>
+                    {/* LEFT COLUMN: Course Details */}
+                    <div className="lg:col-span-7 p-6 md:p-8 overflow-y-auto max-h-[80vh] border-r border-white/5">
+                      
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-5">
+                        <div>
+                          <div className={`w-12 h-12 rounded-2xl border flex justify-center items-center ${theme.bgIcon} mb-4`}>
+                            <i data-lucide={enrollModal.icon} className="w-5 h-5"></i>
+                          </div>
+                          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white font-heading leading-tight">
+                            {enrollModal.title}
+                          </h2>
+                          {enrollModal.tagline && (
+                            <p className="text-xs font-mono text-gray-400 mt-1.5 max-w-lg">{enrollModal.tagline}</p>
+                          )}
                         </div>
-                        <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: enrollModal.colorCode, opacity: 0.7 }}>
-                          {enrollModal.discount} · One-time payment
+                        <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border border-white/10 text-gray-400 whitespace-nowrap" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                          {enrollModal.badge}
                         </span>
                       </div>
-                      <span className="px-3 py-1.5 rounded-full text-[10px] font-mono text-white border border-white/10 bg-white/5">
-                        Lifetime Access
-                      </span>
-                    </div>
 
-                    {/* Customer Login Details Form */}
-                    <div className="space-y-4 mb-6">
-                      <div className="text-left">
-                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
-                          Enter Your Name
-                        </label>
-                        <div className="relative flex items-center">
-                          <i data-lucide="user" className="absolute left-4 w-4 h-4 text-gray-500"></i>
-                          <input
-                            type="text"
-                            placeholder="John Doe"
-                            value={nameInput}
-                            onChange={(e) => setNameInput(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
-                            style={{
-                              fontFamily: 'Outfit, sans-serif',
-                            }}
-                            onFocus={(e) => {
-                              e.target.style.borderColor = enrollModal.colorCode;
-                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
-                            }}
-                            onBlur={(e) => {
-                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
-                              e.target.style.boxShadow = 'none';
-                            }}
-                          />
+                      {/* Full Description */}
+                      {enrollModal.fullDescription && (
+                        <p className="text-gray-400 text-xs md:text-sm leading-relaxed mb-6">{enrollModal.fullDescription}</p>
+                      )}
+
+                      {/* What You'll Learn */}
+                      {enrollModal.whatYouLearn && enrollModal.whatYouLearn.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-xs font-mono text-white font-bold uppercase tracking-widest mb-3">What You'll Learn</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {enrollModal.whatYouLearn.map((item, i) => (
+                              <div key={i} className="flex items-center space-x-2.5 text-gray-400 text-xs">
+                                <i data-lucide="check" className="w-3.5 h-3.5 flex-shrink-0" style={{ color: enrollModal.colorCode }}></i>
+                                <span>{item}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="text-left">
-                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
-                          Enter Email Address
-                        </label>
-                        <div className="relative flex items-center">
-                          <i data-lucide="mail" className="absolute left-4 w-4 h-4 text-gray-500"></i>
-                          <input
-                            type="email"
-                            placeholder="name@example.com"
-                            value={emailInput}
-                            onChange={(e) => setEmailInput(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
-                            style={{
-                              fontFamily: 'Outfit, sans-serif',
-                            }}
-                            onFocus={(e) => {
-                              e.target.style.borderColor = enrollModal.colorCode;
-                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
-                            }}
-                            onBlur={(e) => {
-                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
-                              e.target.style.boxShadow = 'none';
-                            }}
-                          />
+                      {/* AI Tools Covered */}
+                      {enrollModal.toolsCovered && enrollModal.toolsCovered.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-xs font-mono text-white font-bold uppercase tracking-widest mb-3">AI Tools Covered</h4>
+                          <div className="flex flex-wrap gap-2.5">
+                            {enrollModal.toolsCovered.map((tool, i) => {
+                              const logoUrl = toolLogoMap[tool] || toolLogoMap[tool.replace(' AI', '')];
+                              return (
+                                <div key={i} className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 text-gray-400 text-[10px] font-mono">
+                                  {logoUrl ? (
+                                    <img src={logoUrl} alt={tool} className="w-4 h-4 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 flex-shrink-0"><path d="M12 20h.01"/><path d="M18.36 17.64a9 9 0 0 0 0-12.73"/><path d="M5.64 17.64a9 9 0 0 1 0-12.73"/></svg>
+                                  )}
+                                  <span>{tool}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="text-left">
-                        <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">
-                          Enter Mobile Number
-                        </label>
-                        <div className="relative flex items-center">
-                          <i data-lucide="phone" className="absolute left-4 w-4 h-4 text-gray-500"></i>
-                          <input
-                            type="tel"
-                            placeholder="10-digit mobile number"
-                            value={phoneInput}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, '');
-                              if (val.length <= 10) {
-                                setPhoneInput(val);
-                              }
-                            }}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
-                            style={{
-                              fontFamily: 'Outfit, sans-serif',
-                            }}
-                            onFocus={(e) => {
-                              e.target.style.borderColor = enrollModal.colorCode;
-                              e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`;
-                            }}
-                            onBlur={(e) => {
-                              e.target.style.borderColor = 'rgba(255,255,255,0.1)';
-                              e.target.style.boxShadow = 'none';
-                            }}
-                          />
+                      {/* Projects You'll Build */}
+                      {enrollModal.projectList && enrollModal.projectList.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-xs font-mono text-white font-bold uppercase tracking-widest mb-3">Projects You'll Build</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {enrollModal.projectList.map((proj, i) => (
+                              <span key={i} className="px-3 py-1.5 rounded-lg border flex items-center space-x-1.5 text-gray-400 text-[10px] font-mono" style={{ borderColor: `${enrollModal.colorCode}22`, backgroundColor: `${enrollModal.colorCode}11` }}>
+                                <i data-lucide="folder" className="w-3 h-3" style={{ color: enrollModal.colorCode }}></i>
+                                <span>{proj}</span>
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
-                      {enrollError && (
-                        <div className="text-left text-rose-500 text-[10px] font-mono mt-2 bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-lg flex items-center space-x-1.5">
-                          <i data-lucide="alert-triangle" className="w-3.5 h-3.5 flex-shrink-0 text-rose-500"></i>
-                          <span>{enrollError}</span>
+                      {/* Perfect For */}
+                      {enrollModal.perfectFor && enrollModal.perfectFor.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-mono text-white font-bold uppercase tracking-widest mb-3">Perfect For</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {enrollModal.perfectFor.map((audience, i) => (
+                              <span key={i} className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-gray-400 text-[10px] font-mono">{audience}</span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Payment Button */}
-                    <button
-                      onClick={handleRazorpayPay}
-                      className="w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-wider text-white transition-all duration-300 flex items-center justify-center space-x-3 hover:scale-[1.02] active:scale-[0.99]"
-                      style={{
-                        background: 'linear-gradient(135deg, #528FF0 0%, #3a73d8 100%)',
-                        boxShadow: '0 0 30px rgba(82,143,240,0.3)',
-                      }}
-                    >
-                      <i data-lucide="sparkles" className="w-5 h-5"></i>
-                      <span>PAY & EXPLORE</span>
-                    </button>
+                    {/* RIGHT COLUMN: Enrollment Form */}
+                    <div className="lg:col-span-5 p-6 md:p-8 flex flex-col justify-between bg-zinc-900/30">
+                      
+                      {/* Pricing */}
+                      <div>
+                        <div className="flex items-end justify-between mb-6">
+                          <div>
+                            <div className="flex items-baseline space-x-2">
+                              <span className="text-3xl font-black font-heading" style={{ color: enrollModal.colorCode }}>{enrollModal.price}</span>
+                              <span className="text-sm font-mono text-gray-600 line-through">{enrollModal.originalPrice}</span>
+                            </div>
+                            <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: enrollModal.colorCode, opacity: 0.7 }}>
+                              {enrollModal.discount} &middot; One-time payment
+                            </span>
+                          </div>
+                          <span className="px-3 py-1.5 rounded-full text-[10px] font-mono text-white border border-white/10 bg-white/5">Lifetime Access</span>
+                        </div>
 
-                    {/* Trust note */}
-                    <p className="text-center text-[10px] font-mono text-gray-600 mt-4 flex items-center justify-center space-x-1.5">
-                      <i data-lucide="shield-check" className="w-3 h-3 text-green-500"></i>
-                      <span>Secured by Razorpay · 256-bit SSL encryption</span>
-                    </p>
+                        <div className="border-t border-white/5 mb-6" />
 
+                        {/* Customer Login Details Form */}
+                        <div className="space-y-4 mb-6">
+                          <div className="text-left">
+                            <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">Enter Your Name</label>
+                            <div className="relative flex items-center">
+                              <i data-lucide="user" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                              <input
+                                type="text"
+                                placeholder="John Doe"
+                                value={nameInput}
+                                onChange={(e) => setNameInput(e.target.value)}
+                                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                                style={{ fontFamily: 'Outfit, sans-serif' }}
+                                onFocus={(e) => { e.target.style.borderColor = enrollModal.colorCode; e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`; }}
+                                onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-left">
+                            <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">Enter Email Address</label>
+                            <div className="relative flex items-center">
+                              <i data-lucide="mail" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                              <input
+                                type="email"
+                                placeholder="name@example.com"
+                                value={emailInput}
+                                onChange={(e) => setEmailInput(e.target.value)}
+                                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                                style={{ fontFamily: 'Outfit, sans-serif' }}
+                                onFocus={(e) => { e.target.style.borderColor = enrollModal.colorCode; e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`; }}
+                                onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-left">
+                            <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block">Enter Mobile Number</label>
+                            <div className="relative flex items-center">
+                              <i data-lucide="phone" className="absolute left-4 w-4 h-4 text-gray-500"></i>
+                              <input
+                                type="tel"
+                                placeholder="10-digit mobile number"
+                                value={phoneInput}
+                                onChange={(e) => { const val = e.target.value.replace(/\D/g, ''); if (val.length <= 10) { setPhoneInput(val); } }}
+                                className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300"
+                                style={{ fontFamily: 'Outfit, sans-serif' }}
+                                onFocus={(e) => { e.target.style.borderColor = enrollModal.colorCode; e.target.style.boxShadow = `0 0 15px ${enrollModal.colorCode}22`; }}
+                                onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
+                              />
+                            </div>
+                          </div>
+                          {enrollError && (
+                            <div className="text-left text-rose-500 text-[10px] font-mono mt-2 bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-lg flex items-center space-x-1.5">
+                              <i data-lucide="alert-triangle" className="w-3.5 h-3.5 flex-shrink-0 text-rose-500"></i>
+                              <span>{enrollError}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Payment Button */}
+                      <button
+                        onClick={handleRazorpayPay}
+                        className="w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-wider text-white transition-all duration-300 flex items-center justify-center space-x-3 hover:scale-[1.02] active:scale-[0.99]"
+                        style={{
+                          background: 'linear-gradient(135deg, #528FF0 0%, #3a73d8 100%)',
+                          boxShadow: '0 0 30px rgba(82,143,240,0.3)',
+                        }}
+                      >
+                        <i data-lucide="sparkles" className="w-5 h-5"></i>
+                        <span>PAY &amp; ENROLL NOW</span>
+                      </button>
+
+                      <p className="text-center text-[10px] font-mono text-gray-600 mt-4 flex items-center justify-center space-x-1.5">
+                        <i data-lucide="shield-check" className="w-3 h-3 text-green-500"></i>
+                        <span>Secured by Razorpay &middot; 256-bit SSL encryption</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
 
           {/* ===== THEATER MODE MODAL ===== */}
           {theaterVideo && (
@@ -6112,7 +6238,7 @@
                   {/* Main Work Area */}
                     {studentTab === 'courses' ? (
                     /* Dashboard View 1: Video Lectures */
-                    <main className="flex-grow flex flex-col lg:flex-row lg:max-h-[calc(100vh-76px)]">
+                    <main className="flex-grow flex flex-col lg:flex-row lg:max-h-[calc(100vh-145px)]">
                        
                        {/* Left Course Tabs Column (hidden on mobile, shown on lg) */}
                        <aside className="hidden lg:block lg:w-64 border-r border-white/5 bg-zinc-950/20 p-4 space-y-2 overflow-x-auto shrink-0 flex lg:flex-col flex-row gap-2 lg:gap-0">
@@ -6146,7 +6272,7 @@
                        <section className="flex-grow p-4 md:p-8 flex flex-col space-y-6 overflow-y-auto lg:max-h-full">
                          
                          {/* Video Player Display Container */}
-                         <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-2xl relative">
+                         <div className="w-full aspect-video rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-2xl relative shrink-0">
                            {(() => {
                              const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
                              if (!enrolled) {
@@ -6486,11 +6612,11 @@
                          </div>
                        </aside>
                      </main>
-                   ) : (
-                     /* Dashboard View 2: Live Chat Support */
-                    <main className="flex-grow flex flex-col lg:flex-row lg:max-h-[calc(100vh-76px)]">
-                      {/* Full-width Doubt Clearing Window */}
-                      <section className="flex-grow flex flex-col bg-zinc-950/20 lg:overflow-hidden relative">
+                    ) : (
+                      /* Dashboard View 2: Live Chat Support */
+                     <main className="flex-grow flex flex-col lg:flex-row max-h-[calc(100vh-145px)]">
+                       {/* Full-width Doubt Clearing Window */}
+                       <section className="flex-grow flex flex-col bg-zinc-950/20 overflow-hidden relative">
                         {/* Chat Header */}
                         <header className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-zinc-950/40">
                           <div className="flex items-center space-x-3">
@@ -6522,7 +6648,7 @@
 
                         {/* Messages Area */}
                         <div 
-                          className="flex-grow p-4 md:p-6 overflow-y-auto space-y-4 lg:max-h-[calc(100vh-220px)] flex flex-col"
+                          className="flex-grow p-4 md:p-6 overflow-y-auto space-y-4 flex flex-col min-h-0"
                           ref={el => {
                             if (el) el.scrollTop = el.scrollHeight;
                           }}
@@ -6703,16 +6829,6 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                               </label>
 
-                              {/* Voice recorder micro button */}
-                              <button
-                                type="button"
-                                onClick={startStudentVoiceRecording}
-                                disabled={studentChatSending}
-                                className="w-11 h-11 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-gray-400 hover:text-rose-500 transition disabled:opacity-50"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                              </button>
-
                               {/* Input Text Box */}
                               <input
                                 type="text"
@@ -6723,6 +6839,16 @@
                                 className="flex-grow px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition"
                                 style={{ outline: 'none' }}
                               />
+
+                              {/* Voice recorder micro button */}
+                              <button
+                                type="button"
+                                onClick={startStudentVoiceRecording}
+                                disabled={studentChatSending}
+                                className="w-11 h-11 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-gray-400 hover:text-rose-500 transition disabled:opacity-50"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                              </button>
 
                               {/* Send Text Button */}
                               <button
@@ -6746,7 +6872,7 @@
           {/* ===== ADMIN PORTAL OVERLAY ===== */}
           {isAdminOpen && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-y-auto lg:overflow-y-hidden"
+              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-hidden"
               onWheel={(e) => { if (window.innerWidth >= 1024) e.stopPropagation(); }}
             >
               {!isAdminAuthenticated ? (
@@ -6814,7 +6940,7 @@
                 </div>
               ) : (
                 /* Admin Dashboard View */
-                <div className="flex-grow flex flex-col text-gray-300">
+                <div className="flex-grow flex flex-col text-gray-300 overflow-hidden">
                   {/* Top Bar Header */}
                   <header className="px-6 py-4 md:px-12 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50">
                     <div className="flex items-center space-x-3 text-left">
@@ -6907,7 +7033,7 @@
                   </header>
 
                   {/* Main Scrollable Content */}
-                  <main className="flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 overflow-y-auto lg:max-h-[calc(100vh-80px)]">
+                  <main className={`flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 lg:h-0 lg:min-h-0 lg:flex-1 min-h-0 ${adminTab === 'chat' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
                     {adminTab === 'registrations' && (
                       <div className="flex flex-col gap-6 lg:gap-8 text-left">
                         <div className="flex-1 min-w-0 flex flex-col space-y-6 lg:space-y-8">
@@ -7324,7 +7450,7 @@
                     )}
 
                     {adminTab === 'chat' && (
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 h-[calc(100vh-190px)] min-h-[500px]">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-grow lg:h-full min-h-0">
                         {/* Left sidebar - Chats list */}
                         <div className="lg:col-span-3 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl">
                           <div className="p-4 lg:p-5 border-b border-white/5">
@@ -8198,14 +8324,27 @@
                             alt="Fullscreen attachment preview" 
                             className="max-h-[80vh] max-w-full object-contain rounded-2xl border border-white/15" 
                           />
-                        ) : (
-                          <video 
-                            src={activePreviewMedia.url} 
-                            controls 
-                            autoPlay 
-                            className="max-h-[80vh] max-w-full rounded-2xl border border-white/15" 
-                          />
-                        )}
+                        ) : (() => {
+                          const fileId = getDriveFileId(activePreviewMedia.url);
+                          if (fileId) {
+                            return (
+                              <iframe 
+                                src={`https://drive.google.com/file/d/${fileId}/preview`} 
+                                className="w-[85vw] h-[48vh] md:w-[70vw] md:h-[60vh] max-w-4xl rounded-2xl border border-white/15 bg-black" 
+                                allow="autoplay"
+                                allowFullScreen
+                              />
+                            );
+                          }
+                          return (
+                            <video 
+                              src={activePreviewMedia.url} 
+                              controls 
+                              autoPlay 
+                              className="max-h-[80vh] max-w-full rounded-2xl border border-white/15" 
+                            />
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
