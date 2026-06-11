@@ -30,6 +30,20 @@
     .animate-wave-3 { animation: soundwave 0.5s ease-in-out infinite 0.3s; }
     .animate-wave-4 { animation: soundwave 0.7s ease-in-out infinite 0.05s; }
     .animate-wave-5 { animation: soundwave 0.9s ease-in-out infinite 0.2s; }
+    @keyframes scan {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(100%); }
+    }
+    .animate-scan { animation: scan 8s linear infinite; }
+    @keyframes bounce-x {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+    .animate-bounce-x { animation: bounce-x 1.2s ease-in-out infinite; }
+    video::-webkit-media-controls { display: none !important; }
+    video::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; }
+    video::--webkit-media-controls-play-button { display: none !important; }
+    video::-webkit-media-controls-start-playback-button { display: none !important; }
   </style>
   
   <!-- Tailwind Configuration for custom colors & fonts -->
@@ -2486,6 +2500,7 @@
       const [studentChats, setStudentChats] = useState([]);
       const [showEmojiPicker, setShowEmojiPicker] = useState(false);
       const [selectedChatId, setSelectedChatId] = useState(''); // student email_escaped
+      const [showMobileChatPopup, setShowMobileChatPopup] = useState(false);
       const [chatMessages, setChatMessages] = useState([]);
       const [replyInput, setReplyInput] = useState('');
       const [sendingReply, setSendingReply] = useState(false);
@@ -4323,6 +4338,72 @@
         });
       };
 
+      const startDemoTyping = () => {
+        const popup = document.getElementById('demo-chat-popup');
+        if (!popup || popup.classList.contains('opacity-0')) return;
+        const msgEl = document.getElementById('demo-typing-text');
+        const mentorEl = document.getElementById('demo-mentor-text');
+        const mentorRow = document.getElementById('demo-mentor-reply');
+        if (!msgEl) return;
+
+        const studentQuestions = [
+          'How do I generate videos using Google Veo AI?',
+          'What prompts work best for Google Veo video generation?',
+          'Can Google Veo create 60fps cinematic videos?',
+        ];
+        const mentorAnswers = [
+          'To get professional-quality Veo videos, structure your prompts like this:\n\nSubject + Action + Environment + Camera + Lighting + Style\n\nExample:\n\n"Vintage car driving through a rainy Kerala road, cinematic tracking shot, dramatic monsoon atmosphere, soft natural lighting, ultra-realistic 4K film look."',
+          'Awesome! For Veo, use descriptive visual language: specify camera angle, lighting, mood, and subject movement. Example: "Low angle tracking shot of a futuristic car drifting in rain, dramatic lighting". The more visual detail, the better the output!',
+          'Yes! Veo supports up to 60fps for cinematic motion. Use prompts like "smooth 60fps slow-motion shot of waves crashing at golden hour, hyper-realistic". Pair it with descriptive camera movements for the best results!',
+        ];
+
+        const idx = Math.floor(Math.random() * studentQuestions.length);
+        const question = studentQuestions[idx];
+        const answer = mentorAnswers[idx];
+
+        // Reset mentor reply
+        if (mentorRow) {
+          mentorRow.classList.add('opacity-0', 'translate-y-2');
+        }
+        if (mentorEl) {
+          mentorEl.textContent = '';
+        }
+
+        // Type student question
+        msgEl.textContent = '';
+        msgEl.classList.remove('animate-pulse');
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < question.length) {
+            msgEl.textContent += question.charAt(i);
+            i++;
+          } else {
+            clearInterval(interval);
+            msgEl.classList.add('animate-pulse');
+
+            // Show mentor reply after a brief pause
+            setTimeout(() => {
+              if (mentorEl && mentorRow) {
+                mentorEl.textContent = answer;
+                mentorRow.classList.remove('opacity-0', 'translate-y-2');
+              }
+            }, 800);
+
+            // Reset after display
+            setTimeout(() => {
+              msgEl.textContent = '▊';
+              msgEl.classList.add('animate-pulse');
+              if (mentorRow) {
+                mentorRow.classList.add('opacity-0', 'translate-y-2');
+              }
+              if (mentorEl) {
+                mentorEl.textContent = '';
+              }
+            }, 6000);
+          }
+        }, 30);
+      };
+
       const colorThemes = {
         emerald: {
           grad: 'linear-gradient(135deg, #10b981, #00f0ff)',
@@ -4484,6 +4565,116 @@
       const filteredShowcase = showcaseFilter === 'All' 
         ? showcaseProjects 
         : showcaseProjects.filter(p => p.cat === showcaseFilter);
+
+      // Auto-play demo animation when 24/7 support section is visible
+      useEffect(() => {
+        const section = document.getElementById('final-cta');
+        if (!section) return;
+
+        let timeoutIds = [];
+        let isVisible = false;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              isVisible = true;
+              startAutoDemo();
+            } else {
+              isVisible = false;
+            }
+          });
+        }, { threshold: 0.35 });
+
+        observer.observe(section);
+
+        function startAutoDemo() {
+
+          function setActiveTab(tab) {
+            const videoBtn = document.getElementById('demo-tab-video');
+            const chatBtn = document.getElementById('demo-tab-chat');
+            if (!videoBtn || !chatBtn) return;
+
+            if (tab === 'chat') {
+              videoBtn.classList.remove('bg-brand-cyan', 'text-black');
+              videoBtn.classList.add('text-gray-500');
+              chatBtn.classList.remove('text-gray-500');
+              chatBtn.classList.add('bg-brand-cyan', 'text-black');
+            } else {
+              videoBtn.classList.remove('text-gray-500');
+              videoBtn.classList.add('bg-brand-cyan', 'text-black');
+              chatBtn.classList.remove('bg-brand-cyan', 'text-black');
+              chatBtn.classList.add('text-gray-500');
+            }
+          }
+
+          function playCycle() {
+            if (!isVisible) return;
+            const popup = document.getElementById('demo-chat-popup');
+            const video = document.getElementById('demo-video');
+            if (!popup) return;
+
+            // Show popup + switch to Chat tab + pause video
+            popup.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+            setActiveTab('chat');
+            if (video) video.pause();
+
+            // Start typing after popup slides in
+            window.typingTimeout = setTimeout(() => {
+              if (!isVisible) return;
+              startDemoTyping();
+            }, 700);
+
+            // Hide popup + switch back to Video tab + resume video
+            window.cycleTimeout = setTimeout(() => {
+              if (!isVisible) return;
+              popup.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+              setActiveTab('video');
+              if (video) video.play();
+
+              // Restart cycle after hidden pause
+              timeoutIds.push(setTimeout(() => {
+                if (isVisible) playCycle();
+              }, 2500));
+            }, 11000);
+          }
+
+          // Initial delay before first play
+          timeoutIds.push(setTimeout(playCycle, 2000));
+        }
+
+        return () => {
+          observer.disconnect();
+          timeoutIds.forEach(id => clearTimeout(id));
+        };
+      }, []);
+
+      // Glow spotlight tracker on demo device frame
+      useEffect(() => {
+        const frame = document.getElementById('demo-device-frame');
+        const spotlight = document.getElementById('demo-spotlight');
+        if (!frame || !spotlight) return;
+
+        const handleMouseMove = (e) => {
+          const rect = frame.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          spotlight.style.setProperty('--sx', x + '%');
+          spotlight.style.setProperty('--sy', y + '%');
+          spotlight.style.opacity = '1';
+        };
+
+        const handleMouseLeave = () => {
+          spotlight.style.opacity = '0';
+        };
+
+        frame.addEventListener('mousemove', handleMouseMove);
+        frame.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+          frame.removeEventListener('mousemove', handleMouseMove);
+          frame.removeEventListener('mouseleave', handleMouseLeave);
+        };
+      }, []);
 
       return (
           <div className="relative min-h-screen bg-brand-bg text-gray-200 select-none overflow-x-hidden pb-1">
@@ -5418,36 +5609,184 @@
             </div>
           </section>
 
-          {/* ===== FINAL CTA ===== */}
-          <section id="final-cta" className="pt-24 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker overflow-hidden text-center">
+          {/* ===== 24/7 SUPPORT DEMO ===== */}
+          <section id="final-cta" className="pt-24 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker overflow-hidden">
             <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[400px] bg-brand-cyan/5 filter blur-[100px] rounded-full pointer-events-none" />
             <div className="absolute top-1/3 right-1/4 -translate-y-1/2 w-[300px] h-[300px] bg-brand-violet/5 filter blur-[100px] rounded-full pointer-events-none" />
-            <div className="max-w-3xl mx-auto w-full relative z-10">
-              <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center justify-center mb-4">
-                <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
-                Start Your Journey Today
-              </span>
-              <h2 className="text-4xl md:text-6xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
-                Ready to Master AI?
-              </h2>
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-10 font-light">
-                Join hundreds of learners already using AI to build better careers, businesses, and creative portfolios. Get lifetime access to all courses and future updates.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={handleGeneralEnroll}
-                  className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02]"
-                >
-                  Enroll Now &mdash; &#8377;5 Only
-                </button>
-                <a
-                  href="mailto:dxignlearn@gmail.com"
-                  className="px-10 py-4 rounded-2xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300"
-                >
-                  Contact Us
-                </a>
+            
+            <div className="max-w-6xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left: Text */}
+              <div className="text-left">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-4">
+                  <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2 animate-pulse" />
+                  24/7 Doubt Support
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black uppercase text-white font-heading tracking-tight leading-none mb-6">
+                  Clear Doubts <span className="text-brand-cyan">Instantly</span>
+                </h2>
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-md mb-8 font-light">
+                  Stuck on a concept during class? Get real-time help from mentors right when you need it. No waiting, no emails — just instant answers.
+                </p>
+                <div className="flex flex-col sm:flex-row items-start gap-4">
+                  <button
+                    onClick={handleGeneralEnroll}
+                    className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-violet text-white font-bold uppercase tracking-wider text-xs text-center transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:shadow-[0_0_35px_rgba(0,240,255,0.45)] hover:scale-[1.02]"
+                  >
+                    Enroll &amp; Get Live Support &mdash; &#8377;5
+                  </button>
+                  <a
+                    href="mailto:dxignlearn@gmail.com"
+                    className="px-10 py-4 rounded-2xl liquid-glass text-white font-bold uppercase tracking-wider text-xs text-center hover:border-white/20 transition-all duration-300"
+                  >
+                    Talk to a Mentor
+                  </a>
+                </div>
+                <p className="text-gray-600 text-[10px] font-mono mt-6">Limited launch offer &middot; Lifetime access &middot; 7-day money-back guarantee</p>
               </div>
-              <p className="text-gray-600 text-[10px] font-mono mt-6">Limited launch offer &middot; Lifetime access &middot; 7-day money-back guarantee</p>
+              
+              {/* Right: Interactive Demo Player */}
+              <div className="relative w-full max-w-lg mx-auto lg:mx-0">
+                {/* Device Frame */}
+                <div id="demo-device-frame" className="bg-[#0d0d12] rounded-3xl border border-white/[0.08] overflow-hidden shadow-2xl shadow-brand-cyan/5 relative">
+                  {/* Spotlight glow */}
+                  <div id="demo-spotlight" className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500" style={{ background: 'radial-gradient(circle at var(--sx, 50%) var(--sy, 50%), rgba(0, 255, 255, 0.15) 0%, rgba(0, 255, 255, 0.05) 40%, transparent 70%)' }}></div>
+                  <div className="relative z-[1]">
+                  
+                  {/* Dynamic Island */}
+                  <div className="flex items-center justify-center px-5 pt-5 pb-3">
+                    <div className="inline-flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] rounded-full p-1">
+                      <button id="demo-tab-video" className="px-5 py-2 rounded-full text-[11px] font-bold bg-brand-cyan text-black tracking-wide cursor-default transition-all duration-700 ease-out">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        Video
+                      </button>
+                      <button
+                        id="demo-tab-chat"
+                        className="px-5 py-2 rounded-full text-[11px] font-bold text-gray-500 transition-all duration-700 ease-out cursor-default"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Video Player Area */}
+                  <div className="relative mx-5 mb-3 rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center cursor-default">
+                    
+                    {/* Demo video */}
+                    <video
+                      id="demo-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      disablePictureInPicture
+                      controlsList="nodownload nofullscreen noremoteplayback"
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      style={{ WebkitMediaControls: 'none' }}
+                    >
+                      <source src="public/Images/videos/motion/Screen%20Recording%202026-06-12%20022336.mp4" type="video/mp4" />
+                    </video>
+                    
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none" />
+                    
+                    {/* Time badge */}
+                    <span className="absolute top-3 right-3 z-30 px-2 py-0.5 rounded-md bg-black/60 text-[9px] font-mono text-gray-400 border border-white/5">Demo</span>
+                    
+                    {/* Chat Popup */}
+                    <div
+                      id="demo-chat-popup"
+                      className="absolute bottom-0 left-0 right-0 bg-[#0d0d12]/95 backdrop-blur-md border-t border-white/[0.08] rounded-b-2xl overflow-hidden opacity-0 translate-y-4 pointer-events-none transition-all duration-500 z-50"
+                    >
+                      {/* Chat Popup Header */}
+                      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 flex items-center justify-center text-[9px] font-bold text-brand-cyan">M</div>
+                          <span className="text-[11px] font-bold text-white">Mentor Support</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] text-gray-600 font-mono">Active</span>
+                          <button
+                            id="demo-chat-close"
+                            className="w-5 h-5 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-500 hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
+                            onClick={() => {
+                              const popup = document.getElementById('demo-chat-popup');
+                              const video = document.getElementById('demo-video');
+                              if (popup) popup.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                              if (video && video.paused) video.play();
+                              // Switch tab back to video
+                              const videoBtn = document.getElementById('demo-tab-video');
+                              const chatBtn = document.getElementById('demo-tab-chat');
+                              if (videoBtn) { videoBtn.classList.remove('text-gray-500'); videoBtn.classList.add('bg-brand-cyan', 'text-black'); }
+                              if (chatBtn) { chatBtn.classList.remove('bg-brand-cyan', 'text-black'); chatBtn.classList.add('text-gray-500'); }
+                              // Cancel ongoing cycle so it doesn't clear messages
+                              if (window.typingTimeout) clearTimeout(window.typingTimeout);
+                              if (window.cycleTimeout) clearTimeout(window.cycleTimeout);
+                              // Pop animation
+                              const btn = document.getElementById('demo-chat-close');
+                              if (btn) {
+                                btn.style.transform = 'scale(0.85)';
+                                setTimeout(() => { btn.style.transform = ''; }, 200);
+                              }
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Chat Messages */}
+                      <div className="px-4 py-2.5 space-y-2 min-h-[100px] max-h-[140px] overflow-y-auto">
+                        {/* Student - typing a doubt */}
+                        <div className="flex items-start gap-2 justify-end">
+                          <div className="bg-brand-cyan/10 rounded-2xl rounded-tr-sm px-3 py-2 max-w-[85%]">
+                            <p className="text-[11px] text-white leading-relaxed" id="demo-typing-text">
+                              <span className="inline-block animate-pulse">▊</span>
+                            </p>
+                          </div>
+                          <div className="w-5 h-5 rounded-full bg-brand-violet/20 border border-brand-violet/30 flex items-center justify-center text-[7px] font-bold text-brand-violet shrink-0 mt-0.5">S</div>
+                        </div>
+                        
+                        {/* Mentor reply - hidden initially, appears after student types */}
+                        <div id="demo-mentor-reply" className="flex items-start gap-2 opacity-0 translate-y-2 transition-all duration-700 ease-out">
+                          <div className="w-5 h-5 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 flex items-center justify-center text-[7px] font-bold text-brand-cyan shrink-0 mt-0.5">M</div>
+                          <div className="bg-white/[0.04] rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%]">
+                            <p className="text-[11px] text-gray-300 leading-relaxed" id="demo-mentor-text"></p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Chat Input */}
+                      <div className="px-4 py-2.5 border-t border-white/[0.06] flex items-center gap-2">
+                        <div className="flex-1 bg-white/[0.03] rounded-xl border border-white/[0.06] px-3 py-1.5">
+                          <input
+                            type="text"
+                            placeholder="Type your doubt..."
+                            readOnly
+                            className="w-full bg-transparent text-white text-[11px] placeholder-gray-600 cursor-default"
+                          />
+                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-brand-cyan flex items-center justify-center text-black shrink-0 cursor-default">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom bar */}
+                  <div className="flex items-center justify-between px-5 pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse" />
+                      <span className="text-[10px] font-mono text-gray-500 tracking-wide">Mentor Online</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-gray-600">24/7 Support Active</span>
+                  </div>
+                  
+                  </div>
+                </div>
+              </div>
+              
             </div>
           </section>
 
@@ -5560,7 +5899,7 @@
                 onClick={closeEnrollModal}
                 onWheel={(e) => e.stopPropagation()}
               >
-                <div className="min-h-full flex items-center justify-center p-4 md:p-8" onClick={closeEnrollModal}>
+                <div className="min-h-full flex items-start lg:items-center justify-center p-4 md:p-8" onClick={closeEnrollModal}>
                   <div
                     className="relative w-full max-w-5xl mx-auto rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12"
                     style={{
@@ -5581,7 +5920,7 @@
                     </button>
 
                     {/* LEFT COLUMN: Course Details */}
-                    <div className="lg:col-span-7 p-6 md:p-8 overflow-y-auto max-h-[80vh] border-r border-white/5">
+                    <div className="lg:col-span-7 p-6 md:p-8 overflow-y-auto lg:max-h-[80vh] lg:border-r border-white/5">
                       
                       {/* Header */}
                       <div className="flex items-start justify-between mb-5">
@@ -7452,7 +7791,7 @@
                     {adminTab === 'chat' && (
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-grow lg:h-full min-h-0">
                         {/* Left sidebar - Chats list */}
-                        <div className="lg:col-span-3 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl">
+                        <div className={`lg:col-span-3 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl ${showMobileChatPopup ? 'hidden ' : ''}lg:flex`}>
                           <div className="p-4 lg:p-5 border-b border-white/5">
                             <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold block mb-3">Doubt Rooms ({studentChats.length})</span>
                             <div className="relative flex items-center">
@@ -7486,7 +7825,10 @@
                                 return (
                                     <button
                                       key={chat.id}
-                                      onClick={() => setSelectedChatId(chat.id)}
+                                      onClick={() => {
+                                        setSelectedChatId(chat.id);
+                                        setShowMobileChatPopup(true);
+                                      }}
                                       className={`w-full text-left p-3.5 lg:p-4 rounded-2xl flex items-center gap-3 lg:gap-4 transition-all duration-300 ${
                                         isSelected 
                                           ? 'bg-white/[0.06] border border-white/10 shadow-[0_4px_20px_rgba(0,240,255,0.03)]' 
@@ -7523,7 +7865,7 @@
                         </div>
 
                         {/* Right active chat pane */}
-                        <div className="lg:col-span-9 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative">
+                        <div className={`lg:col-span-9 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative ${showMobileChatPopup ? 'fixed inset-0 z-[100] rounded-none lg:static lg:inset-auto lg:z-auto lg:rounded-3xl' : 'hidden lg:flex'}`}>
                           {!selectedChatId ? (
                             // Empty state
                             <div className="flex-grow flex flex-col items-center justify-center p-8 text-center">
@@ -7590,13 +7932,20 @@
 
                                     <div className="flex items-center gap-3">
                                       {activeChat.courses && activeChat.courses.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 items-center">
+                                        <div className="hidden sm:flex flex-wrap gap-1 items-center">
                                           <span className="text-[8px] font-mono text-gray-500 mr-1 uppercase">Enrolled:</span>
                                           {activeChat.courses.map((course, idx) => (
                                             <span key={idx} className="px-2 py-0.5 rounded-md text-[8px] font-mono font-bold bg-brand-violet/10 text-brand-violet border border-brand-violet/20">{course}</span>
                                           ))}
                                         </div>
                                       )}
+                                      <button
+                                        onClick={() => setShowMobileChatPopup(false)}
+                                        className="lg:hidden w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition shrink-0"
+                                        aria-label="Close chat"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                      </button>
                                       <button
                                         onClick={() => {
                                           setAdminSelectionMode(true);
