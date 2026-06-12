@@ -7254,7 +7254,7 @@
                             ) : (
                               /* Inline Chat Panel workspace */
                               <div 
-                                className="flex-grow flex flex-col bg-[#0d0d12]/95 border border-white/[0.08] rounded-2xl overflow-hidden min-h-[400px] lg:min-h-0 relative shadow-2xl"
+                                className="flex-grow flex flex-col bg-[#0d0d12]/95 border border-white/[0.08] rounded-2xl overflow-hidden min-h-[450px] relative shadow-2xl"
                                 style={{ backdropFilter: 'blur(24px)' }}
                               >
                                 {/* Chat Header */}
@@ -7487,7 +7487,7 @@
           )}
 
           {/* Chat FAB + Popup — rendered outside portal overlay to avoid stacking context issues */}
-          {(isStudentOpen || closingStudent) && (
+          {(isStudentOpen || closingStudent) && isStudentAuthenticated && (
             <>
               {/* Floating Chat FAB — Dynamic Island pill style */}
               <button
