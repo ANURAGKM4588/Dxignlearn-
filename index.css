@@ -25,6 +25,7 @@
 
 html {
   background-color: var(--color-bg-dark);
+  overflow-y: scroll;
 }
 
 body {
