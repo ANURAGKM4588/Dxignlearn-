@@ -6817,397 +6817,613 @@
                           })}
                         </aside>
 
-                         {/* Center Column: Video Viewer */}
-                         <section className="flex-grow p-3 md:p-6 flex flex-col space-y-4 overflow-y-auto lg:max-h-full">
-                           
-                           {/* Video Player Display Container — Dynamic Island glass style */}
-                           <div className="w-full aspect-video rounded-[20px] overflow-hidden bg-black/50 border border-white/[0.06] shadow-2xl relative shrink-0" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                            {(() => {
-                              const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                              if (!enrolled) {
-                                const payUrl = COURSE_PAYMENT_LINKS[studentSelectedCourse] || 'https://rzp.io/l/dxign-graphic-design';
-                                return (
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm">
-                                    <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 animate-pulse">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                    </div>
-                                    <h2 className="text-xl font-black uppercase text-white font-heading tracking-wide mb-2">COURSE LOCKED</h2>
-                                    <p className="text-xs text-gray-500 max-w-sm mb-6">You are not currently enrolled in the <span className="text-white font-bold">{studentSelectedCourse}</span> training program.</p>
-                                    <a 
-                                      href={payUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
-                                    >
-                                      UNLOCK & BUY PROGRAM (₹499)
-                                    </a>
-                                  </div>
-                                );
-                              }
-
-                              if (!studentActiveVideo) {
-                                return (
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-4 animate-bounce"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                                    <p className="text-xs text-gray-500">Select a lesson from the syllabus sidebar to start streaming</p>
-                                  </div>
-                                );
-                              }
-
-                              const videoId = getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
-                              if (videoId) {
-                                const lectureList = getMergedLectures()[studentSelectedCourse] || [];
-                                const curIdx = lectureList.findIndex(l => l.id === studentActiveVideo.id);
-                                return <YouTubeCustomPlayer
-                                  key={studentActiveVideo.id}
-                                  videoId={videoId}
-                                  resumePosition={getVideoProgress(studentActiveVideo.id)}
-                                  onPrev={curIdx > 0 ? () => setStudentActiveVideo(lectureList[curIdx - 1]) : null}
-                                  onNext={curIdx < lectureList.length - 1 ? () => setStudentActiveVideo(lectureList[curIdx + 1]) : null}
-                                />;
-                              }
-                              return (
-                                <video 
-                                  key={studentActiveVideo.id}
-                                  ref={studentNativeVideoRef}
-                                  src={getAttachmentUrl(studentActiveVideo.videoUrl)}
-                                  controls
-                                  onLoadedMetadata={() => {
-                                    const pos = getVideoProgress(studentActiveVideo.id);
-                                    if (pos > 0 && studentNativeVideoRef.current) studentNativeVideoRef.current.currentTime = pos;
-                                  }}
-                                  className="w-full h-full object-contain"
-                                  style={{ display: 'block' }}
-                                />
-                              );
-                            })()}
-                           </div>
-
-                          {/* ── MOBILE TAB BAR (below lg screens) — Dynamic Island pill style ── */}
-                          <div className="lg:hidden flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-[14px] p-1 font-mono text-[9px] font-bold">
-                            <button
-                              onClick={() => setStudentMobileTab('syllabus')}
-                              className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                                studentMobileTab === 'syllabus'
-                                  ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
-                                  : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                              }`}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                              Syllabus
-                            </button>
-                            <button
-                              onClick={() => setStudentMobileTab('about')}
-                              className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                                studentMobileTab === 'about'
-                                  ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
-                                  : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                              }`}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                              About Lesson
-                            </button>
-                            <button
-                              onClick={() => setStudentMobileTab('programs')}
-                              className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                                studentMobileTab === 'programs'
-                                  ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
-                                  : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                              }`}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
-                              My Programs
-                            </button>
-                          </div>
-
-                          {/* ── MOBILE TAB CONTENT (below lg screens) — Dynamic Island glass ── */}
-                           <div className="lg:hidden space-y-3">
-                             {/* Syllabus Tab: Course Syllabus lecture list */}
-                             <div className={studentMobileTab === 'syllabus' ? 'block' : 'hidden'}>
-                                <div className="text-left">
-                                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
-                                    <div>
-                                      <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
-                                      <h2 className="text-base font-black text-white tracking-tight mt-0.5">Course Syllabus</h2>
-                                    </div>
-                                    <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
-                                      {(getMergedLectures()[studentSelectedCourse] || []).length} Lectures
-                                    </span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {(() => {
-                                      const list = getMergedLectures()[studentSelectedCourse] || [];
-                                      const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                                      if (list.length === 0) {
-                                        return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
-                                      }
-                                      return list.map((item, index) => {
-                                        const active = studentActiveVideo && studentActiveVideo.id === item.id;
-                                        return (
-                                          <button
-                                            key={item.id}
-                                            onClick={() => enrolled && setStudentActiveVideo(item)}
-                                            className={`w-full p-3 rounded-[14px] border text-left flex items-center justify-between transition-all ${
-                                              !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/[0.04]' :
-                                              active
-                                                ? 'bg-gradient-to-r from-brand-cyan/8 to-brand-blue/[0.03] border-brand-cyan/15 text-white'
-                                                : 'bg-white/[0.015] hover:bg-white/[0.03] border-white/[0.04] text-gray-400 hover:text-white hover:border-white/10'
-                                            } group`}
-                                            style={active ? { backdropFilter: 'blur(8px)' } : {}}
-                                          >
-                                            <div className="flex items-center space-x-2.5 truncate">
-                                              <div className={`w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0 text-[9px] font-mono font-bold border transition-all ${
-                                                active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/[0.04] border-white/[0.08] text-gray-400 group-hover:text-brand-cyan'
-                                              }`}>
-                                                {index + 1}
-                                              </div>
-                                              <div className="truncate text-left">
-                                                <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{item.title}</p>
-                                                <div className="flex items-center gap-1.5 mt-0.5 text-[8px] font-mono text-gray-500">
-                                                  <span>{item.duration}</span>
-                                                  <span>•</span>
-                                                  <span className="uppercase text-brand-violet font-bold">{item.difficulty || 'Beginner'}</span>
-                                                </div>
-                                              </div>
-                                            </div>
-                                            {active ? (
-                                              <div className="w-5 h-5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center shrink-0">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5 text-brand-cyan"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                              </div>
-                                            ) : (
-                                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-gray-500 group-hover:text-brand-cyan transition"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                            )}
-                                          </button>
-                                        );
-                                      });
-                                    })()}
-                                  </div>
-                                </div>
+                          {/* Center Column: Video Viewer */}
+                          <section className="flex-grow p-3 md:p-6 flex flex-col space-y-4 overflow-y-auto lg:max-h-full">
+                            
+                            {/* Centered Video/Chat Navigation Pill Toggle */}
+                            <div className="flex justify-center shrink-0">
+                              <div className="inline-flex items-center gap-1 bg-[#0f0f15]/80 border border-white/[0.06] rounded-full p-1 font-mono text-[9px] font-bold">
+                                <button
+                                  type="button"
+                                  onClick={() => setStudentTab('courses')}
+                                  className={`px-5 py-2 rounded-full flex items-center gap-1.5 transition-all duration-300 ${
+                                    studentTab === 'courses'
+                                      ? 'bg-brand-cyan text-black font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]'
+                                      : 'text-gray-400 hover:text-white'
+                                  }`}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                  Video
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setStudentTab('chat')}
+                                  className={`px-5 py-2 rounded-full flex items-center gap-1.5 transition-all duration-300 ${
+                                    studentTab === 'chat'
+                                      ? 'bg-brand-cyan text-black font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]'
+                                      : 'text-gray-400 hover:text-white'
+                                  }`}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                  Chat
+                                </button>
                               </div>
+                            </div>
 
-                             {/* About Lesson Tab — Dynamic Island glass style */}
-                             <div className={studentMobileTab === 'about' ? 'block' : 'hidden'}>
-                               {(() => {
-                                 const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                                 if (!enrolled) {
-                                   return (
-                                     <div className="text-left">
-                                       <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
-                                         <div>
-                                           <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
-                                           <h2 className="text-base font-black text-white tracking-tight mt-0.5">Course Locked</h2>
-                                         </div>
-                                       </div>
-                                       <div className="p-6 rounded-[16px] border border-white/[0.05] bg-white/[0.015] text-center flex flex-col items-center justify-center" style={{ backdropFilter: 'blur(8px)' }}>
-                                         <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-3">
-                                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                         </div>
-                                         <p className="text-xs text-gray-500 font-mono">Please enroll in this course to view lesson details</p>
-                                       </div>
-                                     </div>
-                                   );
-                                 }
-                                 if (!studentActiveVideo) {
-                                   return (
-                                     <div className="text-left">
-                                       <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
-                                         <div>
-                                           <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
-                                           <h2 className="text-base font-black text-white tracking-tight mt-0.5">Lesson Details</h2>
-                                         </div>
-                                       </div>
-                                       <div className="p-6 rounded-[16px] border border-white/[0.05] bg-white/[0.015] text-center flex flex-col items-center justify-center" style={{ backdropFilter: 'blur(8px)' }}>
-                                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                                         <p className="text-xs text-gray-500 font-mono">Select a lesson from the Syllabus tab to view details</p>
-                                       </div>
-                                     </div>
-                                   );
-                                 }
-                                 return (
-                                   <div className="text-left">
-                                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
-                                       <div>
-                                         <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
-                                         <h2 className="text-sm font-black text-white tracking-tight mt-0.5">{studentActiveVideo.title}</h2>
-                                       </div>
-                                       <div className="flex items-center gap-2">
-                                         <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
-                                           {studentActiveVideo.difficulty || 'Intermediate'}
-                                         </span>
-                                         <span className="text-[9px] text-gray-500 font-mono">{studentActiveVideo.duration}</span>
-                                       </div>
-                                     </div>
-                                     <div className="space-y-2.5 p-4 rounded-[16px] border border-white/[0.04] bg-white/[0.01] mb-3" style={{ backdropFilter: 'blur(6px)' }}>
-                                       <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
-                                       <p className="text-gray-400 text-[11px] font-light leading-relaxed">{studentActiveVideo.description}</p>
-                                     </div>
-                                     {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
-                                       <div className="flex flex-wrap gap-1.5 mb-3 px-0.5">
-                                         {studentActiveVideo.tags.map(tag => (
-                                           <span key={tag} className="px-2 py-1 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[8px] font-medium text-gray-500 font-mono">#{tag}</span>
-                                         ))}
-                                       </div>
-                                     )}
-                                     {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
-                                       <div className="pt-3 border-t border-white/[0.04]">
-                                         <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-3 px-0.5">Downloadable Templates & Source Files</h4>
-                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                           {studentActiveVideo.resources.map((res, idx) => (
-                                             <a 
-                                               key={idx}
-                                               href={getAttachmentUrl(res.url)}
-                                               target="_blank"
-                                               rel="noreferrer"
-                                               className="p-3 rounded-[14px] bg-white/[0.015] hover:bg-white/[0.03] border border-white/[0.04] hover:border-brand-cyan/15 flex items-center justify-between transition-all group"
-                                             >
-                                               <div className="flex items-center space-x-2.5 truncate">
-                                                 <div className="w-7 h-7 rounded-[10px] bg-white/[0.04] flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
-                                                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
-                                                 </div>
-                                                 <div className="truncate text-left">
-                                                   <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
-                                                   <p className="text-[8px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
-                                                 </div>
-                                               </div>
-                                               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition shrink-0"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
-                                             </a>
-                                           ))}
-                                         </div>
-                                       </div>
-                                     )}
-                                   </div>
-                                 );
-                               })()}
-                             </div>
+                            {/* Video Player Display Container — Dynamic Island glass style */}
+                            <div className="w-full aspect-video rounded-[20px] overflow-hidden bg-black/50 border border-white/[0.06] shadow-2xl relative shrink-0" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                              {/* Demo Badge */}
+                              {studentTab === 'chat' && (
+                                <div className="absolute top-4 right-4 z-20 px-2.5 py-1 rounded-[6px] bg-black/70 border border-white/[0.08] text-[9px] font-mono font-bold tracking-widest text-gray-300 uppercase shadow-lg select-none">
+                                  Demo
+                                </div>
+                              )}
+                              
+                              {(() => {
+                                const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                                if (!enrolled) {
+                                  const payUrl = COURSE_PAYMENT_LINKS[studentSelectedCourse] || 'https://rzp.io/l/dxign-graphic-design';
+                                  return (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm">
+                                      <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 animate-pulse">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                      </div>
+                                      <h2 className="text-xl font-black uppercase text-white font-heading tracking-wide mb-2">COURSE LOCKED</h2>
+                                      <p className="text-xs text-gray-500 max-w-sm mb-6">You are not currently enrolled in the <span className="text-white font-bold">{studentSelectedCourse}</span> training program.</p>
+                                      <a 
+                                        href={payUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
+                                      >
+                                        UNLOCK & BUY PROGRAM (₹499)
+                                      </a>
+                                    </div>
+                                  );
+                                }
 
-                             {/* My Programs Tab: Course switching buttons — Dynamic Island glass style */}
-                             <div className={studentMobileTab === 'programs' ? 'block' : 'hidden'}>
-                               <div className="text-left">
-                                 <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
-                                   <div>
-                                     <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">Student Portal</span>
-                                     <h2 className="text-base font-black text-white tracking-tight mt-0.5">My Programs</h2>
-                                   </div>
-                                   <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
-                                     {Object.keys(DEFAULT_COURSE_CURRICULUM).length} Programs
-                                   </span>
-                                 </div>
-                                 <div className="space-y-2">
-                                   {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
-                                     const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
-                                     const active = studentSelectedCourse === courseName;
-                                     const courseInfo = courseList.find(c => c.title.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.id.replace('-', ' '))) || {
-                                       duration: '6 Weeks'
-                                     };
-                                     return (
-                                       <button
-                                         key={courseName}
-                                         onClick={() => {
-                                           setStudentSelectedCourse(courseName);
-                                           const saved = getLastWatchedVideo(courseName);
-                                           if (saved) setStudentActiveVideo(saved);
-                                           else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
-                                         }}
-                                         className={`w-full p-3 rounded-[14px] border text-left flex items-center justify-between transition-all ${
-                                           active 
-                                             ? 'bg-gradient-to-r from-brand-cyan/8 to-brand-blue/[0.03] border-brand-cyan/15 text-white' 
-                                             : 'bg-white/[0.015] hover:bg-white/[0.03] border-white/[0.04] text-gray-400 hover:text-white hover:border-white/10'
-                                         } group`}
-                                         style={active ? { backdropFilter: 'blur(8px)' } : {}}
-                                       >
-                                         <div className="flex items-center space-x-2.5 truncate">
-                                           <div className={`w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0 border transition-all ${
-                                             active ? 'bg-brand-cyan border-brand-cyan text-black font-bold shadow-[0_0_10px_rgba(0,240,255,0.15)]' : 'bg-white/[0.04] border-white/[0.08] text-gray-400 group-hover:text-brand-cyan'
-                                           }`}>
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
-                                           </div>
-                                           <div className="truncate text-left">
-                                             <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{courseName}</p>
-                                             <div className="flex items-center gap-1.5 mt-0.5 text-[8px] font-mono text-gray-500">
-                                               <span>{courseInfo.duration}</span>
-                                               <span>•</span>
-                                               <span className={`uppercase font-bold ${enrolled ? 'text-brand-cyan' : 'text-rose-400'}`}>
-                                                 {enrolled ? 'Enrolled' : 'Locked'}
-                                               </span>
-                                             </div>
-                                           </div>
-                                         </div>
-                                         {enrolled ? (
-                                           <div className="w-5 h-5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center">
-                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-brand-cyan"><polyline points="9 18 15 12 9 6"/></svg>
-                                           </div>
-                                         ) : (
-                                           <span className="text-[10px] text-rose-400 shrink-0 ml-1">🔒</span>
-                                         )}
-                                       </button>
-                                     );
-                                   })}
-                                 </div>
-                               </div>
-                             </div>
-                           </div>
+                                if (!studentActiveVideo) {
+                                  return (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-4 animate-bounce"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                      <p className="text-xs text-gray-500">Select a lesson from the syllabus sidebar to start streaming</p>
+                                    </div>
+                                  );
+                                }
 
-                          {/* Desktop-only video metadata description — Dynamic Island glass style */}
-                          <div className="hidden lg:block">
-                            {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
-                              <div className="text-left">
-                                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 px-0.5">
-                                  <div>
-                                    <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
-                                    <h2 className="text-lg font-black text-white tracking-tight mt-0.5">{studentActiveVideo.title}</h2>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
-                                      {studentActiveVideo.difficulty || 'Intermediate'}
-                                    </span>
-                                    <span className="text-[9px] text-gray-500 font-mono">{studentActiveVideo.duration}</span>
-                                  </div>
+                                const videoId = getYoutubeEmbedUrl(studentActiveVideo.videoUrl);
+                                if (videoId) {
+                                  const lectureList = getMergedLectures()[studentSelectedCourse] || [];
+                                  const curIdx = lectureList.findIndex(l => l.id === studentActiveVideo.id);
+                                  return <YouTubeCustomPlayer
+                                    key={studentActiveVideo.id}
+                                    videoId={videoId}
+                                    resumePosition={getVideoProgress(studentActiveVideo.id)}
+                                    onPrev={curIdx > 0 ? () => setStudentActiveVideo(lectureList[curIdx - 1]) : null}
+                                    onNext={curIdx < lectureList.length - 1 ? () => setStudentActiveVideo(lectureList[curIdx + 1]) : null}
+                                  />;
+                                }
+                                return (
+                                  <video 
+                                    key={studentActiveVideo.id}
+                                    ref={studentNativeVideoRef}
+                                    src={getAttachmentUrl(studentActiveVideo.videoUrl)}
+                                    controls
+                                    onLoadedMetadata={() => {
+                                      const pos = getVideoProgress(studentActiveVideo.id);
+                                      if (pos > 0 && studentNativeVideoRef.current) studentNativeVideoRef.current.currentTime = pos;
+                                    }}
+                                    className="w-full h-full object-contain"
+                                    style={{ display: 'block' }}
+                                  />
+                                );
+                              })()}
+                            </div>
+
+                            {/* Conditional Workspace */}
+                            {studentTab === 'courses' ? (
+                              <>
+                                {/* ── MOBILE TAB BAR (below lg screens) — Dynamic Island pill style ── */}
+                                <div className="lg:hidden flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-[14px] p-1 font-mono text-[9px] font-bold">
+                                  <button
+                                    type="button"
+                                    onClick={() => setStudentMobileTab('syllabus')}
+                                    className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                                      studentMobileTab === 'syllabus'
+                                        ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+                                    }`}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    Syllabus
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setStudentMobileTab('about')}
+                                    className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                                      studentMobileTab === 'about'
+                                        ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+                                    }`}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                    About Lesson
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setStudentMobileTab('programs')}
+                                    className={`flex-1 py-2 rounded-[10px] transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                                      studentMobileTab === 'programs'
+                                        ? 'bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+                                    }`}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                                    My Programs
+                                  </button>
                                 </div>
 
-                                <div className="p-4 rounded-[16px] border border-white/[0.04] bg-white/[0.01] mb-3" style={{ backdropFilter: 'blur(6px)' }}>
-                                  <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-2">Lecture Summary</h4>
-                                  <p className="text-gray-400 text-xs font-light leading-relaxed">{studentActiveVideo.description}</p>
-                                </div>
-
-                                {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1.5 mb-3 px-0.5">
-                                    {studentActiveVideo.tags.map(tag => (
-                                      <span key={tag} className="px-2 py-1 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[8px] font-medium text-gray-500 font-mono">#{tag}</span>
-                                    ))}
+                                {/* ── MOBILE TAB CONTENT (below lg screens) — Dynamic Island glass ── */}
+                                <div className="lg:hidden space-y-3">
+                                  {/* Syllabus Tab: Course Syllabus lecture list */}
+                                  <div className={studentMobileTab === 'syllabus' ? 'block' : 'hidden'}>
+                                    <div className="text-left">
+                                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
+                                        <div>
+                                          <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
+                                          <h2 className="text-base font-black text-white tracking-tight mt-0.5">Course Syllabus</h2>
+                                        </div>
+                                        <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
+                                          {(getMergedLectures()[studentSelectedCourse] || []).length} Lectures
+                                        </span>
+                                      </div>
+                                      <div className="space-y-2">
+                                        {(() => {
+                                          const list = getMergedLectures()[studentSelectedCourse] || [];
+                                          const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                                          if (list.length === 0) {
+                                            return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
+                                          }
+                                          return list.map((item, index) => {
+                                            const active = studentActiveVideo && studentActiveVideo.id === item.id;
+                                            return (
+                                              <button
+                                                key={item.id}
+                                                onClick={() => enrolled && setStudentActiveVideo(item)}
+                                                className={`w-full p-3 rounded-[14px] border text-left flex items-center justify-between transition-all ${
+                                                  !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/[0.04]' :
+                                                  active
+                                                    ? 'bg-gradient-to-r from-brand-cyan/8 to-brand-blue/[0.03] border-brand-cyan/15 text-white'
+                                                    : 'bg-white/[0.015] hover:bg-white/[0.03] border-white/[0.04] text-gray-400 hover:text-white hover:border-white/10'
+                                                } group`}
+                                                style={active ? { backdropFilter: 'blur(8px)' } : {}}
+                                              >
+                                                <div className="flex items-center space-x-2.5 truncate">
+                                                  <div className={`w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0 text-[9px] font-mono font-bold border transition-all ${
+                                                    active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/[0.04] border-white/[0.08] text-gray-400 group-hover:text-brand-cyan'
+                                                  }`}>
+                                                    {index + 1}
+                                                  </div>
+                                                  <div className="truncate text-left">
+                                                    <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{item.title}</p>
+                                                    <div className="flex items-center gap-1.5 mt-0.5 text-[8px] font-mono text-gray-500">
+                                                      <span>{item.duration}</span>
+                                                      <span>•</span>
+                                                      <span className="uppercase text-brand-violet font-bold">{item.difficulty || 'Beginner'}</span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                {active ? (
+                                                  <div className="w-5 h-5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5 text-brand-cyan"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                                  </div>
+                                                ) : (
+                                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-gray-500 group-hover:text-brand-cyan transition shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                                )}
+                                              </button>
+                                            );
+                                          });
+                                        })()}
+                                      </div>
+                                    </div>
                                   </div>
-                                )}
 
-                                {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
-                                  <div className="pt-3 border-t border-white/[0.04]">
-                                    <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-3">Downloadable Templates & Source Files</h4>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                      {studentActiveVideo.resources.map((res, idx) => (
-                                        <a 
-                                          key={idx}
-                                          href={getAttachmentUrl(res.url)}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="p-3 rounded-[14px] bg-white/[0.015] hover:bg-white/[0.03] border border-white/[0.04] hover:border-brand-cyan/15 flex items-center justify-between transition-all group"
-                                        >
-                                          <div className="flex items-center space-x-2.5 truncate">
-                                            <div className="w-7 h-7 rounded-[10px] bg-white/[0.04] flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                  {/* About Lesson Tab — Dynamic Island glass style */}
+                                  <div className={studentMobileTab === 'about' ? 'block' : 'hidden'}>
+                                    {(() => {
+                                      const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                                      if (!enrolled) {
+                                        return (
+                                          <div className="text-left">
+                                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
+                                              <div>
+                                                <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
+                                                <h2 className="text-base font-black text-white tracking-tight mt-0.5">Course Locked</h2>
+                                              </div>
                                             </div>
-                                            <div className="truncate text-left">
-                                              <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
-                                              <p className="text-[8px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                            <div className="p-6 rounded-[16px] border border-white/[0.05] bg-white/[0.015] text-center flex flex-col items-center justify-center" style={{ backdropFilter: 'blur(8px)' }}>
+                                              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                              </div>
+                                              <p className="text-xs text-gray-500 font-mono">Please enroll in this course to view lesson details</p>
                                             </div>
                                           </div>
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition shrink-0"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
-                                        </a>
-                                      ))}
+                                        );
+                                      }
+                                      if (!studentActiveVideo) {
+                                        return (
+                                          <div className="text-left">
+                                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
+                                              <div>
+                                                <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
+                                                <h2 className="text-base font-black text-white tracking-tight mt-0.5">Lesson Details</h2>
+                                              </div>
+                                            </div>
+                                            <div className="p-6 rounded-[16px] border border-white/[0.05] bg-white/[0.015] text-center flex flex-col items-center justify-center" style={{ backdropFilter: 'blur(8px)' }}>
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 mb-3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                              <p className="text-xs text-gray-500 font-mono">Select a lesson from the Syllabus tab to view details</p>
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                      return (
+                                        <div className="text-left">
+                                          <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
+                                            <div>
+                                              <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
+                                              <h2 className="text-sm font-black text-white tracking-tight mt-0.5">{studentActiveVideo.title}</h2>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
+                                                {studentActiveVideo.difficulty || 'Intermediate'}
+                                              </span>
+                                              <span className="text-[9px] text-gray-500 font-mono">{studentActiveVideo.duration}</span>
+                                            </div>
+                                          </div>
+                                          <div className="space-y-2.5 p-4 rounded-[16px] border border-white/[0.04] bg-white/[0.01] mb-3" style={{ backdropFilter: 'blur(6px)' }}>
+                                            <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
+                                            <p className="text-gray-400 text-[11px] font-light leading-relaxed">{studentActiveVideo.description}</p>
+                                          </div>
+                                          {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5 mb-3 px-0.5">
+                                              {studentActiveVideo.tags.map(tag => (
+                                                <span key={tag} className="px-2 py-1 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[8px] font-medium text-gray-500 font-mono">#{tag}</span>
+                                              ))}
+                                            </div>
+                                          )}
+                                          {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
+                                            <div className="pt-3 border-t border-white/[0.04]">
+                                              <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-3 px-0.5">Downloadable Templates & Source Files</h4>
+                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {studentActiveVideo.resources.map((res, idx) => (
+                                                  <a 
+                                                    key={idx}
+                                                    href={getAttachmentUrl(res.url)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="p-3 rounded-[14px] bg-white/[0.015] hover:bg-white/[0.03] border border-white/[0.04] hover:border-brand-cyan/15 flex items-center justify-between transition-all group"
+                                                  >
+                                                    <div className="flex items-center space-x-2.5 truncate">
+                                                      <div className="w-7 h-7 rounded-[10px] bg-white/[0.04] flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                                      </div>
+                                                      <div className="truncate text-left">
+                                                        <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
+                                                        <p className="text-[8px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                                      </div>
+                                                    </div>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition shrink-0"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+                                                  </a>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+
+                                  {/* My Programs Tab Switch */}
+                                  <div className={studentMobileTab === 'programs' ? 'block' : 'hidden'}>
+                                    <div className="text-left">
+                                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 px-0.5">
+                                        <div>
+                                          <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">Student Portal</span>
+                                          <h2 className="text-base font-black text-white tracking-tight mt-0.5">My Programs</h2>
+                                        </div>
+                                        <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
+                                          {Object.keys(DEFAULT_COURSE_CURRICULUM).length} Programs
+                                        </span>
+                                      </div>
+                                      <div className="space-y-2">
+                                        {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
+                                          const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
+                                          const active = studentSelectedCourse === courseName;
+                                          const courseInfo = courseList.find(c => c.title.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.id.replace('-', ' '))) || {
+                                            duration: '6 Weeks'
+                                          };
+                                          return (
+                                            <button
+                                              key={courseName}
+                                              onClick={() => {
+                                                setStudentSelectedCourse(courseName);
+                                                const saved = getLastWatchedVideo(courseName);
+                                                if (saved) setStudentActiveVideo(saved);
+                                                else { const currentList = getMergedLectures()[courseName] || []; setStudentActiveVideo(currentList[0] || null); }
+                                              }}
+                                              className={`w-full p-3 rounded-[14px] border text-left flex items-center justify-between transition-all ${
+                                                active 
+                                                  ? 'bg-gradient-to-r from-brand-cyan/8 to-brand-blue/[0.03] border-brand-cyan/15 text-white' 
+                                                  : 'bg-white/[0.015] hover:bg-white/[0.03] border-white/[0.04] text-gray-400 hover:text-white hover:border-white/10'
+                                              } group`}
+                                              style={active ? { backdropFilter: 'blur(8px)' } : {}}
+                                            >
+                                              <div className="flex items-center space-x-2.5 truncate">
+                                                <div className={`w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0 border transition-all ${
+                                                  active ? 'bg-brand-cyan border-brand-cyan text-black font-bold shadow-[0_0_10px_rgba(0,240,255,0.15)]' : 'bg-white/[0.04] border-white/[0.08] text-gray-400 group-hover:text-brand-cyan'
+                                                }`}>
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                                                </div>
+                                                <div className="truncate text-left">
+                                                  <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{courseName}</p>
+                                                  <div className="flex items-center gap-1.5 mt-0.5 text-[8px] font-mono text-gray-500">
+                                                    <span>{courseInfo.duration}</span>
+                                                    <span>•</span>
+                                                    <span className={`uppercase font-bold ${enrolled ? 'text-brand-cyan' : 'text-rose-400'}`}>
+                                                      {enrolled ? 'Enrolled' : 'Locked'}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              {enrolled ? (
+                                                <div className="w-5 h-5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-brand-cyan"><polyline points="9 18 15 12 9 6"/></svg>
+                                                </div>
+                                              ) : (
+                                                <span className="text-[10px] text-rose-400 shrink-0 ml-1">🔒</span>
+                                              )}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
                                     </div>
                                   </div>
-                                )}
+                                </div>
+
+                                {/* Desktop-only video metadata description — Dynamic Island glass style */}
+                                <div className="hidden lg:block">
+                                  {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
+                                    <div className="text-left">
+                                      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 px-0.5">
+                                        <div>
+                                          <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-brand-cyan/80">{studentSelectedCourse}</span>
+                                          <h2 className="text-lg font-black text-white tracking-tight mt-0.5">{studentActiveVideo.title}</h2>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="px-2.5 py-1 text-[7px] font-mono font-bold rounded-lg border border-brand-violet/20 bg-brand-violet/5 text-brand-violet uppercase">
+                                            {studentActiveVideo.difficulty || 'Intermediate'}
+                                          </span>
+                                          <span className="text-[9px] text-gray-500 font-mono">{studentActiveVideo.duration}</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="p-4 rounded-[16px] border border-white/[0.04] bg-white/[0.01] mb-3" style={{ backdropFilter: 'blur(6px)' }}>
+                                        <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-2">Lecture Summary</h4>
+                                        <p className="text-gray-400 text-xs font-light leading-relaxed">{studentActiveVideo.description}</p>
+                                      </div>
+
+                                      {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 mb-3 px-0.5">
+                                          {studentActiveVideo.tags.map(tag => (
+                                            <span key={tag} className="px-2 py-1 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[8px] font-medium text-gray-500 font-mono">#{tag}</span>
+                                          ))}
+                                        </div>
+                                      )}
+
+                                      {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
+                                        <div className="pt-3 border-t border-white/[0.04]">
+                                          <h4 className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-3">Downloadable Templates & Source Files</h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {studentActiveVideo.resources.map((res, idx) => (
+                                              <a 
+                                                key={idx}
+                                                href={getAttachmentUrl(res.url)}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="p-3 rounded-[14px] bg-white/[0.015] hover:bg-white/[0.03] border border-white/[0.04] hover:border-brand-cyan/15 flex items-center justify-between transition-all group"
+                                              >
+                                                <div className="flex items-center space-x-2.5 truncate">
+                                                  <div className="w-7 h-7 rounded-[10px] bg-white/[0.04] flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                                  </div>
+                                                  <div className="truncate text-left">
+                                                    <p className="text-[11px] font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
+                                                    <p className="text-[8px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                                  </div>
+                                                </div>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition shrink-0"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+                                              </a>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            ) : (
+                              /* Inline Chat Panel workspace */
+                              <div 
+                                className="flex-grow flex flex-col bg-[#0d0d12]/95 border border-white/[0.08] rounded-2xl overflow-hidden min-h-[400px] lg:min-h-0 relative shadow-2xl"
+                                style={{ backdropFilter: 'blur(24px)' }}
+                              >
+                                {/* Chat Header */}
+                                <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between shrink-0 bg-zinc-950/40">
+                                  <div className="flex items-center gap-3">
+                                    {/* Mentor Avatar */}
+                                    <div className="w-8 h-8 rounded-full bg-teal-950/60 border border-brand-cyan flex items-center justify-center text-[10px] font-bold text-brand-cyan font-mono shadow-[0_0_10px_rgba(0,240,255,0.1)] shrink-0">
+                                      M
+                                    </div>
+                                    <div>
+                                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                                        Mentor Support
+                                        <span className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-emerald opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-emerald"></span>
+                                        </span>
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[9px] font-mono text-gray-500 uppercase tracking-wider">Active</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setStudentTab('courses')}
+                                      className="w-5 h-5 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-500 hover:text-white transition-all duration-200 cursor-pointer"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Chat Messages Area */}
+                                <div
+                                  className="flex-grow p-4 overflow-y-auto space-y-3 min-h-0"
+                                  ref={el => { if (el) el.scrollTop = el.scrollHeight; }}
+                                >
+                                  {studentChatMessages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600 py-12">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                      <p className="text-[11px] font-mono italic text-gray-600">No messages yet. Start a conversation!</p>
+                                    </div>
+                                  ) : (
+                                    studentChatMessages.map((msg) => {
+                                      const isMe = msg.sender === studentUser.email;
+                                      const timestamp = msg.timestamp
+                                        ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                        : 'just now';
+                                      return (
+                                        <div key={msg.id} className={`flex items-start gap-2 max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
+                                          {/* Avatar */}
+                                          {isMe ? (
+                                            <div className="w-5 h-5 rounded-full bg-brand-violet/20 border border-brand-violet/30 flex items-center justify-center text-[7px] font-bold text-brand-violet shrink-0 mt-0.5">s</div>
+                                          ) : (
+                                            <div className="w-5 h-5 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 flex items-center justify-center text-[7px] font-bold text-brand-cyan shrink-0 mt-0.5">M</div>
+                                          )}
+                                          
+                                          <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                                            <span className="text-[7px] text-gray-600 font-mono mb-1 uppercase px-1">{msg.name || (isMe ? 'You' : 'Mentor')}</span>
+                                            {msg.type === 'text' && (
+                                              <div className={`px-3.5 py-2 rounded-2xl text-[11px] leading-relaxed ${
+                                                isMe 
+                                                  ? 'bg-brand-cyan/10 text-white rounded-tr-sm' 
+                                                  : 'bg-white/[0.04] text-gray-300 rounded-tl-sm'
+                                              }`}>
+                                                {renderParsedTextWeb(msg.text)}
+                                              </div>
+                                            )}
+                                            {msg.type === 'image' && (
+                                              <div onClick={() => setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') })} className="rounded-2xl border border-white/[0.04] overflow-hidden max-w-[200px] cursor-pointer hover:border-brand-cyan/30 transition-all bg-black">
+                                                <img src={getAttachmentUrl(msg.fileUrl, 'image')} alt="Doubt attachment" className="max-h-44 w-full object-cover block" />
+                                                {msg.fileName && <p className="p-2 bg-black/40 text-[8px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
+                                              </div>
+                                            )}
+                                            {msg.type === 'video' && (
+                                              <div className="rounded-2xl overflow-hidden max-w-[200px] border border-white/[0.04] bg-black">
+                                                <VideoChatPreview fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} timeStr={timestamp} isMentor={!isMe} msgStatus={msg.status} onPress={() => setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') })} />
+                                              </div>
+                                            )}
+                                            {msg.type === 'audio' && (
+                                              <AudioPlayer fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} GOOGLE_SHEET_WEBHOOK_URL={GOOGLE_SHEET_WEBHOOK_URL} isMentor={!isMe} timeStr={timestamp} msgStatus={msg.status} />
+                                            )}
+                                            {msg.type === 'document' && (
+                                              <a href={getAttachmentUrl(msg.fileUrl)} target="_blank" rel="noreferrer" className="px-3.5 py-2 rounded-2xl bg-white/[0.015] border border-white/[0.04] hover:border-brand-cyan/15 text-[11px] flex items-center space-x-2 max-w-[220px]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-cyan shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                <span className="truncate text-gray-300 font-bold text-[10px] hover:text-white transition">{msg.fileName || 'Download'}</span>
+                                              </a>
+                                            )}
+                                            <div className="flex items-center space-x-1 text-[7px] font-mono text-gray-600 mt-1 uppercase px-1">
+                                              <span>{timestamp}</span>
+                                              {isMe && <span className={msg.status === 'read' ? 'text-brand-cyan font-bold' : 'text-gray-600'}>{msg.status === 'read' ? '✓✓' : '✓'}</span>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+
+                                {/* Chat Input Area */}
+                                <div className="px-4 py-2.5 border-t border-white/[0.06] bg-zinc-950/40 shrink-0">
+                                  {studentIsRecording ? (
+                                    <div className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-rose-500/10 border border-rose-500/20">
+                                      <div className="flex items-center space-x-2">
+                                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                                        <span className="text-[10px] font-mono text-rose-500">Recording {Math.floor(studentRecordingDuration / 60)}:{String(studentRecordingDuration % 60).padStart(2, '0')}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-1.5">
+                                        <button type="button" onClick={cancelStudentVoiceRecording} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                        <button type="button" onClick={stopStudentVoiceRecording} className="px-3 py-1.5 h-8 rounded-xl bg-rose-500 text-white text-[9px] font-bold uppercase flex items-center gap-1 hover:scale-[1.02] transition">Send</button>
+                                      </div>
+                                    </div>
+                                  ) : studentUploadingProgress !== null ? (
+                                    <div className="flex items-center space-x-3 px-3 py-2 rounded-[14px] bg-brand-cyan/10 border border-brand-cyan/20">
+                                      <span className="text-[9px] font-mono font-bold text-brand-cyan uppercase animate-pulse">Uploading {studentUploadingProgress}%</span>
+                                      <div className="flex-grow h-1 rounded bg-white/5 overflow-hidden"><div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${studentUploadingProgress}%` }} /></div>
+                                    </div>
+                                  ) : (
+                                    <form onSubmit={handleSendStudentMessage} className="flex items-center gap-2">
+                                      <div className="flex items-center gap-1 shrink-0">
+                                        <button type="button" onClick={() => setStudentChatEmojiOpen(!studentChatEmojiOpen)} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                        </button>
+                                        <label className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white cursor-pointer transition">
+                                          <input type="file" className="hidden" onChange={handleStudentFileUpload} disabled={studentChatSending} />
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                        </label>
+                                        <button type="button" onClick={startStudentVoiceRecording} disabled={studentChatSending} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-rose-500 transition disabled:opacity-50">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                                        </button>
+                                      </div>
+                                      <input 
+                                        type="text" 
+                                        placeholder={studentChatSending ? "Sending..." : "Type your doubt..."} 
+                                        value={studentChatInput} 
+                                        onChange={(e) => setStudentChatInput(e.target.value)} 
+                                        disabled={studentChatSending} 
+                                        className="flex-grow px-3 py-1.5 rounded-xl bg-[#0d0d12] border border-white/[0.06] text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/30 transition" 
+                                        style={{ outline: 'none' }} 
+                                      />
+                                      <button 
+                                        type="submit" 
+                                        disabled={!studentChatInput.trim() || studentChatSending} 
+                                        className="w-8 h-8 rounded-xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center text-black shadow-[0_0_12px_rgba(0,240,255,0.2)] transition disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                      </button>
+                                      {studentChatEmojiOpen && (
+                                        <div className="absolute bottom-20 left-4 dark-glass border border-white/10 rounded-2xl p-2.5 grid grid-cols-8 gap-1.5 z-[60] shadow-2xl max-w-[240px]">
+                                          {['😀', '😂', '😍', '👍', '🙌', '🔥', '❤️', '👏', '🎉', '🚀', '💡', '💯', '🤔', '😎', '💻', '😢'].map(em => (
+                                            <button key={em} type="button" onClick={() => { setStudentChatInput(prev => prev + em); setStudentChatEmojiOpen(false); }} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-sm transition">{em}</button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </form>
+                                  )}
+                                </div>
+
+                                {/* Chat Status Footer */}
+                                <div className="px-4 py-2 flex items-center justify-between text-[9px] font-mono text-gray-500 shrink-0 border-t border-white/[0.04]">
+                                  <span className="flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse" />
+                                    Mentor Online
+                                  </span>
+                                  <span>24/7 Support Active</span>
+                                </div>
                               </div>
                             )}
-                          </div>
-                        </section>
+                          </section>
+
 
                         {/* Right Syllabus Sidebar Column — Dynamic Island glass style */}
                         <aside className="hidden lg:block lg:w-80 border-t lg:border-t-0 lg:border-l border-white/[0.04] bg-zinc-950/5 p-3 lg:p-4 lg:overflow-y-auto shrink-0 flex flex-col text-left">
@@ -7298,12 +7514,12 @@
                                   <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-blue/10 border border-brand-cyan/20 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                   </div>
-                                  <div className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-zinc-950 ${supportSettings.isOnline ? 'bg-brand-emerald' : 'bg-zinc-600'}`} />
+                                  <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-zinc-950 bg-brand-emerald" />
                                 </div>
                                 <div>
                                   <h3 className="text-xs font-black uppercase text-white font-heading">Doubt Clearance</h3>
                                   <p className="text-[8px] font-mono text-gray-500">
-                                    {supportSettings.isOnline ? `🟢 Online • ${supportSettings.avgResponseTime || '4 mins'} response` : '⚫ Offline • Replies via mail'}
+                                    🟢 Online • ~4 min response
                                   </p>
                                 </div>
                               </div>
@@ -7342,21 +7558,13 @@
                                         </div>
                                       )}
                                       {msg.type === 'image' && (
-                                        <div onClick={() => setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') })} className="rounded-[14px] border border-white/[0.04] overflow-hidden max-w-[200px] cursor-pointer hover:border-brand-cyan/30 transition-all bg-black">
-                                          <img src={getAttachmentUrl(msg.fileUrl, 'image')} alt="Doubt attachment" className="max-h-44 w-full object-cover block" />
+                                        <div className="rounded-[14px] border border-white/[0.04] overflow-hidden max-w-[200px] bg-black">
+                                          <img src={msg.fileUrl} alt="Doubt attachment" className="max-h-44 w-full object-cover block" />
                                           {msg.fileName && <p className="p-2 bg-black/40 text-[8px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
                                         </div>
                                       )}
-                                      {msg.type === 'video' && (
-                                        <div className="rounded-[14px] overflow-hidden max-w-[200px] border border-white/[0.04] bg-black">
-                                          <VideoChatPreview fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} timeStr={timestamp} isMentor={!isMe} msgStatus={msg.status} onPress={() => setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') })} />
-                                        </div>
-                                      )}
-                                      {msg.type === 'audio' && (
-                                        <AudioPlayer fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} GOOGLE_SHEET_WEBHOOK_URL={GOOGLE_SHEET_WEBHOOK_URL} isMentor={!isMe} timeStr={timestamp} msgStatus={msg.status} />
-                                      )}
                                       {msg.type === 'document' && (
-                                        <a href={getAttachmentUrl(msg.fileUrl)} target="_blank" rel="noreferrer" className="px-3.5 py-2.5 rounded-[14px] bg-white/[0.015] border border-white/[0.04] hover:border-brand-cyan/15 text-[11px] flex items-center space-x-2 max-w-[220px]">
+                                        <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="px-3.5 py-2.5 rounded-[14px] bg-white/[0.015] border border-white/[0.04] hover:border-brand-cyan/15 text-[11px] flex items-center space-x-2 max-w-[220px]">
                                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-cyan shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                                           <span className="truncate text-gray-300 font-bold text-[10px] hover:text-white transition">{msg.fileName || 'Download'}</span>
                                         </a>
@@ -7391,7 +7599,7 @@
                                 </div>
                               ) : (
                                 <form onSubmit={handleSendStudentMessage} className="flex items-center space-x-2">
-                                  <button type="button" onClick={() => setStudentChatEmojiOpen(!studentChatEmojiOpen)} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition shrink-0">
+                                  <button type="button" className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                                   </button>
                                   <label className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white cursor-pointer transition shrink-0">
@@ -7405,13 +7613,6 @@
                                   <button type="submit" disabled={!studentChatInput.trim() || studentChatSending} className="w-9 h-9 rounded-xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center text-black shadow-[0_0_12px_rgba(0,240,255,0.2)] transition disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-0.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                                   </button>
-                                  {studentChatEmojiOpen && (
-                                    <div className="absolute bottom-20 right-4 dark-glass border border-white/10 rounded-2xl p-2.5 grid grid-cols-8 gap-1.5 z-[60] shadow-2xl max-w-[240px]">
-                                      {['😀', '😂', '😍', '👍', '🙌', '🔥', '❤️', '👏', '🎉', '🚀', '💡', '💯', '🤔', '😎', '💻', '😢'].map(em => (
-                                        <button key={em} onClick={() => { setStudentChatInput(prev => prev + em); setStudentChatEmojiOpen(false); }} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-sm transition">{em}</button>
-                                      ))}
-                                    </div>
-                                  )}
                                 </form>
                               )}
                             </div>
