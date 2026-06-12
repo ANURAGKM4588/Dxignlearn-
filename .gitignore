@@ -1,2 +1,6 @@
 # Exclude large hero animation frame sequence (180+ PNGs, ~570MB)
 # public/Images/heropage/
+
+node_modules/
+diff.txt
+diff_utf8.txt

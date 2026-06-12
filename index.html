@@ -40,6 +40,31 @@
       50% { transform: translateX(6px); }
     }
     .animate-bounce-x { animation: bounce-x 1.2s ease-in-out infinite; }
+    @keyframes slideDown {
+      0% { opacity: 0; transform: translateY(-16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slideDown { animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+    @keyframes popup {
+      0% { opacity: 0; transform: scale(0.35) translateY(120px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-popup { animation: popup 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform, opacity; transform-origin: bottom center; }
+    @keyframes popupOut {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.3) translateY(80px); }
+    }
+    .animate-popupOut { animation: popupOut 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform, opacity; transform-origin: bottom center; }
+    @keyframes studentPopup {
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(0); }
+    }
+    .animate-student-popup { animation: studentPopup 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform; }
+    @keyframes studentPopupOut {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(100%); }
+    }
+    .animate-student-popupOut { animation: studentPopupOut 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform; }
     video::-webkit-media-controls { display: none !important; }
     video::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; }
     video::--webkit-media-controls-play-button { display: none !important; }
@@ -1525,22 +1550,26 @@
     ];
 
     const toolLogoMap = {
-      'ChatGPT': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg',
-      'Midjourney': 'https://www.google.com/s2/favicons?domain=midjourney.com&sz=64',
+      'ChatGPT': 'public/Images/Ai logos/chatgpt_PNG8.png',
+      'Midjourney': 'public/Images/Ai logos/tech-20-UTRF1-eT.png',
       'Adobe Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
       'Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
-      'Adobe Firefly': 'https://www.google.com/s2/favicons?domain=firefly.adobe.com&sz=64',
-      'Figma AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/figma.svg',
+      'Adobe Firefly': 'public/Images/Ai logos/lg-66cb1819333c2-Adobe-Firefly-Logo.webp',
+      'Figma AI': 'public/Images/Ai logos/figma_logo_icon_171159.webp',
       'Framer AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/framer.svg',
-      'Claude AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg',
-      'Claude': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg',
-      'Runway ML': 'https://www.google.com/s2/favicons?domain=runwayml.com&sz=64',
-      'Runway': 'https://www.google.com/s2/favicons?domain=runwayml.com&sz=64',
-      'Kling AI': 'https://www.google.com/s2/favicons?domain=klingai.com&sz=64',
-      'Canva AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/canva.svg',
+      'Claude AI': 'public/Images/Ai logos/Claude_Logo_2023-s1280.png',
+      'Claude': 'public/Images/Ai logos/Claude_Logo_2023-s1280.png',
+      'Runway ML': 'public/Images/Ai logos/Runway_Logo.webp',
+      'Runway': 'public/Images/Ai logos/Runway_Logo.webp',
+      'Kling AI': 'public/Images/Ai logos/vfeQT3Qi_Uxuk3xz-65eZABtXQwmDeXbt4MmH4PQUnMcMtuww9p2D2qCdNR_wEw35n6z9EFpyDGoVJFagHf-_g.webp',
+      'Canva AI': 'public/Images/Ai logos/canva.png',
       'Leonardo AI': 'https://www.google.com/s2/favicons?domain=leonardo.ai&sz=64',
-      'Gemini AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg',
-      'Gemini': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg',
+      'Gemini AI': 'public/Images/Ai logos/Gemini-logo.png',
+      'Gemini': 'public/Images/Ai logos/Gemini-logo.png',
+      'Higgsfield': 'public/Images/Ai logos/higgsfield_logo-scaled.webp',
+      'Lovable': 'public/Images/Ai logos/lovable.png',
+      'Google Flow': 'public/Images/Ai logos/Google-Flow-Colored-Logo.png',
+      'Antigravity': 'public/Images/Ai logos/Google_Antigravity_Logo_2025.png',
       'Adobe Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
       'Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
       'HeyGen': 'https://www.google.com/s2/favicons?domain=heygen.com&sz=64',
@@ -1550,7 +1579,6 @@
       'Veo': 'https://www.google.com/s2/favicons?domain=deepmind.google&sz=64',
       'Relume': 'https://www.google.com/s2/favicons?domain=relume.io&sz=64',
       'Hostinger AI': 'https://www.google.com/s2/favicons?domain=hostinger.com&sz=64',
-      'Lovable': 'https://www.google.com/s2/favicons?domain=lovable.dev&sz=64',
       'Bolt': 'https://www.google.com/s2/favicons?domain=bolt.new&sz=64',
       'Uizard': 'https://www.google.com/s2/favicons?domain=uizard.io&sz=64',
       'Galileo AI': 'https://www.google.com/s2/favicons?domain=galileo.ai&sz=64',
@@ -1573,6 +1601,126 @@
       'Kling AI': '#FFFFFF',
       'Canva AI': '#00C4CC',
       'Leonardo AI': '#FFFFFF',
+    };
+
+    const toolDetails = {
+      'ChatGPT': {
+        title: 'ChatGPT',
+        tagline: 'AI Language Model by OpenAI',
+        description: 'A powerful conversational AI that understands and generates human-like text. From drafting content to writing code, ChatGPT handles complex language tasks with remarkable accuracy and creativity.',
+        longDescription: 'ChatGPT is revolutionizing how professionals approach their daily work. Whether you need engaging blog posts, persuasive marketing copy, well-structured code, or thoughtful email replies, ChatGPT delivers high-quality results in seconds. Its advanced reasoning capabilities make it ideal for brainstorming creative concepts, debugging complex code, analyzing data sets, and even role-playing scenarios for interview prep or client pitches. With support for file uploads, web browsing, and custom GPTs, it\'s the most versatile AI assistant available today for creative professionals, developers, and business owners alike.',
+        useCases: ['Content writing & copywriting', 'Brainstorming & ideation', 'Code generation & debugging', 'Email & message drafting', 'Research & summarization', 'Conversational AI & chatbots'],
+        color: '#10A37F',
+        logo: toolLogoMap['ChatGPT'],
+      },
+      'Midjourney': {
+        title: 'Midjourney',
+        tagline: 'AI Image Generation Tool',
+        description: 'An independent research lab\'s AI that transforms text prompts into stunning, artistic visuals. Known for its distinctive aesthetic, it\'s widely used by designers, artists, and marketers for creative visual content.',
+        longDescription: 'Midjourney has redefined visual creativity by enabling anyone to generate professional-grade imagery from simple text descriptions. Its advanced AI models excel at interpreting nuanced prompts, producing everything from photorealistic product shots to dreamlike fantasy landscapes. Designers use it for rapid concept exploration, branding agencies leverage it for logo and mood board creation, and filmmakers rely on it for storyboard visualization. With features like image-to-image variation, region-based editing, and consistent character rendering across multiple generations, Midjourney is an indispensable tool in any modern creative workflow.',
+        useCases: ['Concept art & illustration', 'Logo & brand asset creation', 'Social media visuals', 'Product mockups & prototyping', 'Architectural visualization', 'Fantasy & sci-fi art'],
+        color: '#0066FF',
+        logo: toolLogoMap['Midjourney'],
+      },
+      'Adobe Firefly': {
+        title: 'Adobe Firefly',
+        tagline: 'Generative AI for Creatives',
+        description: 'Adobe\'s family of creative generative AI models integrated directly into Adobe apps. It enables designers to generate images, text effects, color palettes, and more using natural language prompts.',
+        longDescription: 'Adobe Firefly brings the power of generative AI directly into the tools creative professionals already use every day. Seamlessly integrated with Photoshop, Illustrator, and Adobe Express, Firefly allows you to generate new images from scratch, extend existing compositions with Generative Expand, remove unwanted objects with Generative Fill, and create custom text effects with stunning typography. Its commercial-safe training data makes it ideal for professional client work. Whether you are a graphic designer, photographer, or marketer, Firefly accelerates your creative process while maintaining full creative control within Adobe\'s industry-standard ecosystem.',
+        useCases: ['AI image generation in Photoshop', 'Text effects & typography', 'Color palette generation', 'Object removal & replacement', '3D-to-image rendering', 'Reimagining & expanding images'],
+        color: '#FF6B00',
+        logo: toolLogoMap['Adobe Firefly'],
+      },
+      'Figma AI': {
+        title: 'Figma AI',
+        tagline: 'AI-Powered UI/UX Design',
+        description: 'Figma\'s integrated AI assistant that accelerates the design process. It helps designers generate layouts, create components, rename layers, and automate repetitive tasks directly inside Figma.',
+        longDescription: 'Figma AI transforms the UI/UX design workflow by automating tedious tasks and accelerating the creative process. With intelligent features like auto-layout generation, smart layer naming, component creation, and design system suggestions, Figma AI lets designers focus on solving real user problems instead of manual busywork. It can generate entire page layouts from simple prompts, suggest accessible color palettes and typography pairings, and even convert wireframes into high-fidelity prototypes. For product teams, Figma AI means faster iteration cycles, more consistent design systems, and the ability to explore more creative directions in less time.',
+        useCases: ['UI layout generation', 'Auto-naming layers & components', 'Design system creation', 'Wireframe to prototype', 'Asset generation & editing', 'Design feedback & suggestions'],
+        color: '#A259FF',
+        logo: toolLogoMap['Figma AI'],
+      },
+      'Claude AI': {
+        title: 'Claude AI',
+        tagline: 'AI Assistant by Anthropic',
+        description: 'Anthropic\'s advanced AI assistant designed for safety, reasoning, and deep analysis. Claude excels at handling long documents, coding tasks, and nuanced conversations with thoughtful responses.',
+        longDescription: 'Claude stands out for its exceptional reasoning abilities, massive context window, and thoughtful approach to complex tasks. It can process and analyze entire books, research papers, or codebases in a single conversation, making it invaluable for researchers, developers, and analysts. Claude excels at nuanced writing tasks, from crafting compelling narratives to refining business proposals with precise language. Its safety-focused architecture means it delivers reliable, well-reasoned responses without hallucination. For professionals who need deep analysis, thorough document review, or sophisticated coding assistance, Claude offers a level of depth and reliability that sets it apart from other AI assistants.',
+        useCases: ['Document analysis & summarization', 'Code review & debugging', 'Research & data extraction', 'Report & proposal writing', 'Complex reasoning tasks', 'Safe & ethical AI interactions'],
+        color: '#D97706',
+        logo: toolLogoMap['Claude AI'],
+      },
+      'Runway ML': {
+        title: 'Runway ML',
+        tagline: 'AI Video & Image Creation',
+        description: 'A research company building multimodal AI tools for video and image generation. Runway offers real-time video editing, inpainting, motion tracking, and generative video creation accessible through the browser.',
+        longDescription: 'Runway ML is at the forefront of AI-powered video creation, offering a comprehensive suite of tools that make professional video production accessible to everyone. With Gen-3 Alpha, you can generate cinematic-quality video clips from text descriptions, complete with realistic motion, lighting, and camera dynamics. The platform includes powerful editing features like real-time green screen removal, object tracking, inpainting, and slow-motion generation — all accessible through a web browser without specialized hardware. Content creators use Runway for everything from social media shorts to commercial productions, while filmmakers leverage its tools for pre-visualization, VFX, and post-production workflows that would traditionally require expensive studio infrastructure.',
+        useCases: ['AI video generation & editing', 'Green screen & background removal', 'Motion tracking & keyframing', 'Inpainting & outpainting', 'Text-to-video synthesis', 'Real-time video effects'],
+        color: '#FFFFFF',
+        logo: toolLogoMap['Runway ML'],
+      },
+      'Kling AI': {
+        title: 'Kling AI',
+        tagline: 'AI Video Generation Platform',
+        description: 'A next-generation AI video generation model developed by Kuaishou. Kling can generate high-quality, realistic videos from text prompts or images, with impressive motion consistency and physics simulation.',
+        longDescription: 'Kling AI represents a breakthrough in AI video generation, producing videos with exceptional realism, smooth motion, and physical accuracy that rivals traditional production methods. Unlike earlier models that struggled with consistent movement and natural physics, Kling generates videos where objects move believably, characters maintain visual consistency, and scenes follow real-world dynamics. It supports text-to-video, image-to-video animation, and extended video generation up to 2 minutes in length. For content creators, marketers, and filmmakers, Kling AI opens up possibilities for rapid video prototyping, cost-effective commercial production, and creative storytelling that was previously impossible without large production budgets and extensive technical expertise.',
+        useCases: ['Text-to-video generation', 'Image-to-video animation', 'Cinematic video production', 'Social media content creation', 'Advertising & marketing videos', 'Concept visualization'],
+        color: '#FFFFFF',
+        logo: toolLogoMap['Kling AI'],
+      },
+      'Canva AI': {
+        title: 'Canva AI',
+        tagline: 'AI Design Platform for Everyone',
+        description: 'Canva\'s integrated AI features that make professional design accessible to everyone. From Magic Design to AI image generation, it empowers non-designers to create stunning visual content in minutes.',
+        longDescription: 'Canva AI democratizes design by putting professional-grade creative tools into the hands of everyone, regardless of their design experience. Its Magic Studio suite includes Magic Design which generates complete designs from text prompts, Magic Eraser for removing unwanted elements from images, Magic Expand for extending images beyond their original boundaries, and Magic Write for generating copy that perfectly fits your design. Canva AI also powers background removal, image upscaling, animated transitions, and brand kit generation — automatically applying your brand colors, fonts, and logos across any design. For entrepreneurs, social media managers, and small business owners, Canva AI eliminates the need for expensive design software and specialized design skills.',
+        useCases: ['Social media graphics & posts', 'Presentations & slides', 'Marketing materials & flyers', 'Logo & brand kit creation', 'AI image & asset generation', 'Video editing & animation'],
+        color: '#00C4CC',
+        logo: toolLogoMap['Canva AI'],
+      },
+      'Gemini AI': {
+        title: 'Gemini AI',
+        tagline: 'Google\'s Multimodal AI Model',
+        description: 'Google\'s most capable AI model designed to understand and combine text, images, audio, video, and code. Gemini powers creative workflows, research, and development across Google\'s ecosystem.',
+        longDescription: 'Gemini represents Google\'s vision for the future of AI — a truly multimodal model that can understand and reason across text, images, audio, video, and code simultaneously. Unlike single-modality models, Gemini can analyze a chart in an image, explain its implications in text, generate a video summary, and write code to reproduce the analysis — all in one conversation. Deeply integrated with Google Workspace, it powers AI features in Gmail, Docs, Sheets, and Meet, making it an invisible productivity layer across your workflow. For developers, Gemini\'s advanced code generation and debugging capabilities rival specialized coding assistants. For researchers and analysts, its ability to synthesize information across formats makes it an unparalleled research partner.',
+        useCases: ['Multi-modal content analysis', 'Code generation & assistance', 'Image understanding & captioning', 'Research & knowledge discovery', 'Creative writing & brainstorming', 'Google Workspace integration'],
+        color: '#4285F4',
+        logo: toolLogoMap['Gemini AI'],
+      },
+      'Higgsfield': {
+        title: 'Higgsfield',
+        tagline: 'AI Video & Motion Generation',
+        description: 'A cutting-edge AI video generation platform that creates ultra-realistic videos, face swaps, and motion animations from simple text prompts or reference images.',
+        longDescription: 'Higgsfield is redefining AI video creation with its state-of-the-art motion generation technology. It excels at producing hyper-realistic character animations, facial expressions, and body movements that maintain consistency across frames. Content creators use Higgsfield to generate talking head videos, character-driven narratives, dynamic social media content, and personalized video messages. Its advanced face swap and motion transfer capabilities make it a powerful tool for filmmakers, marketers, and content producers looking to create professional video content without expensive equipment or studio time.',
+        useCases: ['AI video generation from text', 'Face swap & motion transfer', 'Talking head video creation', 'Character animation & storytelling', 'Social media video content', 'Personalized video messages'],
+        color: '#FFFFFF',
+        logo: toolLogoMap['Higgsfield'],
+      },
+      'Lovable': {
+        title: 'Lovable',
+        tagline: 'AI Website & App Builder',
+        description: 'An AI-powered development platform that lets you build full-stack web applications, landing pages, and SaaS products by describing what you want in natural language.',
+        longDescription: 'Lovable (formerly GPT Engineer) is transforming how web applications are built. Instead of writing code line by line, you describe your application in plain English and Lovable generates the entire codebase — frontend, backend, database schema, and API integrations — in minutes. It supports modern frameworks, responsive design, authentication, payment processing, and deployment. For entrepreneurs, founders, and designers, Lovable means you can go from idea to working prototype in hours instead of weeks, without needing a development team. It\'s the fastest way to validate product ideas and launch MVPs.',
+        useCases: ['Full-stack web app generation', 'Landing page & website creation', 'SaaS product prototyping', 'API & database integration', 'Authentication & payment setup', 'Rapid MVP development'],
+        color: '#FF6B35',
+        logo: toolLogoMap['Lovable'],
+      },
+      'Google Flow': {
+        title: 'Google Flow',
+        tagline: 'AI-Powered Automation Platform',
+        description: 'Google\'s intelligent automation platform that connects apps, automates workflows, and leverages AI to streamline business processes without requiring coding expertise.',
+        longDescription: 'Google Flow empowers teams to build powerful automations that connect Google Workspace apps with hundreds of third-party services. With built-in AI capabilities, it can intelligently route data, generate reports, automate email sequences, and trigger complex workflows based on natural language instructions. For marketers, it automates campaign reporting and lead nurturing. For operations teams, it streamlines approval processes and data synchronization. For developers, it provides a low-code environment to build integrations that would otherwise require hours of manual coding.',
+        useCases: ['Workflow automation & integration', 'Email & notification sequences', 'Data synchronization between apps', 'Automated reporting & dashboards', 'Approval & review processes', 'AI-powered document processing'],
+        color: '#4285F4',
+        logo: toolLogoMap['Google Flow'],
+      },
+      'Antigravity': {
+        title: 'Antigravity',
+        tagline: 'AI Creative Suite',
+        description: 'A next-generation AI creative platform that combines image generation, video creation, and design tools into a single unified workspace for modern creators.',
+        longDescription: 'Antigravity is pushing the boundaries of AI-powered creativity by offering a comprehensive suite of generation tools in one seamless platform. From photorealistic image generation to cinematic video creation, Antigravity leverages advanced diffusion models and neural networks to produce studio-quality content. Its intuitive interface makes it accessible for beginners while offering the depth that professional creators demand. Features include text-to-image generation, style transfer, video synthesis, batch processing, and collaborative workspaces for team projects.',
+        useCases: ['AI image generation & editing', 'Video synthesis & animation', 'Style transfer & effects', 'Batch content production', 'Collaborative creative workflows', 'Multi-format asset export'],
+        color: '#8B5CF6',
+        logo: toolLogoMap['Antigravity'],
+      },
     };
 
     const whyChooseUsData = [
@@ -2436,6 +2584,7 @@
       const [courseCategory, setCourseCategory] = useState('all');
       const [courseView, setCourseView] = useState('grid');
       const [enrollModal, setEnrollModal] = useState(null); // holds selected course object
+      const [closingModal, setClosingModal] = useState(false);
       const [showAllProjects, setShowAllProjects] = useState(false);
       const [theaterVideo, setTheaterVideo] = useState(null);
       const [carouselIndex, setCarouselIndex] = useState(0);
@@ -2443,6 +2592,30 @@
       const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
       const [showIosModal, setShowIosModal] = useState(false);
       const [faqOpenStates, setFaqOpenStates] = useState({});
+      const marqueeEl = useRef(null);
+      const marqueePos = useRef(0);
+      const marqueeBaseSpeed = useRef(0.3);
+
+      useEffect(() => {
+        const el = marqueeEl.current;
+        if (!el) return;
+        let lastScrollY = window.scrollY;
+        let animId;
+        const halfW = () => el.scrollWidth / 2;
+
+        const tick = () => {
+          const s = window.scrollY;
+          const delta = s - lastScrollY;
+          lastScrollY = s;
+          marqueePos.current -= marqueeBaseSpeed.current + Math.abs(delta) * 0.15;
+          if (marqueePos.current < -halfW()) marqueePos.current += halfW();
+          el.style.transform = `translateX(${marqueePos.current}px)`;
+          animId = requestAnimationFrame(tick);
+        };
+
+        animId = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(animId);
+      }, []);
 
       // Customer prefill login details for payment
       const [nameInput, setNameInput] = useState('');
@@ -2576,6 +2749,7 @@
 
       // --- Student Portal States ---
       const [isStudentOpen, setIsStudentOpen] = useState(false);
+      const [closingStudent, setClosingStudent] = useState(false);
       const [isStudentAuthenticated, setIsStudentAuthenticated] = useState(false);
       const [studentEmailInput, setStudentEmailInput] = useState('');
       const [studentOtpInput, setStudentOtpInput] = useState('');
@@ -2782,7 +2956,21 @@
         setEnrollModal(course);
       };
       const closeEnrollModal = () => {
-        setEnrollModal(null);
+        if (closingModal) return;
+        setClosingModal(true);
+        setTimeout(() => {
+          setEnrollModal(null);
+          setClosingModal(false);
+        }, 350);
+      };
+
+      const closeStudentPortal = () => {
+        if (closingStudent) return;
+        setClosingStudent(true);
+        setTimeout(() => {
+          setIsStudentOpen(false);
+          setClosingStudent(false);
+        }, 350);
       };
 
       // Lock/Unlock body scroll and Lenis when modal/overlays are open
@@ -2793,27 +2981,16 @@
         if (isModalOpen) {
           document.body.setAttribute('data-modal-active', 'true');
           document.body.setAttribute('data-scroll-y', window.scrollY);
-          const sbWidth = window.innerWidth - document.documentElement.clientWidth;
-          document.body.style.position = 'fixed';
-          document.body.style.top = `-${window.scrollY}px`;
-          document.body.style.left = '0';
-          document.body.style.width = '100%';
-          if (sbWidth > 0) {
-            document.body.style.paddingRight = `${sbWidth}px`;
-            if (header) header.style.right = `${sbWidth}px`;
-          }
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
           if (window.lenis) window.lenis.stop();
         } else {
           document.body.removeAttribute('data-modal-active');
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          if (window.lenis) window.lenis.start();
           const scrollY = parseInt(document.body.getAttribute('data-scroll-y') || '0');
           document.body.removeAttribute('data-scroll-y');
-          document.body.style.position = '';
-          document.body.style.top = '';
-          document.body.style.left = '';
-          document.body.style.width = '';
-          document.body.style.paddingRight = '';
-          if (header) header.style.right = '';
-          if (window.lenis) window.lenis.start();
           window.scrollTo(0, scrollY);
         }
       }, [enrollModal, theaterVideo, isAdminOpen, showIosModal, isStudentOpen, mobileMenuOpen]);
@@ -4178,7 +4355,7 @@
   </div>
 
   <div class="footer">
-    <span>&copy; 2026 <strong>Dxign.learn</strong> &middot; All Rights Reserved &middot; Confidential Document</span>
+    <span>&copy; 2026 <strong>Obtecs</strong> &middot; All Rights Reserved &middot; Confidential Document</span>
     <span>contact@aimastery.academy &middot; +91 73564 13558 &middot; Total: <strong>${adminData.length} records</strong></span>
   </div>
 
@@ -4768,23 +4945,12 @@
                 >
                   Showcase
                 </button>
-                <button 
-                  onClick={() => navigateToSection('final-cta')}
-                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
-                >
-                  App
-                </button>
+
                 <button 
                   onClick={() => navigateToSection('footer')}
                   className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors duration-300"
                 >
                   Contact
-                </button>
-                <button 
-                  onClick={() => { setIsStudentOpen(true); }}
-                  className="px-3.5 py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-white hover:text-brand-cyan transition-colors duration-300 border border-white/10 bg-white/5 rounded-lg"
-                >
-                  Student Portal
                 </button>
               </nav>
 
@@ -4795,6 +4961,18 @@
                   className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-brand-cyan border border-brand-cyan/20 bg-brand-cyan/5 hover:bg-brand-cyan hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.05)] hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
                 >
                   Enroll Now
+                </button>
+
+                <button 
+                  onClick={() => { setIsStudentOpen(true); }}
+                  className="w-10 h-10 rounded-full border border-white/10 bg-white/5 hover:bg-brand-cyan hover:border-brand-cyan text-white/70 hover:text-black flex items-center justify-center transition-all duration-300"
+                  aria-label="Student Portal"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" opacity="0.15" fill="currentColor"/>
+                    <path d="M16.5 17.5a5 5 0 0 0-9 0"/>
+                    <circle cx="12" cy="9" r="3.5"/>
+                  </svg>
                 </button>
 
                 {/* Hamburger — mobile only */}
@@ -4923,23 +5101,7 @@
                 Showcase
               </button>
 
-              {/* App */}
-              <button
-                onClick={() => { setMobileMenuOpen(false); navigateToSection('final-cta'); }}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white hover:bg-white/6 transition-all duration-300 text-left w-full"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                App
-              </button>
 
-              {/* Student Portal mobile trigger */}
-              <button
-                onClick={() => { setMobileMenuOpen(false); setIsStudentOpen(true); }}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold uppercase tracking-wider text-white hover:text-brand-cyan hover:bg-white/6 transition-all duration-300 text-left w-full border border-white/5 bg-white/3"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Student Portal
-              </button>
 
               {/* Contact */}
               <button
@@ -5251,8 +5413,8 @@
           {/* ===== AI TOOLS COVERED ===== */}
           <section id="popular-tools" className="pt-12 pb-32 px-6 md:px-12 lg:px-24 relative z-10 border-t border-white/5 select-none bg-brand-bgDarker">
             <div className="max-w-7xl mx-auto w-full">
-              <div className="max-w-xl text-left mb-16">
-                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center mb-3">
+              <div className="text-center mb-16">
+                <span className="text-xs font-mono text-brand-cyan font-bold uppercase tracking-widest flex items-center justify-center mb-3">
                   <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full mr-2" />
                   AI Tools Covered
                 </span>
@@ -5261,13 +5423,25 @@
                 </h2>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-3">
-                {['ChatGPT', 'Midjourney', 'Adobe Photoshop AI', 'Adobe Firefly', 'Figma AI', 'Framer AI', 'Claude AI', 'Runway ML', 'Kling AI', 'Canva AI', 'Leonardo AI', 'Gemini AI'].map((tool, idx) => (
-                  <div key={idx} className="group px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-cyan/30 transition-all duration-300">
-                    <span className="text-xs font-mono text-gray-400 group-hover:text-white transition-colors duration-300 text-center leading-tight select-none">{tool}</span>
-                  </div>
-                ))}
+              <div className="-mx-6 md:-mx-12 lg:-mx-24">
+                <div ref={marqueeEl} className="flex gap-8" style={{ width: 'fit-content', willChange: 'transform' }}>
+                  {(() => {
+                    const tools = ['ChatGPT', 'Midjourney', 'Adobe Firefly', 'Figma AI', 'Claude AI', 'Runway ML', 'Kling AI', 'Canva AI', 'Gemini AI', 'Higgsfield', 'Lovable', 'Google Flow', 'Antigravity'];
+                    const items = [...tools, ...tools];
+                    return items.map((tool, idx) => {
+                      const logoUrl = toolLogoMap[tool] || toolLogoMap[tool.replace(' AI', '')];
+                      return (
+                        <div key={idx} className="group flex-shrink-0 cursor-pointer">
+                          <div className="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110" style={{ willChange: 'transform' }}>
+                            <img src={logoUrl} alt={tool} className="h-20 w-auto object-contain transition-all duration-300 ease-out" style={{ willChange: 'transform, opacity' }} />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
               </div>
+
             </div>
           </section>
 
@@ -5804,7 +5978,7 @@
                   />
                 </div>
                 <p className="text-xs text-gray-600 max-w-sm leading-relaxed mb-4">
-                  Dxign.learn is an independent education portal. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
+                  Obtecs is an independent education portal. Midjourney, Stable Diffusion, Runway, and ElevenLabs are trademarks of their respective owners.
                 </p>
               </div>
 
@@ -5836,6 +6010,13 @@
                   <a href="mailto:dxignlearn@gmail.com" className="hover:text-white transition-colors duration-300">
                     dxignlearn@gmail.com
                   </a>
+                  {/* Admin */}
+                  <span
+                    onClick={() => { window.location.hash = '#admin'; }}
+                    className="cursor-pointer hover:text-white transition-colors duration-300"
+                  >
+                    Admin
+                  </span>
                 </div>
 
                 {/* Social media icons */}
@@ -5879,12 +6060,9 @@
 
             {/* Copyright notes */}
             <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs gap-4 text-center md:text-left font-mono">
-              <span
-                onClick={() => { window.location.hash = '#admin'; }}
-                className="cursor-default hover:text-white/40 transition-colors select-none"
-              >
-                &copy; 2026 Dxign.learn. All Rights Reserved.
-              </span>
+              <a href="https://www.obtecs.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors select-none">
+                &copy; 2026 Obtecs. All Rights Reserved.
+              </a>
               <span className="text-gray-600">Site inspired by Apple. Engineered using React, CSS, and Tailwind CSS.</span>
             </div>
           </footer>
@@ -5895,13 +6073,17 @@
             return (
               <div
                 className="fixed inset-0 z-[10005] overflow-y-auto"
-                style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
+                style={{
+                  backgroundColor: closingModal ? 'transparent' : 'rgba(0,0,0,0.15)',
+                  backdropFilter: closingModal ? 'blur(0px)' : 'blur(4px)',
+                  transition: 'background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), backdropFilter 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+                }}
                 onClick={closeEnrollModal}
                 onWheel={(e) => e.stopPropagation()}
               >
-                <div className="min-h-full flex items-start lg:items-center justify-center p-4 md:p-8" onClick={closeEnrollModal}>
+                <div className="min-h-screen flex items-start lg:items-center justify-center p-4 md:p-8" onClick={closeEnrollModal}>
                   <div
-                    className="relative w-full max-w-5xl mx-auto rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12"
+                    className={`relative w-full max-w-5xl mx-auto rounded-3xl border border-white/10 overflow-hidden flex flex-col ${closingModal ? 'animate-popupOut' : 'animate-popup'}`}
                     style={{
                       background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
                       boxShadow: `0 0 60px ${enrollModal.colorCode}22, 0 30px 80px rgba(0,0,0,0.8)`,
@@ -5909,7 +6091,7 @@
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Gradient top accent bar - full width */}
-                    <div className="h-1 w-full col-span-12" style={{ background: theme.grad }} />
+                    <div className="h-1 w-full" style={{ background: theme.grad }} />
 
                     {/* Close button */}
                     <button
@@ -5920,7 +6102,7 @@
                     </button>
 
                     {/* LEFT COLUMN: Course Details */}
-                    <div className="lg:col-span-7 p-6 md:p-8 overflow-y-auto lg:max-h-[80vh] lg:border-r border-white/5">
+                    <div className="p-6 md:p-8 border-b border-white/5">
                       
                       {/* Header */}
                       <div className="flex items-start justify-between mb-5">
@@ -6005,13 +6187,13 @@
                             {enrollModal.perfectFor.map((audience, i) => (
                               <span key={i} className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-gray-400 text-[10px] font-mono">{audience}</span>
                             ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
 
                     {/* RIGHT COLUMN: Enrollment Form */}
-                    <div className="lg:col-span-5 p-6 md:p-8 flex flex-col justify-between bg-zinc-900/30">
+                    <div className="p-6 md:p-8 flex flex-col justify-between bg-zinc-900/30">
                       
                       {/* Pricing */}
                       <div>
@@ -6378,22 +6560,15 @@
           )}
 
           {/* ===== STUDENT PORTAL OVERLAY ===== */}
-          {isStudentOpen && (
+          {(isStudentOpen || closingStudent) && (
             <div
-              className="fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-y-auto lg:overflow-y-hidden"
+              className={`fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-y-auto lg:overflow-y-hidden ${closingStudent ? 'animate-student-popupOut' : 'animate-student-popup'}`}
               onWheel={(e) => { if (window.innerWidth >= 1024) e.stopPropagation(); }}
             >
               {!isStudentAuthenticated ? (
                 /* Student Login View */
                 <div className="flex-grow flex items-center justify-center p-4 overflow-y-auto" style={{ background: 'linear-gradient(135deg, #050505 0%, #0c0c0c 100%)' }}>
-                  {/* Close Login View */}
-                  <button 
-                    onClick={() => { setIsStudentOpen(false); }}
-                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-
+                  
                   {studentLoginStep === 1 ? (
                     /* Step 1: Email Form */
                     <form onSubmit={handleStudentRequestOTP} className="max-w-md w-full p-8 liquid-glass border border-white/10 rounded-3xl text-center shadow-[0_20px_60px_rgba(0,240,255,0.05)] relative overflow-hidden">
@@ -6448,6 +6623,14 @@
                       >
                         {studentLoading && <span className="animate-spin rounded-full h-3.5 w-3.5 border border-black border-t-transparent" />}
                         Send Verification Code
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => closeStudentPortal()}
+                        className="w-full mt-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider text-gray-500 border border-white/10 hover:text-white hover:border-white/30 transition-all duration-300"
+                      >
+                        Cancel
                       </button>
                     </form>
                   ) : (
@@ -6707,112 +6890,114 @@
                            </button>
                          </div>
 
-                         {/* ── MOBILE TAB CONTENT (below lg screens) ── */}
-                         <div className="lg:hidden">
-                           {/* Syllabus Tab: Course Syllabus lecture list */}
-                           {studentMobileTab === 'syllabus' && (
-                             <div className="text-left space-y-2.5">
-                               <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">Course Syllabus</h3>
-                               {(() => {
-                                 const list = getMergedLectures()[studentSelectedCourse] || [];
-                                 const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
-                                 if (list.length === 0) {
-                                   return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
-                                 }
-                                 return list.map((item, index) => {
-                                   const active = studentActiveVideo && studentActiveVideo.id === item.id;
-                                   return (
-                                     <button
-                                       key={item.id}
-                                       onClick={() => enrolled && setStudentActiveVideo(item)}
-                                       className={`w-full p-4 rounded-2xl border text-left flex items-start space-x-3 transition-all ${
-                                         !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/5' :
-                                         active
-                                           ? 'bg-brand-cyan/5 border-brand-cyan/25 text-white'
-                                           : 'bg-white/[0.01] hover:bg-white/[0.04] border-white/5 text-gray-400 hover:text-white'
-                                       }`}
-                                     >
-                                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-mono font-bold border ${
-                                         active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/5 border-white/10 text-gray-400'
-                                       }`}>
-                                         {index + 1}
-                                       </div>
-                                       <div className="truncate">
-                                         <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
-                                         <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-500">
-                                           <span>{item.duration}</span>
-                                           <span>•</span>
-                                           <span className="uppercase text-brand-violet">{item.difficulty || 'Beginner'}</span>
-                                         </div>
-                                       </div>
-                                     </button>
-                                   );
-                                 });
-                               })()}
-                             </div>
-                           )}
+                          {/* ── MOBILE TAB CONTENT (below lg screens) ── */}
+                          <div className="lg:hidden">
+                            {/* Syllabus Tab: Course Syllabus lecture list */}
+                            <div className={studentMobileTab === 'syllabus' ? 'block' : 'hidden'}>
+                              <div className="text-left space-y-2.5">
+                                <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">Course Syllabus</h3>
+                                {(() => {
+                                  const list = getMergedLectures()[studentSelectedCourse] || [];
+                                  const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+                                  if (list.length === 0) {
+                                    return <p className="text-xs text-gray-600 italic font-mono">No lectures uploaded for this syllabus yet.</p>;
+                                  }
+                                  return list.map((item, index) => {
+                                    const active = studentActiveVideo && studentActiveVideo.id === item.id;
+                                    return (
+                                      <button
+                                        key={item.id}
+                                        onClick={() => enrolled && setStudentActiveVideo(item)}
+                                        className={`w-full p-4 rounded-2xl border text-left flex items-start space-x-3 transition-all ${
+                                          !enrolled ? 'opacity-40 cursor-not-allowed bg-transparent border-white/5' :
+                                          active
+                                            ? 'bg-brand-cyan/5 border-brand-cyan/25 text-white'
+                                            : 'bg-white/[0.01] hover:bg-white/[0.04] border-white/5 text-gray-400 hover:text-white'
+                                        }`}
+                                      >
+                                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-mono font-bold border ${
+                                          active ? 'bg-brand-cyan border-brand-cyan text-black' : 'bg-white/5 border-white/10 text-gray-400'
+                                        }`}>
+                                          {index + 1}
+                                        </div>
+                                        <div className="truncate">
+                                          <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
+                                          <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-500">
+                                            <span>{item.duration}</span>
+                                            <span>•</span>
+                                            <span className="uppercase text-brand-violet">{item.difficulty || 'Beginner'}</span>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    );
+                                  });
+                                })()}
+                              </div>
+                            </div>
 
-                           {/* About Lesson Tab: Title, metadata, description, tags, resources */}
-                           {studentMobileTab === 'about' && studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
-                             <div className="space-y-6 text-left">
-                               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
-                                 <div>
-                                   <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-cyan">{studentSelectedCourse}</span>
-                                   <h2 className="text-xl font-black text-white uppercase tracking-tight mt-1">{studentActiveVideo.title}</h2>
-                                 </div>
-                                 <div className="flex items-center gap-3">
-                                   <span className="px-3 py-1 text-[8px] font-mono font-bold rounded-lg border border-brand-violet/25 bg-brand-violet/10 text-brand-violet uppercase">
-                                     {studentActiveVideo.difficulty || 'Intermediate'}
-                                   </span>
-                                   <span className="text-xs text-gray-500 font-mono">{studentActiveVideo.duration}</span>
-                                 </div>
-                               </div>
-                               <div className="space-y-2">
-                                 <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
-                                 <p className="text-gray-400 text-xs font-light leading-relaxed">{studentActiveVideo.description}</p>
-                               </div>
-                               {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
-                                 <div className="flex flex-wrap gap-2 pt-2">
-                                   {studentActiveVideo.tags.map(tag => (
-                                     <span key={tag} className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-medium text-gray-500 font-mono">#{tag}</span>
-                                   ))}
-                                 </div>
-                               )}
-                               {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
-                                 <div className="pt-4 border-t border-white/5">
-                                   <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-4">Downloadable Templates & Source Files</h4>
-                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                     {studentActiveVideo.resources.map((res, idx) => (
-                                       <a 
-                                         key={idx}
-                                         href={getAttachmentUrl(res.url)}
-                                         target="_blank"
-                                         rel="noreferrer"
-                                         className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-brand-cyan/20 flex items-center justify-between transition-all group"
-                                       >
-                                         <div className="flex items-center space-x-3 truncate">
-                                           <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
-                                           </div>
-                                           <div className="truncate text-left">
-                                             <p className="text-xs font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
-                                             <p className="text-[9px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
-                                           </div>
-                                         </div>
-                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
-                                       </a>
-                                     ))}
-                                   </div>
-                                 </div>
-                               )}
-                             </div>
-                           )}
+                            {/* About Lesson Tab: Title, metadata, description, tags, resources */}
+                            <div className={studentMobileTab === 'about' ? 'block' : 'hidden'}>
+                              {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
+                                <div className="space-y-6 text-left">
+                                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                    <div>
+                                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-brand-cyan">{studentSelectedCourse}</span>
+                                      <h2 className="text-xl font-black text-white uppercase tracking-tight mt-1">{studentActiveVideo.title}</h2>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                      <span className="px-3 py-1 text-[8px] font-mono font-bold rounded-lg border border-brand-violet/25 bg-brand-violet/10 text-brand-violet uppercase">
+                                        {studentActiveVideo.difficulty || 'Intermediate'}
+                                      </span>
+                                      <span className="text-xs text-gray-500 font-mono">{studentActiveVideo.duration}</span>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Lecture Summary</h4>
+                                    <p className="text-gray-400 text-xs font-light leading-relaxed">{studentActiveVideo.description}</p>
+                                  </div>
+                                  {studentActiveVideo.tags && studentActiveVideo.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 pt-2">
+                                      {studentActiveVideo.tags.map(tag => (
+                                        <span key={tag} className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-medium text-gray-500 font-mono">#{tag}</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {studentActiveVideo.resources && studentActiveVideo.resources.length > 0 && (
+                                    <div className="pt-4 border-t border-white/5">
+                                      <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold mb-4">Downloadable Templates & Source Files</h4>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {studentActiveVideo.resources.map((res, idx) => (
+                                          <a 
+                                            key={idx}
+                                            href={getAttachmentUrl(res.url)}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-brand-cyan/20 flex items-center justify-between transition-all group"
+                                          >
+                                            <div className="flex items-center space-x-3 truncate">
+                                              <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-brand-cyan transition">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                                              </div>
+                                              <div className="truncate text-left">
+                                                <p className="text-xs font-bold text-gray-200 truncate group-hover:text-white transition">{res.name}</p>
+                                                <p className="text-[9px] font-mono text-gray-500 mt-0.5">{res.size || '—'}</p>
+                                              </div>
+                                            </div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-brand-cyan transition"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+                                          </a>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
 
-                           {/* My Programs Tab: Course switching buttons */}
-                           {studentMobileTab === 'programs' && (
-                             <div className="text-left">
-                               <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">My Programs</h3>
-                               <div className="space-y-2">
+                            {/* My Programs Tab: Course switching buttons */}
+                            <div className={studentMobileTab === 'programs' ? 'block' : 'hidden'}>
+                              <div className="text-left">
+                                <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-3 font-bold">My Programs</h3>
+                                <div className="space-y-2">
                                  {Object.keys(DEFAULT_COURSE_CURRICULUM).map((courseName) => {
                                    const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
                                    const active = studentSelectedCourse === courseName;
@@ -6836,12 +7021,12 @@
                                      </button>
                                    );
                                  })}
-                               </div>
-                             </div>
-                           )}
-                         </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-                         {/* Desktop-only video metadata description (hidden on mobile) */}
+                          {/* Desktop-only video metadata description (hidden on mobile) */}
                          <div className="hidden lg:block">
                            {studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && (
                              <div className="space-y-6 text-left">
