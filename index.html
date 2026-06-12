@@ -5452,11 +5452,11 @@
                     return items.map((tool, idx) => {
                       const logoUrl = toolLogoMap[tool] || toolLogoMap[tool.replace(' AI', '')];
                       return (
-                        <div key={idx} className="group flex-shrink-0 cursor-pointer">
-                          <div className="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110" style={{ willChange: 'transform' }}>
-                            <img src={logoUrl} alt={tool} className="h-20 w-auto object-contain transition-all duration-300 ease-out" style={{ willChange: 'transform, opacity' }} />
-                          </div>
-                        </div>
+                         <div key={idx} className="group flex-shrink-0 cursor-pointer w-28 flex items-center justify-center">
+                           <div className="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 flex items-center justify-center" style={{ willChange: 'transform' }}>
+                             <img src={logoUrl} alt={tool} className="h-16 w-full object-contain transition-all duration-300 ease-out" style={{ willChange: 'transform, opacity' }} />
+                           </div>
+                         </div>
                       );
                     });
                   })()}
