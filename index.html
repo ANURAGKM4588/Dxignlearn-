@@ -8443,61 +8443,65 @@ Dxign Learn Team`
                     )}
 
                     {adminTab === 'controls' && (
-                      <div className="max-w-2xl mx-auto w-full flex flex-col space-y-6 lg:space-y-8">
-                        {/* Support status controls */}
-                        <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start">
+
+                        {/* ===== LEFT COLUMN ===== */}
+                        <div className="flex flex-col gap-8 lg:gap-10">
+
+                        {/* ===== SUPPORT STATUS ===== */}
+                        <div className="p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose" />
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
                             </div>
                             <div>
-                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Mentor Support status</h3>
-                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Control live online availability in mobile app</p>
+                              <h3 className="text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading">Mentor Support Status</h3>
+                              <p className="text-xs font-mono text-gray-500 mt-1">Control live online availability shown in the mobile app</p>
                             </div>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="space-y-5">
                             <div>
-                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Mentor status</label>
+                              <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Availability</label>
                               <div className="grid grid-cols-2 gap-3">
                                 <button
                                   type="button"
                                   onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: true }))}
-                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                  className={`py-4 rounded-xl font-mono text-sm font-bold uppercase flex items-center justify-center gap-3 border-2 transition ${
                                     supportSettings.isOnline 
-                                      ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                      ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white hover:border-white/20'
                                   }`}
                                 >
-                                  <span className={`w-2.5 h-2.5 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`} />
+                                  <span className={`w-3 h-3 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`} />
                                   ONLINE
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setSupportSettings(prev => ({ ...prev, isOnline: false }))}
-                                  className={`py-3 rounded-xl font-mono text-xs font-bold uppercase flex items-center justify-center gap-2 border transition ${
+                                  className={`py-4 rounded-xl font-mono text-sm font-bold uppercase flex items-center justify-center gap-3 border-2 transition ${
                                     !supportSettings.isOnline 
-                                      ? 'bg-rose-500/10 text-rose-500 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white'
+                                      ? 'bg-rose-500/10 text-rose-500 border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+                                      : 'bg-transparent border-white/10 text-gray-500 hover:text-white hover:border-white/20'
                                   }`}
                                 >
-                                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                                  <span className="w-3 h-3 rounded-full bg-rose-500" />
                                   OFFLINE
                                 </button>
                               </div>
                             </div>
 
                             <div>
-                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2">Average response time</label>
+                              <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Average Response Time</label>
                               <div className="relative flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 w-4 h-4 text-gray-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 w-5 h-5 text-gray-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 <input
                                   type="text"
                                   placeholder="e.g. 4 mins, 15 mins"
                                   value={supportSettings.avgResponseTime || ''}
                                   onChange={(e) => setSupportSettings(prev => ({ ...prev, avgResponseTime: e.target.value }))}
-                                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-violet/50 transition duration-300"
+                                  className="w-full pl-12 pr-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-violet/50 transition duration-300"
                                 />
                               </div>
                             </div>
@@ -8506,68 +8510,270 @@ Dxign Learn Team`
                               type="button"
                               onClick={() => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime)}
                               disabled={savingSupport}
-                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+                              className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_25px_rgba(168,85,247,0.2)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
                             >
                               {savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'}
                             </button>
                           </div>
                         </div>
 
-                        {/* Whitelister Form */}
-                        <form onSubmit={handleWhitelistSubmit} className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                        {/* ===== WELCOME AUTOMATION ===== */}
+                        <div className="p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-emerald to-brand-cyan" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                             </div>
                             <div>
-                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
-                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Add students and bypass standard Razorpay checkout flow</p>
+                              <h3 className="text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading">Welcome Automation</h3>
+                              <p className="text-xs font-mono text-gray-500 mt-1">Auto-send welcome email &amp; WhatsApp message on payment success</p>
                             </div>
                           </div>
 
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-6">
+                            {/* Email status */}
+                            <div className="p-5 rounded-xl bg-white/[0.03] border border-white/5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-brand-cyan/15 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan shrink-0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-3 flex-wrap">
+                                    <span className="text-sm font-bold text-white">Welcome Email</span>
+                                    <span className="text-xs font-mono bg-brand-emerald/15 text-brand-emerald px-3 py-1 rounded-full border border-brand-emerald/25 font-bold">ACTIVE</span>
+                                  </div>
+                                  <p className="text-sm font-mono text-gray-500 mt-1">Automatically sent via Google Apps Script MailApp (free, 100 recipients/day)</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* WhatsApp config */}
+                            <div className="p-5 rounded-xl bg-white/[0.03] border border-white/5">
+                              <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-xl bg-brand-emerald/15 border border-brand-emerald/25 flex items-center justify-center text-brand-emerald shrink-0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-3 flex-wrap">
+                                    <span className="text-sm font-bold text-white">WhatsApp Notification</span>
+                                    <span className={`text-xs font-mono px-3 py-1 rounded-full border font-bold ${
+                                      whatsAppConfigured
+                                        ? 'bg-brand-emerald/15 text-brand-emerald border-brand-emerald/25'
+                                        : 'bg-white/5 text-gray-400 border-white/10'
+                                    }`}>
+                                      {whatsAppConfigured ? 'CONFIGURED' : 'DISABLED'}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm font-mono text-gray-500 mt-1">Optional. Leave empty to run in email-only mode.</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                  <div>
+                                    <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">API Endpoint URL</label>
+                                    <input
+                                      type="text"
+                                      placeholder="https://api.ultramsg.com/instance12345/messages/chat"
+                                      value={whatsAppApiUrl}
+                                      onChange={(e) => setWhatsAppApiUrl(e.target.value)}
+                                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">API Key / Bearer Token</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Your API key or bearer token"
+                                      value={whatsAppApiKey}
+                                      onChange={(e) => setWhatsAppApiKey(e.target.value)}
+                                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Phone Number ID <span className="text-gray-600 normal-case">(WhatsApp Cloud API only — leave blank for other providers)</span></label>
+                                  <input
+                                    type="text"
+                                    placeholder="Leave blank for UltraMsg, Twilio, or custom webhooks"
+                                    value={whatsAppPhoneId}
+                                    onChange={(e) => setWhatsAppPhoneId(e.target.value)}
+                                    className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Test Phone Number</label>
+                                  <div className="flex gap-3">
+                                    <input
+                                      type="text"
+                                      placeholder="+919876543210"
+                                      value={whatsAppTestPhone}
+                                      onChange={(e) => setWhatsAppTestPhone(e.target.value)}
+                                      className="flex-1 px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleTestWhatsApp}
+                                      disabled={whatsAppSaving}
+                                      className="px-6 py-3.5 rounded-xl bg-brand-emerald/15 border border-brand-emerald/25 text-brand-emerald text-sm font-bold font-mono hover:bg-brand-emerald/25 transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                      {whatsAppSaving ? 'Sending...' : 'Send Test'}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Templates */}
+                                <div className="border-t border-white/5 pt-6">
+                                  <h4 className="text-sm font-bold uppercase tracking-wider text-white font-heading mb-1">Notification Templates</h4>
+                                  <p className="text-sm font-mono text-gray-500 mb-5">
+                                    Use <code className="text-brand-cyan font-bold">{'{name}'}</code>, <code className="text-brand-cyan font-bold">{'{course}'}</code> as placeholders
+                                  </p>
+                                  <div className="space-y-5">
+                                    <div>
+                                      <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Email Subject</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Welcome to Dxign Learn - {course}"
+                                        value={welcomeEmailSubject}
+                                        onChange={(e) => setWelcomeEmailSubject(e.target.value)}
+                                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Email Body</label>
+                                      <textarea
+                                        rows={5}
+                                        placeholder="Hi {name}, Welcome to Dxign Learn!..."
+                                        value={welcomeEmailBody}
+                                        onChange={(e) => setWelcomeEmailBody(e.target.value)}
+                                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300 resize-y"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">WhatsApp Message Body</label>
+                                      <textarea
+                                        rows={4}
+                                        placeholder="Hi {name}! Welcome to Dxign Learn!..."
+                                        value={welcomeWhatsappBody}
+                                        onChange={(e) => setWelcomeWhatsappBody(e.target.value)}
+                                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300 resize-y"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {whatsAppStatus.text && (
+                                  <div className={`p-4 rounded-xl border text-sm font-mono ${
+                                    whatsAppStatus.type === 'success'
+                                      ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
+                                      : whatsAppStatus.type === 'warning'
+                                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                      : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                  }`}>
+                                    {whatsAppStatus.text}
+                                  </div>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={handleSaveWhatsAppConfig}
+                                  disabled={whatsAppSaving}
+                                  className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-emerald to-brand-cyan shadow-[0_0_25px_rgba(16,185,129,0.2)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+                                >
+                                  {whatsAppSaving ? 'Saving...' : 'Save Settings & Templates'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Setup guide */}
+                            <details className="group">
+                              <summary className="text-xs font-mono text-gray-500 hover:text-gray-400 cursor-pointer uppercase tracking-wider py-2 select-none">
+                                <span className="mr-1">▶</span> Free WhatsApp Provider Setup Guide
+                              </summary>
+                              <div className="mt-4 p-5 rounded-xl bg-white/[0.02] border border-white/5 text-sm font-mono text-gray-400 space-y-4 leading-relaxed">
+                                <div>
+                                  <p className="text-white font-bold mb-2">Option 1: UltraMsg (50 msgs/day free)</p>
+                                  <ol className="list-decimal list-inside space-y-1 text-gray-500">
+                                    <li>Sign up at <a href="https://ultramsg.com" target="_blank" className="text-brand-cyan hover:underline">ultramsg.com</a></li>
+                                    <li>Get your instance ID and token from the dashboard</li>
+                                    <li>API URL format: <code className="text-white">https://api.ultramsg.com/{'{instanceId}'}/messages/chat</code></li>
+                                    <li>Paste the token as the API Key above</li>
+                                  </ol>
+                                </div>
+                                <div className="border-t border-white/5 pt-4">
+                                  <p className="text-white font-bold mb-2">Option 2: WhatsApp Cloud API (free tier)</p>
+                                  <ol className="list-decimal list-inside space-y-1 text-gray-500">
+                                    <li>Go to <a href="https://developers.facebook.com" target="_blank" className="text-brand-cyan hover:underline">Meta for Developers</a></li>
+                                    <li>Create a WhatsApp Business App, get your token &amp; phone number ID</li>
+                                    <li>API URL format: <code className="text-white">https://graph.facebook.com/v22.0/</code></li>
+                                    <li>Enter both token and Phone Number ID above (auto-detected)</li>
+                                  </ol>
+                                </div>
+                              </div>
+                            </details>
+                          </div>
+                        </div>
+                      </div>
+
+                        {/* ===== RIGHT COLUMN: WHITELIST ===== */}
+                        <div className="flex flex-col gap-8 lg:gap-10">
+
+                        <form onSubmit={handleWhitelistSubmit} className="p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                            </div>
+                            <div>
+                              <h3 className="text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading">Manual Whitelist Creator</h3>
+                              <p className="text-xs font-mono text-gray-500 mt-1">Add students and bypass standard Razorpay checkout flow</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                               <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Student Name</label>
+                                <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Student Name</label>
                                 <input
                                   type="text"
                                   placeholder="John Doe"
                                   value={whitelistName}
                                   onChange={(e) => setWhitelistName(e.target.value)}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                  className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number</label>
+                                <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Phone Number</label>
                                 <input
                                   type="text"
                                   placeholder="+91 98765 43210"
                                   value={whitelistPhone}
                                   onChange={(e) => setWhitelistPhone(e.target.value)}
-                                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                  className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
                                 />
                               </div>
                             </div>
 
                             <div>
-                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Email Address</label>
+                              <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Email Address</label>
                               <input
                                 type="email"
                                 placeholder="student@gmail.com"
                                 value={whitelistEmail}
                                 onChange={(e) => setWhitelistEmail(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+                                className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
                               />
                             </div>
 
                             <div>
-                              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Grant Course Access</label>
-                              <div className="grid grid-cols-2 gap-2 bg-white/[0.02] border border-white/5 p-3.5 rounded-xl font-sans text-xs">
+                              <label className="text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2">Grant Course Access</label>
+                              <div className="grid grid-cols-2 gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-xl font-sans text-sm">
                                 {courseList.map(c => {
                                   const isChecked = whitelistCourses.includes(c.title);
                                   return (
-                                    <label key={c.id} className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none">
+                                    <label key={c.id} className="flex items-center gap-3 text-gray-400 hover:text-white cursor-pointer select-none py-1">
                                       <input
                                         type="checkbox"
                                         checked={isChecked}
@@ -8578,13 +8784,13 @@ Dxign Learn Team`
                                             setWhitelistCourses(prev => [...prev, c.title]);
                                           }
                                         }}
-                                        className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                        className="w-4 h-4 rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
                                       />
                                       <span className="truncate">{c.title}</span>
                                     </label>
                                   );
                                 })}
-                                <label className="flex items-center gap-2 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-1 border-t border-white/5 pt-2">
+                                <label className="flex items-center gap-3 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-2 border-t border-white/5 pt-3">
                                   <input
                                     type="checkbox"
                                     checked={whitelistCourses.includes('All Courses Lifetime Access')}
@@ -8595,15 +8801,15 @@ Dxign Learn Team`
                                         setWhitelistCourses(['All Courses Lifetime Access']);
                                       }
                                     }}
-                                    className="rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+                                    className="w-4 h-4 rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
                                   />
-                                  <span className="font-bold text-brand-cyan">All Courses Bundle</span>
+                                  <span className="font-bold text-brand-cyan text-sm">All Courses Bundle</span>
                                 </label>
                               </div>
                             </div>
 
                             {whitelistStatus.text && (
-                              <div className={`p-3 rounded-xl border text-[10px] font-mono ${
+                              <div className={`p-4 rounded-xl border text-sm font-mono ${
                                 whitelistStatus.type === 'success'
                                   ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
                                   : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
@@ -8615,197 +8821,15 @@ Dxign Learn Team`
                             <button
                               type="submit"
                               disabled={whitelistingLoading}
-                              className="w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                              className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_25px_rgba(0,240,255,0.2)]"
                             >
                               {whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'}
                             </button>
                           </div>
                         </form>
 
-                        {/* WhatsApp Automation Config */}
-                        <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-emerald to-brand-cyan" />
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            </div>
-                            <div>
-                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Welcome Automation</h3>
-                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Auto-send welcome messages on payment success</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-4">
-                            {/* Email status (always on) */}
-                            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan shrink-0">
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-white">Welcome Email</span>
-                                    <span className="text-[9px] font-mono bg-brand-emerald/10 text-brand-emerald px-2 py-0.5 rounded-full border border-brand-emerald/20">ACTIVE</span>
-                                  </div>
-                                  <p className="text-[9px] font-mono text-gray-500 mt-0.5">Auto-sent via Google Apps Script MailApp (free)</p>
-                                </div>
-                              </div>
-                            </div>
-                            {/* WhatsApp config */}
-                            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-lg bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0">
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-white">WhatsApp Notification (Optional)</span>
-                                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${whatsAppConfigured ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' : 'bg-white/10 text-white/40 border-white/10'}`}>
-                                      {whatsAppConfigured ? 'ACTIVE' : 'DISABLED'}
-                                    </span>
-                                  </div>
-                                  <p className="text-[9px] font-mono text-gray-500 mt-0.5">Optional. Leave credentials blank to run in Mail-only mode (Free).</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">API Endpoint URL</label>
-                                  <input
-                                    type="text"
-                                    placeholder="https://api.ultramsg.com/instance12345/messages/chat"
-                                    value={whatsAppApiUrl}
-                                    onChange={(e) => setWhatsAppApiUrl(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">API Key / Bearer Token</label>
-                                  <input
-                                    type="text"
-                                    placeholder="Your API key or bearer token"
-                                    value={whatsAppApiKey}
-                                    onChange={(e) => setWhatsAppApiKey(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number ID (WhatsApp Cloud API only)</label>
-                                  <input
-                                    type="text"
-                                    placeholder="Leave blank for other providers"
-                                    value={whatsAppPhoneId}
-                                    onChange={(e) => setWhatsAppPhoneId(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Test Phone Number (for test message)</label>
-                                  <div className="flex gap-2">
-                                    <input
-                                      type="text"
-                                      placeholder="+919876543210"
-                                      value={whatsAppTestPhone}
-                                      onChange={(e) => setWhatsAppTestPhone(e.target.value)}
-                                      className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={handleTestWhatsApp}
-                                      disabled={whatsAppSaving}
-                                      className="px-4 py-2.5 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-[9px] font-mono font-bold hover:bg-brand-emerald/20 transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
-                                    >
-                                      {whatsAppSaving ? 'Sending...' : 'Test'}
-                                    </button>
-                                  </div>
-                                </div>
-                                
-                                <div className="border-t border-white/5 pt-4 my-2">
-                                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-white font-heading mb-3">Notification Templates</h4>
-                                  <p className="text-[9px] font-mono text-gray-500 mb-4">
-                                    You can use placeholders: <code className="text-brand-cyan font-bold">{'{name}'}</code>, <code className="text-brand-cyan font-bold">{'{course}'}</code>
-                                  </p>
-                                  
-                                  <div className="space-y-3">
-                                    <div>
-                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome Email Subject</label>
-                                      <input
-                                        type="text"
-                                        placeholder="Welcome to Dxign Learn - {course}"
-                                        value={welcomeEmailSubject}
-                                        onChange={(e) => setWelcomeEmailSubject(e.target.value)}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome Email Body</label>
-                                      <textarea
-                                        rows={5}
-                                        placeholder="Hi {name}, Welcome to Dxign Learn!..."
-                                        value={welcomeEmailBody}
-                                        onChange={(e) => setWelcomeEmailBody(e.target.value)}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome WhatsApp Body</label>
-                                      <textarea
-                                        rows={4}
-                                        placeholder="Hi {name}! Welcome to Dxign Learn! Thank you for completing your registration for the {course} program..."
-                                        value={welcomeWhatsappBody}
-                                        onChange={(e) => setWelcomeWhatsappBody(e.target.value)}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {whatsAppStatus.text && (
-                                  <div className={`p-3 rounded-xl border text-[10px] font-mono ${
-                                    whatsAppStatus.type === 'success'
-                                      ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
-                                      : whatsAppStatus.type === 'warning'
-                                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                                      : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
-                                  }`}>
-                                    {whatsAppStatus.text}
-                                  </div>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={handleSaveWhatsAppConfig}
-                                  disabled={whatsAppSaving}
-                                  className="w-full py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-emerald to-brand-cyan shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
-                                >
-                                  {whatsAppSaving ? 'Saving...' : 'Save Settings & Templates'}
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Setup guide */}
-                            <details className="group">
-                              <summary className="text-[9px] font-mono text-gray-500 hover:text-gray-400 cursor-pointer uppercase tracking-wider py-2">
-                                <span className="group-open:hidden">+ </span>
-                                <span className="hidden group-open:inline">- </span>
-                                Free WhatsApp Provider Setup Guide
-                              </summary>
-                              <div className="mt-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 text-[9px] font-mono text-gray-400 space-y-3 leading-relaxed">
-                                <p><span className="text-white font-bold">Option 1: UltraMsg (50 msgs/day free)</span></p>
-                                <p>1. Sign up at <a href="https://ultramsg.com" target="_blank" className="text-brand-cyan hover:underline">ultramsg.com</a></p>
-                                <p>2. Get your instance ID and token from the dashboard</p>
-                                <p>3. API URL format: <code className="text-white">https://api.ultramsg.com/{'{instanceId}'}/messages/chat</code></p>
-                                <p>4. Paste the token as the API Key above</p>
-                                <div className="border-t border-white/5 pt-3 mt-3">
-                                  <p><span className="text-white font-bold">Option 2: WhatsApp Cloud API (free tier)</span></p>
-                                  <p>1. Go to <a href="https://developers.facebook.com" target="_blank" className="text-brand-cyan hover:underline">Meta for Developers</a></p>
-                                  <p>2. Create a WhatsApp Business App, get your token &amp; phone number ID</p>
-                                  <p>3. API URL format: <code className="text-white">https://graph.facebook.com/v22.0/</code></p>
-                                  <p>4. Enter both token and Phone Number ID above (this provider auto-detected)</p>
-                                </div>
-                              </div>
-                            </details>
-                          </div>
                         </div>
+
                       </div>
                     )}
 

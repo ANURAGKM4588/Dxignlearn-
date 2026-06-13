@@ -446,34 +446,51 @@ function getBeautifulHtmlWrapper(name, course, email, customContentHtml) {
     contentArea = customContentHtml;
   } else {
     contentArea = 
-      "<div style='font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 20px;'>Hi " + name + ",</div>" +
-      "<p style='margin: 0 0 16px 0;'>Welcome to <strong>Dxign Learn</strong>! 🚀</p>" +
-      "<p style='margin: 0 0 16px 0;'>Thank you for enrolling in the <span style='color: #00f0ff; font-weight: bold;'>" + course + "</span> program. We are thrilled to have you join our learning community where we master industry-leading creative skills and business automation.</p>" +
+      "<div style='font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 20px;'>Hi " + name + ",</div>" +
+      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>Welcome to <strong>Dxign Learn</strong>! 🚀</p>" +
+      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>Thank you for enrolling in the <span style='color: #008fa0; font-weight: bold;'>" + course + "</span> program. We are thrilled to have you join our learning community!</p>" +
       
-      "<div style='background-color: #121214; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin: 30px 0;'>" +
-        "<div style='font-size: 14px; font-weight: bold; color: #a855f7; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;'>📱 How to Access Your Course Portal</div>" +
+      "<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; margin: 30px 0;'>" +
+        "<div style='font-size: 13px; font-weight: bold; color: #6b21a8; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 16px;'>📱 How to Access Your Course Portal</div>" +
         
-        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
-          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>1</div>" +
-          "<div style='color: #e4e4e7; font-size: 14px;'>Open the <strong>Dxign Learn Mobile App</strong> on your phone.</div>" +
-        "</div>" +
-        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
-          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>2</div>" +
-          "<div style='color: #e4e4e7; font-size: 14px;'>Log in using the email address you registered with: <strong>" + email + "</strong>.</div>" +
-        "</div>" +
-        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
-          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>3</div>" +
-          "<div style='color: #e4e4e7; font-size: 14px;'>Enter the 6-digit secure verification OTP code sent to your inbox.</div>" +
-        "</div>" +
-        "<div style='display: flex; align-items: flex-start;'>" +
-          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>4</div>" +
-          "<div style='color: #e4e4e7; font-size: 14px;'>Start streaming lectures, downloading resources, and chatting directly with mentors!</div>" +
-        "</div>" +
+        "<table border='0' cellpadding='0' cellspacing='0' width='100%'>" +
+          "<tr>" +
+            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
+              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>1</div>" +
+            "</td>" +
+            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
+              "Open the <strong>Dxign Learn Mobile App</strong> on your phone." +
+            "</td>" +
+          "</tr>" +
+          "<tr>" +
+            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
+              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>2</div>" +
+            "</td>" +
+            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
+              "Log in using the email address you registered with: <strong>" + email + "</strong>." +
+            "</td>" +
+          "</tr>" +
+          "<tr>" +
+            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
+              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>3</div>" +
+            "</td>" +
+            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
+              "Enter the 6-digit secure verification OTP code sent to your inbox." +
+            "</td>" +
+          "</tr>" +
+          "<tr>" +
+            "<td style='vertical-align: top; width: 34px;'>" +
+              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>4</div>" +
+            "</td>" +
+            "<td style='color: #334155; font-size: 14px; line-height: 1.5;'>" +
+              "Start streaming lectures, downloading resources, and chatting directly with mentors!" +
+            "</td>" +
+          "</tr>" +
+        "</table>" +
       "</div>" +
       
-      "<p style='margin: 0 0 16px 0;'>If you have any questions, difficulty logging in, or need immediate assistance, simply reply directly to this email or reach out to our support team.</p>" +
-      "<p style='margin: 0 0 16px 0;'>Get ready to vibe code, design, and automate!</p>" +
-      "<p style='margin: 0;'>Best regards,<br><strong>Dxign Learn Team</strong></p>";
+      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>If you have any questions, difficulty logging in, or need immediate assistance, simply reply directly to this email.</p>" +
+      "<p style='margin: 0; color: #4f5e71;'>Best regards,<br><strong>Dxign Learn Team</strong></p>";
   }
 
   return "<!DOCTYPE html>" +
@@ -482,17 +499,17 @@ function getBeautifulHtmlWrapper(name, course, email, customContentHtml) {
       "<meta charset='utf-8'>" +
       "<title>Welcome to Dxign Learn</title>" +
     "</head>" +
-    "<body style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #050505; color: #e5e5e5; margin: 0; padding: 20px;\">" +
-      "<div style='max-width: 600px; margin: 20px auto; background-color: #0b0b0c; border: 1px solid #1a1a1a; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);'>" +
-        "<div style='background: linear-gradient(135deg, #0f172a 0%, #020617 100%); padding: 40px 20px; text-align: center; border-bottom: 1px solid #1e293b;'>" +
-          "<div style='font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #00f0ff; text-transform: uppercase; margin: 0; text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);'>Dxign Learn</div>" +
+    "<body style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #333333; margin: 0; padding: 20px;\">" +
+      "<div style='max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);'>" +
+        "<div style='background-color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #f0f1f3;'>" +
+          "<img src='https://www.dxignlearn.com/public/Images/logo/Dxign-logo.png' alt='Dxign Learn' style='height: 40px; max-width: 200px; display: inline-block; border: 0;' />" +
         "</div>" +
-        "<div style='padding: 40px 30px; line-height: 1.6; font-size: 15px; color: #cccccc;'>" +
+        "<div style='padding: 40px 35px; line-height: 1.6; font-size: 15px; color: #4f5e71;'>" +
           contentArea +
         "</div>" +
-        "<div style='background-color: #070708; padding: 20px; text-align: center; font-size: 12px; color: #52525b; border-top: 1px solid #18181b;'>" +
+        "<div style='background-color: #f8fafc; padding: 25px 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9;'>" +
           "&copy; 2026 Dxign Learn. All rights reserved.<br>" +
-          "Need help? Email us at <a href='mailto:dxignlearn@gmail.com' style='color: #00f0ff; text-decoration: none;'>dxignlearn@gmail.com</a>" +
+          "Need help? Contact us at <a href='mailto:dxignlearn@gmail.com' style='color: #008fa0; text-decoration: none; font-weight: 500;'>dxignlearn@gmail.com</a>" +
         "</div>" +
       "</div>" +
     "</body>" +
