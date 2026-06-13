@@ -75,6 +75,8 @@
     }
     .animate-slideUp { animation: slideUpPopup 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
     .animate-slideDownOut { animation: slideDownOut 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+    @keyframes shimmer { 0% { transform: skewX(-20deg) translateX(-100%); } 100% { transform: skewX(-20deg) translateX(400%); } }
+    .animate-shimmer { animation: shimmer 2s ease-in-out infinite; }
     video::-webkit-media-controls { display: none !important; }
     video::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; }
     video::--webkit-media-controls-play-button { display: none !important; }
@@ -129,6 +131,7 @@
   <!-- Firebase Compat SDK (v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
   <!-- YouTube IFrame Player API -->
   <script src="https://www.youtube.com/iframe_api"></script>
@@ -170,7 +173,7 @@
         tags: ['Midjourney', 'Adobe Firefly', 'Photoshop AI', 'Canva AI'],
         courseName: 'AI Graphic Design Mastery',
         duration: '6 Weeks',
-        price: '₹4,999',
+        price: 'Free',
         themeColor: '#10b981',
         themeGrad: 'linear-gradient(90deg, #10b981, #a855f7)'
       },
@@ -182,7 +185,7 @@
         tags: ['Runway ML', 'Kling AI', 'HeyGen', 'Premiere Pro'],
         courseName: 'AI Filmmaking & Video Production',
         duration: '8 Weeks',
-        price: '₹7,999',
+        price: 'Free',
         themeColor: '#ec4899',
         themeGrad: 'linear-gradient(90deg, #ec4899, #a855f7)'
       },
@@ -1454,10 +1457,10 @@
         category: 'creative',
         tools: ['Midjourney', 'Adobe Firefly', 'Photoshop AI', 'Canva AI'],
         duration: '6 Weeks',
-        price: '₹4,999',
+        price: 'Free',
         originalPrice: '₹9,999',
-        discount: '50% OFF',
-        priceAmount: 499900,
+        discount: 'Enroll Free',
+        priceAmount: 0,
         tagline: 'Create Professional Designs 10x Faster Using AI',
         fullDescription: 'Master the future of graphic design by combining creativity with powerful AI tools. Learn how to create logos, brand identities, social media campaigns, advertising creatives, product mockups, and marketing materials with professional workflows used by modern designers.',
         whatYouLearn: ['AI Design Fundamentals', 'Prompt Engineering for Designers', 'Brand Identity Design', 'Logo Design & Concept Development', 'Social Media Creative Design', 'Poster & Advertisement Design', 'Product Mockups', 'Packaging Design', 'Marketing Campaign Assets', 'Portfolio Creation'],
@@ -1477,10 +1480,10 @@
         category: 'creative',
         tools: ['Runway ML', 'Kling AI', 'HeyGen', 'Premiere Pro'],
         duration: '8 Weeks',
-        price: '₹7,999',
+        price: 'Free',
         originalPrice: '₹14,999',
-        discount: '47% OFF',
-        priceAmount: 799900,
+        discount: 'Enroll Free',
+        priceAmount: 0,
         tagline: 'Create Cinematic Videos Without a Production Team',
         fullDescription: 'Learn how to produce professional-quality videos using AI-powered workflows. Create commercials, social media content, explainer videos, cinematic trailers, and business promotions with minimal equipment.',
         whatYouLearn: ['AI Video Production Workflow', 'Storytelling & Script Writing', 'AI Video Generation', 'Voice Cloning & AI Voiceovers', 'Cinematic Editing', 'Motion Graphics', 'Social Media Video Creation', 'YouTube Content Production', 'Commercial Advertisement Creation', 'Video Marketing Strategies'],
@@ -1500,10 +1503,10 @@
         category: 'business-tech',
         tools: ['Framer AI', 'Claude AI', 'Cursor AI', 'Tailwind'],
         duration: '5 Weeks',
-        price: '₹5,499',
+        price: 'Free',
         originalPrice: '₹10,999',
-        discount: '50% OFF',
-        priceAmount: 549900,
+        discount: 'Enroll Free',
+        priceAmount: 0,
         tagline: 'Build Professional Websites Without Writing Code',
         fullDescription: 'Learn how to create modern websites, landing pages, business sites, portfolios, and online stores using AI-powered no-code tools. Perfect for entrepreneurs, freelancers, and designers who want to launch websites quickly.',
         whatYouLearn: ['Website Planning', 'AI Website Generation', 'Landing Page Design', 'Responsive Design', 'SEO Fundamentals', 'Lead Generation Pages', 'Website Optimization', 'Domain & Hosting Setup', 'Website Publishing', 'Website Maintenance'],
@@ -1523,10 +1526,10 @@
         category: 'creative',
         tools: ['Figma AI', 'Midjourney', 'Claude AI', 'Gemini AI'],
         duration: '6 Weeks',
-        price: '₹6,499',
+        price: 'Free',
         originalPrice: '₹12,999',
-        discount: '50% OFF',
-        priceAmount: 649900,
+        discount: 'Enroll Free',
+        priceAmount: 0,
         tagline: 'Design Modern Digital Experiences Using AI',
         fullDescription: 'Learn the complete UI/UX design process from research to prototyping while leveraging AI tools to improve productivity and creativity.',
         whatYouLearn: ['User Experience Fundamentals', 'User Research', 'Wireframing', 'User Journey Mapping', 'Mobile App Design', 'Website UI Design', 'Design Systems', 'Interactive Prototyping', 'Usability Testing', 'Portfolio Creation'],
@@ -2755,7 +2758,8 @@
       const [whitelistStatus, setWhitelistStatus] = useState({ type: '', text: '' }); // type: 'success' | 'error'
 
       // Full screen media preview
-      const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
+          const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
+          const [mediaPreviewLoading, setMediaPreviewLoading] = useState(false);
 
       // --- Student Portal States ---
       const [isStudentOpen, setIsStudentOpen] = useState(false);
@@ -2991,6 +2995,7 @@
         setTimeout(() => {
           setStudentChatOpen(false);
           setClosingChatPopup(false);
+          setStudentTab('courses');
         }, 350);
       };
 
@@ -3479,7 +3484,6 @@
         const file = e.target.files[0];
         if (!file || !studentUser) return;
         e.target.value = '';
-        setStudentChatSending(true);
 
         const chatRoomId = studentUser.email.replace(/[@.]/g, '_');
 
@@ -3488,8 +3492,109 @@
         else if (file.type.startsWith('video/')) type = 'video';
         else if (file.type.startsWith('audio/')) type = 'audio';
 
+        setStudentUploadingProgress(0);
+
+        let fileUrl = '';
+
+        // Try Firebase Storage first (native upload, real-time progress, no file size limit)
+        const firebaseStorage = window.firebase && firebase.storage && firebase.storage();
+        if (firebaseStorage && !isFirebaseMock) {
+          try {
+            const timestamp = Date.now();
+            const storagePath = `chats/${chatRoomId}/${timestamp}_${file.name}`;
+            const storageRef = firebaseStorage.ref(storagePath);
+            const metadata = { contentType: file.type };
+
+            // Timeout: dynamic based on file size (min 30s, max 5min, ~30s per 10MB)
+            const uploadTimeout = Math.min(Math.max(Math.round(file.size / 1e7) * 30000, 30000), 300000);
+            const uploadPromise = new Promise((resolve, reject) => {
+              const uploadTask = storageRef.put(file, metadata);
+              const timeoutId = setTimeout(() => {
+                try { uploadTask.cancel(); } catch (e) {}
+                reject(new Error("Firebase Storage upload timed out"));
+              }, uploadTimeout);
+
+              uploadTask.on('state_changed',
+                (snapshot) => {
+                  const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                  setStudentUploadingProgress(Math.round(progress));
+                },
+                (error) => {
+                  clearTimeout(timeoutId);
+                  reject(error);
+                },
+                async () => {
+                  clearTimeout(timeoutId);
+                  try {
+                    const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                    resolve(downloadUrl);
+                  } catch (err) {
+                    reject(err);
+                  }
+                }
+              );
+            });
+
+            fileUrl = await uploadPromise;
+            setStudentUploadingProgress(95);
+          } catch (storageErr) {
+            console.warn("Firebase Storage failed, falling back to webhook:", storageErr);
+            fileUrl = '';
+          }
+        }
+
+        // Fallback to webhook (Google Drive) if Firebase Storage unavailable or failed
+        if (!fileUrl) {
+          if (file.size > 10 * 1024 * 1024) {
+            throw new Error("File too large for fallback upload (max 10MB). Try again later.");
+          }
+          setStudentUploadingProgress(5);
+          try {
+            const reader = new FileReader();
+            const arrayBuffer = await new Promise((resolve, reject) => {
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsArrayBuffer(file);
+            });
+            const bytes = new Uint8Array(arrayBuffer);
+            let binary = '';
+            const chunkSize = 65536;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+              binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+            }
+            const base64Data = btoa(binary);
+            binary = null;
+
+            setStudentUploadingProgress(30);
+
+            const payload = {
+              action: 'upload_file',
+              fileName: file.name,
+              mimeType: file.type,
+              base64Data: base64Data
+            };
+
+            const response = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(payload),
+            });
+            const result = await response.json();
+            if (result && result.status === 'success' && result.fileUrl) {
+              fileUrl = result.fileUrl;
+            } else {
+              throw new Error(result.message || 'Webhook upload failed');
+            }
+
+            setStudentUploadingProgress(80);
+          } catch (webhookErr) {
+            console.warn("Webhook upload failed:", webhookErr);
+            throw webhookErr;
+          }
+        }
+
         try {
-          const fileUrl = URL.createObjectURL(file);
+          setStudentUploadingProgress(80);
 
           const msgData = {
             sender: studentUser.email,
@@ -3500,6 +3605,8 @@
             status: 'sent',
             timestamp: isFirebaseMock ? new Date() : firebase.firestore.FieldValue.serverTimestamp()
           };
+
+          setStudentUploadingProgress(95);
 
           if (isFirebaseMock) {
             const updatedMessages = { ...mockMessages };
@@ -3524,6 +3631,7 @@
           alert("File upload failed: " + err.message);
         } finally {
           setStudentChatSending(false);
+          setStudentUploadingProgress(null);
         }
       };
 
@@ -4469,6 +4577,14 @@
         const courseVal = enrollModal.title;
         const priceVal = enrollModal.price;
 
+        // Free enrollment — skip Razorpay
+        if (enrollModal.priceAmount === 0) {
+          closeEnrollModal();
+          saveToGoogleSheet('Success (Free)', '', nameVal, emailVal, phoneVal, courseVal, priceVal);
+          alert('🎉 Welcome to ' + courseVal + '!\n\nYour free enrollment is confirmed. Check your email for course access details.');
+          return;
+        }
+
         const options = {
           key: RAZORPAY_KEY,
           amount: enrollModal.priceAmount,
@@ -4515,7 +4631,7 @@
         rzp.open();
       };
 
-      // General Enroll Now — All Courses Lifetime Access ₹5
+      // General Enroll Now — All Courses Lifetime Access (Free)
       const handleGeneralEnroll = () => {
         openEnrollModal({
           id: 'all-courses',
@@ -4529,10 +4645,10 @@
           category: 'bundle',
           tools: ['All 5 Courses', 'Full Modules', 'Source Files'],
           duration: 'Lifetime',
-          price: '₹5',
+          price: 'Free',
           originalPrice: '₹999',
-          discount: 'Save 99%',
-          priceAmount: 500
+          discount: 'Enroll Free',
+          priceAmount: 0
         });
       };
 
@@ -5452,11 +5568,11 @@
                     return items.map((tool, idx) => {
                       const logoUrl = toolLogoMap[tool] || toolLogoMap[tool.replace(' AI', '')];
                       return (
-                         <div key={idx} className="group flex-shrink-0 cursor-pointer w-36 flex items-center justify-center">
-                           <div className="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 flex items-center justify-center" style={{ willChange: 'transform' }}>
-                             <img src={logoUrl} alt={tool} className="h-20 w-full object-contain transition-all duration-300 ease-out" style={{ willChange: 'transform, opacity' }} />
-                           </div>
-                         </div>
+                         <div key={idx} className="group flex-shrink-0 cursor-pointer w-48 flex items-center justify-center">
+                            <div className="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 flex items-center justify-center" style={{ willChange: 'transform' }}>
+                              <img src={logoUrl} alt={tool} className="h-28 w-full object-contain transition-all duration-300 ease-out" style={{ willChange: 'transform, opacity' }} />
+                            </div>
+                          </div>
                       );
                     });
                   })()}
@@ -5733,10 +5849,10 @@
                   <p className="text-xs text-gray-500 mt-1">One-time payment. All updates included.</p>
                 </div>
                 <div className="flex items-baseline space-x-3.5">
-                  <span className="text-4xl font-black text-white font-heading tracking-tight">₹5</span>
+                  <span className="text-4xl font-black text-white font-heading tracking-tight">FREE</span>
                   <span className="text-base text-gray-500 line-through font-medium">₹999</span>
                   <span className="text-[10px] font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-2 py-0.5 rounded uppercase font-bold">
-                    Save 99%
+                    Enroll Now
                   </span>
                 </div>
               </div>
@@ -6825,9 +6941,9 @@
                               <div className="inline-flex items-center gap-1 bg-[#0f0f15]/80 border border-white/[0.06] rounded-full p-1 font-mono text-[9px] font-bold">
                                 <button
                                   type="button"
-                                  onClick={() => setStudentTab('courses')}
+                                  onClick={() => { setStudentTab('courses'); closeChatPopup(); }}
                                   className={`px-5 py-2 rounded-full flex items-center gap-1.5 transition-all duration-300 ${
-                                    studentTab === 'courses'
+                                    studentTab === 'courses' && (!studentChatOpen || closingChatPopup)
                                       ? 'bg-brand-cyan text-black font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]'
                                       : 'text-gray-400 hover:text-white'
                                   }`}
@@ -6837,9 +6953,9 @@
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setStudentTab('chat')}
+                                  onClick={() => { setStudentTab('chat'); setClosingChatPopup(false); setStudentChatOpen(true); }}
                                   className={`px-5 py-2 rounded-full flex items-center gap-1.5 transition-all duration-300 ${
-                                    studentTab === 'chat'
+                                    studentTab === 'chat' || studentChatOpen || closingChatPopup
                                       ? 'bg-brand-cyan text-black font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]'
                                       : 'text-gray-400 hover:text-white'
                                   }`}
@@ -6852,17 +6968,10 @@
 
                             {/* Video Player Display Container — Dynamic Island glass style */}
                             <div className="w-full aspect-video rounded-[20px] overflow-hidden bg-black/50 border border-white/[0.06] shadow-2xl relative shrink-0" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                              {/* Demo Badge */}
-                              {studentTab === 'chat' && (
-                                <div className="absolute top-4 right-4 z-20 px-2.5 py-1 rounded-[6px] bg-black/70 border border-white/[0.08] text-[9px] font-mono font-bold tracking-widest text-gray-300 uppercase shadow-lg select-none">
-                                  Demo
-                                </div>
-                              )}
                               
                               {(() => {
                                 const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
                                 if (!enrolled) {
-                                  const payUrl = COURSE_PAYMENT_LINKS[studentSelectedCourse] || 'https://rzp.io/l/dxign-graphic-design';
                                   return (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm">
                                       <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 animate-pulse">
@@ -6870,14 +6979,12 @@
                                       </div>
                                       <h2 className="text-xl font-black uppercase text-white font-heading tracking-wide mb-2">COURSE LOCKED</h2>
                                       <p className="text-xs text-gray-500 max-w-sm mb-6">You are not currently enrolled in the <span className="text-white font-bold">{studentSelectedCourse}</span> training program.</p>
-                                      <a 
-                                        href={payUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
+                                      <button
+                                        onClick={handleGeneralEnroll}
                                         className="px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,240,255,0.2)]"
                                       >
-                                        UNLOCK & BUY PROGRAM (₹499)
-                                      </a>
+                                        GET FREE ACCESS
+                                      </button>
                                     </div>
                                   );
                                 }
@@ -6918,11 +7025,152 @@
                                   />
                                 );
                               })()}
+
+                              {/* Chat Popup — overlays the video player */}
+                              {(studentChatOpen || closingChatPopup) && (
+                                <div className={`absolute lg:inset-0 max-lg:fixed max-lg:inset-0 max-lg:z-[100003] flex flex-col bg-zinc-950/95 backdrop-blur-md rounded-[20px] overflow-hidden ${closingChatPopup ? 'animate-slideDownOut' : 'animate-slideUp'}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{ backdropFilter: 'blur(24px)' }}
+                                >
+                                  {/* Chat Header */}
+                                  <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center justify-between shrink-0">
+                                    <div className="flex items-center space-x-2.5">
+                                      <div className="relative">
+                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-blue/10 border border-brand-cyan/20 flex items-center justify-center">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        </div>
+                                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-zinc-950 bg-brand-emerald" />
+                                      </div>
+                                      <div>
+                                        <h3 className="text-xs font-black uppercase text-white font-heading">Doubt Clearance</h3>
+                                        <p className="text-[8px] font-mono text-gray-500">🟢 Online • ~4 min response</p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={closeChatPopup}
+                                      className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </button>
+                                  </div>
+
+                                  {/* Messages */}
+                                  <div key={`${studentChatOpen}-${studentChatMessages.length}`} className="flex-grow p-4 overflow-y-auto overflow-x-hidden flex flex-col space-y-3 min-h-0"
+                                    ref={el => { if (el) setTimeout(() => el.scrollTop = el.scrollHeight, 100); }}
+                                  >
+                                    {studentChatMessages.length === 0 ? (
+                                      <div className="flex flex-col items-center justify-center h-full text-center text-gray-600 py-12">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        <p className="text-[11px] font-mono text-gray-500">Welcome! 👋 Ask your doubt below and a mentor will respond shortly.</p>
+                                      </div>
+                                    ) : (
+                                      studentChatMessages.map((msg) => {
+                                        const isMe = msg.sender === studentUser.email;
+                                        const timestamp = msg.timestamp
+                                          ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                          : 'just now';
+                                        return (
+                                          <div key={msg.id} className={`flex flex-col max-w-[85%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                                            <span className={`text-[8px] font-mono mb-1.5 px-1.5 ${isMe ? 'text-gray-500' : 'text-brand-cyan/70'}`}>{msg.name || (isMe ? 'You' : 'Mentor')}</span>
+                                            {msg.type === 'text' && (
+                                              <div className={`px-4 py-2.5 text-[12px] leading-[1.6] shadow-sm ${
+                                                isMe
+                                                  ? 'bg-gradient-to-br from-brand-cyan to-brand-blue text-black rounded-[18px] rounded-br-[5px]'
+                                                  : 'bg-[#1c1c22] text-gray-100 border border-white/[0.04] rounded-[18px] rounded-bl-[5px]'
+                                              }`}>
+                                                {renderParsedTextWeb(msg.text)}
+                                              </div>
+                                            )}
+                                            {msg.type === 'image' && (
+                                              <div onClick={() => { setActivePreviewMedia({ type: 'image', url: msg.fileUrl }); setMediaPreviewLoading(true); }} className="rounded-[18px] border border-white/[0.04] overflow-hidden max-w-[220px] bg-black shadow-sm cursor-pointer hover:border-brand-cyan/30 transition-all">
+                                                <img src={msg.fileUrl} alt="" className="max-h-48 w-full object-cover block" />
+                                                {msg.fileName && <p className="p-2.5 bg-black/40 text-[9px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
+                                              </div>
+                                            )}
+                                            {msg.type === 'video' && (
+                                              <div onClick={() => { setActivePreviewMedia({ type: 'video', url: msg.fileUrl }); setMediaPreviewLoading(true); }} className="rounded-[18px] border border-white/[0.04] overflow-hidden max-w-[260px] bg-black shadow-sm cursor-pointer hover:border-brand-cyan/30 transition-all">
+                                                <video src={msg.fileUrl} className="max-h-48 w-full object-cover block" controls preload="metadata" />
+                                                {msg.fileName && <p className="p-2.5 bg-black/40 text-[9px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
+                                              </div>
+                                            )}
+                                            {msg.type === 'document' && (
+                                              <a href={msg.fileUrl} target="_blank" rel="noreferrer" className={`px-4 py-3 rounded-[18px] text-[12px] flex items-center space-x-3 max-w-[240px] shadow-sm transition-all ${
+                                                isMe
+                                                  ? 'bg-gradient-to-br from-brand-cyan/20 to-brand-blue/10 border border-brand-cyan/20 hover:border-brand-cyan/40'
+                                                  : 'bg-[#1c1c22] border border-white/[0.04] hover:border-white/10'
+                                              }`}>
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isMe ? 'bg-brand-cyan/20' : 'bg-white/[0.04]'}`}>
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-cyan"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                                </div>
+                                                <span className="truncate text-gray-200 font-semibold text-[11px]">{msg.fileName || 'Download'}</span>
+                                              </a>
+                                            )}
+                                            <div className="flex items-center space-x-1.5 text-[7px] font-mono mt-1.5 px-1.5">
+                                              <span className="text-gray-500">{timestamp}</span>
+                                              {isMe && <span className={msg.status === 'read' ? 'text-brand-cyan font-bold' : 'text-gray-500'}>{msg.status === 'read' ? '✓✓' : '✓'}</span>}
+                                            </div>
+                                          </div>
+                                        );
+                                      })
+                                    )}
+                                  </div>
+
+                                  {/* Input */}
+                                  <div className="px-4 py-3 border-t border-white/[0.05] bg-zinc-950/80 shrink-0 overflow-x-hidden">
+                                    {studentIsRecording ? (
+                                      <div className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-rose-500/10 border border-rose-500/20">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                                          <span className="text-[10px] font-mono text-rose-500">Recording {Math.floor(studentRecordingDuration / 60)}:{String(studentRecordingDuration % 60).padStart(2, '0')}</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1.5">
+                                          <button onClick={cancelStudentVoiceRecording} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                          <button onClick={stopStudentVoiceRecording} className="px-3 py-1.5 h-8 rounded-xl bg-rose-500 text-white text-[9px] font-bold uppercase flex items-center gap-1 hover:scale-[1.02] transition">Send</button>
+                                        </div>
+                                      </div>
+                                    ) : studentUploadingProgress !== null ? (
+                                      <div className="flex items-center gap-3 px-4 py-3 rounded-[16px] bg-gradient-to-r from-brand-cyan/[0.08] to-brand-blue/[0.05] border border-brand-cyan/15 overflow-hidden relative">
+                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center shadow-[0_0_12px_rgba(0,240,255,0.2)] shrink-0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        </div>
+                                        <div className="flex-grow flex flex-col gap-1">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-[9px] font-mono font-bold text-brand-cyan uppercase tracking-wider">Uploading</span>
+                                            <span className="text-[9px] font-mono text-brand-cyan font-bold tabular-nums">{studentUploadingProgress}%</span>
+                                          </div>
+                                          <div className="w-full h-[3px] rounded-full bg-white/5 overflow-hidden">
+                                            <div className="h-full rounded-full bg-gradient-to-r from-brand-cyan to-brand-blue transition-all duration-300 ease-out" style={{ width: `${studentUploadingProgress}%` }} />
+                                          </div>
+                                        </div>
+                                          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[16px]">
+                                          <div className="absolute inset-y-0 w-32 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <form onSubmit={handleSendStudentMessage} className="flex items-center space-x-2">
+                                        <button type="button" onClick={() => setStudentChatEmojiOpen(!studentChatEmojiOpen)} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition shrink-0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                        </button>
+                                        <label className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white cursor-pointer transition shrink-0">
+                                          <input type="file" className="hidden" onChange={handleStudentFileUpload} disabled={studentChatSending} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar,.txt,.ppt,.pptx,.xls,.xlsx" />
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                        </label>
+                                        <input type="text" placeholder={studentChatSending ? "Sending..." : "Type your doubt..."} value={studentChatInput} onChange={(e) => setStudentChatInput(e.target.value)} disabled={studentChatSending} className="flex-grow px-3.5 py-2 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/30 transition" style={{ outline: 'none' }} />
+                                        <button type="button" onClick={startStudentVoiceRecording} disabled={studentChatSending} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-rose-500 transition shrink-0 disabled:opacity-50">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                                        </button>
+                                        <button type="submit" disabled={!studentChatInput.trim() || studentChatSending} className="w-9 h-9 rounded-xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center text-black shadow-[0_0_12px_rgba(0,240,255,0.2)] transition disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-0.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                        </button>
+                                      </form>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Conditional Workspace */}
-                            {studentTab === 'courses' ? (
-                              <>
+                            <>
                                 {/* ── MOBILE TAB BAR (below lg screens) — Dynamic Island pill style ── */}
                                 <div className="lg:hidden flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-[14px] p-1 font-mono text-[9px] font-bold">
                                   <button
@@ -7251,177 +7499,6 @@
                                   )}
                                 </div>
                               </>
-                            ) : (
-                              /* Inline Chat Panel workspace */
-                              <div 
-                                className="flex-grow flex flex-col bg-[#0d0d12]/95 border border-white/[0.08] rounded-2xl overflow-hidden min-h-[450px] relative shadow-2xl"
-                                style={{ backdropFilter: 'blur(24px)' }}
-                              >
-                                {/* Chat Header */}
-                                <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between shrink-0 bg-zinc-950/40">
-                                  <div className="flex items-center gap-3">
-                                    {/* Mentor Avatar */}
-                                    <div className="w-8 h-8 rounded-full bg-teal-950/60 border border-brand-cyan flex items-center justify-center text-[10px] font-bold text-brand-cyan font-mono shadow-[0_0_10px_rgba(0,240,255,0.1)] shrink-0">
-                                      M
-                                    </div>
-                                    <div>
-                                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                                        Mentor Support
-                                        <span className="relative flex h-2 w-2">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-emerald opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-emerald"></span>
-                                        </span>
-                                      </h3>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-[9px] font-mono text-gray-500 uppercase tracking-wider">Active</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setStudentTab('courses')}
-                                      className="w-5 h-5 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-500 hover:text-white transition-all duration-200 cursor-pointer"
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Chat Messages Area */}
-                                <div
-                                  className="flex-grow p-4 overflow-y-auto space-y-3 min-h-0"
-                                  ref={el => { if (el) el.scrollTop = el.scrollHeight; }}
-                                >
-                                  {studentChatMessages.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600 py-12">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                      <p className="text-[11px] font-mono italic text-gray-600">No messages yet. Start a conversation!</p>
-                                    </div>
-                                  ) : (
-                                    studentChatMessages.map((msg) => {
-                                      const isMe = msg.sender === studentUser.email;
-                                      const timestamp = msg.timestamp
-                                        ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                        : 'just now';
-                                      return (
-                                        <div key={msg.id} className={`flex items-start gap-2 max-w-[85%] ${isMe ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
-                                          {/* Avatar */}
-                                          {isMe ? (
-                                            <div className="w-5 h-5 rounded-full bg-brand-violet/20 border border-brand-violet/30 flex items-center justify-center text-[7px] font-bold text-brand-violet shrink-0 mt-0.5">s</div>
-                                          ) : (
-                                            <div className="w-5 h-5 rounded-full bg-brand-cyan/20 border border-brand-cyan/30 flex items-center justify-center text-[7px] font-bold text-brand-cyan shrink-0 mt-0.5">M</div>
-                                          )}
-                                          
-                                          <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                            <span className="text-[7px] text-gray-600 font-mono mb-1 uppercase px-1">{msg.name || (isMe ? 'You' : 'Mentor')}</span>
-                                            {msg.type === 'text' && (
-                                              <div className={`px-3.5 py-2 rounded-2xl text-[11px] leading-relaxed ${
-                                                isMe 
-                                                  ? 'bg-brand-cyan/10 text-white rounded-tr-sm' 
-                                                  : 'bg-white/[0.04] text-gray-300 rounded-tl-sm'
-                                              }`}>
-                                                {renderParsedTextWeb(msg.text)}
-                                              </div>
-                                            )}
-                                            {msg.type === 'image' && (
-                                              <div onClick={() => setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') })} className="rounded-2xl border border-white/[0.04] overflow-hidden max-w-[200px] cursor-pointer hover:border-brand-cyan/30 transition-all bg-black">
-                                                <img src={getAttachmentUrl(msg.fileUrl, 'image')} alt="Doubt attachment" className="max-h-44 w-full object-cover block" />
-                                                {msg.fileName && <p className="p-2 bg-black/40 text-[8px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
-                                              </div>
-                                            )}
-                                            {msg.type === 'video' && (
-                                              <div className="rounded-2xl overflow-hidden max-w-[200px] border border-white/[0.04] bg-black">
-                                                <VideoChatPreview fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} timeStr={timestamp} isMentor={!isMe} msgStatus={msg.status} onPress={() => setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') })} />
-                                              </div>
-                                            )}
-                                            {msg.type === 'audio' && (
-                                              <AudioPlayer fileUrl={msg.fileUrl} getAttachmentUrl={getAttachmentUrl} GOOGLE_SHEET_WEBHOOK_URL={GOOGLE_SHEET_WEBHOOK_URL} isMentor={!isMe} timeStr={timestamp} msgStatus={msg.status} />
-                                            )}
-                                            {msg.type === 'document' && (
-                                              <a href={getAttachmentUrl(msg.fileUrl)} target="_blank" rel="noreferrer" className="px-3.5 py-2 rounded-2xl bg-white/[0.015] border border-white/[0.04] hover:border-brand-cyan/15 text-[11px] flex items-center space-x-2 max-w-[220px]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-cyan shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                                <span className="truncate text-gray-300 font-bold text-[10px] hover:text-white transition">{msg.fileName || 'Download'}</span>
-                                              </a>
-                                            )}
-                                            <div className="flex items-center space-x-1 text-[7px] font-mono text-gray-600 mt-1 uppercase px-1">
-                                              <span>{timestamp}</span>
-                                              {isMe && <span className={msg.status === 'read' ? 'text-brand-cyan font-bold' : 'text-gray-600'}>{msg.status === 'read' ? '✓✓' : '✓'}</span>}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      );
-                                    })
-                                  )}
-                                </div>
-
-                                {/* Chat Input Area */}
-                                <div className="px-4 py-2.5 border-t border-white/[0.06] bg-zinc-950/40 shrink-0">
-                                  {studentIsRecording ? (
-                                    <div className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-rose-500/10 border border-rose-500/20">
-                                      <div className="flex items-center space-x-2">
-                                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                                        <span className="text-[10px] font-mono text-rose-500">Recording {Math.floor(studentRecordingDuration / 60)}:{String(studentRecordingDuration % 60).padStart(2, '0')}</span>
-                                      </div>
-                                      <div className="flex items-center space-x-1.5">
-                                        <button type="button" onClick={cancelStudentVoiceRecording} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                                        <button type="button" onClick={stopStudentVoiceRecording} className="px-3 py-1.5 h-8 rounded-xl bg-rose-500 text-white text-[9px] font-bold uppercase flex items-center gap-1 hover:scale-[1.02] transition">Send</button>
-                                      </div>
-                                    </div>
-                                  ) : studentUploadingProgress !== null ? (
-                                    <div className="flex items-center space-x-3 px-3 py-2 rounded-[14px] bg-brand-cyan/10 border border-brand-cyan/20">
-                                      <span className="text-[9px] font-mono font-bold text-brand-cyan uppercase animate-pulse">Uploading {studentUploadingProgress}%</span>
-                                      <div className="flex-grow h-1 rounded bg-white/5 overflow-hidden"><div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${studentUploadingProgress}%` }} /></div>
-                                    </div>
-                                  ) : (
-                                    <form onSubmit={handleSendStudentMessage} className="flex items-center gap-2">
-                                      <div className="flex items-center gap-1 shrink-0">
-                                        <button type="button" onClick={() => setStudentChatEmojiOpen(!studentChatEmojiOpen)} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                                        </button>
-                                        <label className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white cursor-pointer transition">
-                                          <input type="file" className="hidden" onChange={handleStudentFileUpload} disabled={studentChatSending} />
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                                        </label>
-                                        <button type="button" onClick={startStudentVoiceRecording} disabled={studentChatSending} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-rose-500 transition disabled:opacity-50">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                                        </button>
-                                      </div>
-                                      <input 
-                                        type="text" 
-                                        placeholder={studentChatSending ? "Sending..." : "Type your doubt..."} 
-                                        value={studentChatInput} 
-                                        onChange={(e) => setStudentChatInput(e.target.value)} 
-                                        disabled={studentChatSending} 
-                                        className="flex-grow px-3 py-1.5 rounded-xl bg-[#0d0d12] border border-white/[0.06] text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/30 transition" 
-                                        style={{ outline: 'none' }} 
-                                      />
-                                      <button 
-                                        type="submit" 
-                                        disabled={!studentChatInput.trim() || studentChatSending} 
-                                        className="w-8 h-8 rounded-xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center text-black shadow-[0_0_12px_rgba(0,240,255,0.2)] transition disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
-                                      >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                                      </button>
-                                      {studentChatEmojiOpen && (
-                                        <div className="absolute bottom-20 left-4 dark-glass border border-white/10 rounded-2xl p-2.5 grid grid-cols-8 gap-1.5 z-[60] shadow-2xl max-w-[240px]">
-                                          {['😀', '😂', '😍', '👍', '🙌', '🔥', '❤️', '👏', '🎉', '🚀', '💡', '💯', '🤔', '😎', '💻', '😢'].map(em => (
-                                            <button key={em} type="button" onClick={() => { setStudentChatInput(prev => prev + em); setStudentChatEmojiOpen(false); }} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-sm transition">{em}</button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </form>
-                                  )}
-                                </div>
-
-                                {/* Chat Status Footer */}
-                                <div className="px-4 py-2 flex items-center justify-between text-[9px] font-mono text-gray-500 shrink-0 border-t border-white/[0.04]">
-                                  <span className="flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-pulse" />
-                                    Mentor Online
-                                  </span>
-                                  <span>24/7 Support Active</span>
-                                </div>
-                              </div>
-                            )}
                           </section>
 
 
@@ -7484,141 +7561,6 @@
                   </div>
               )}
             </div>
-          )}
-
-          {/* Chat FAB + Popup — rendered outside portal overlay to avoid stacking context issues */}
-          {(isStudentOpen || closingStudent) && isStudentAuthenticated && (
-            <>
-              {/* Floating Chat FAB — hidden when panel is open */}
-              {!studentChatOpen && !closingChatPopup && (
-                <button
-                  onClick={() => { setClosingChatPopup(false); setStudentChatOpen(true); }}
-                  className="fixed bottom-6 right-6 z-[100001] w-12 h-12 rounded-full bg-gradient-to-r from-brand-cyan to-brand-blue text-black shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  aria-label="Open chat"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                </button>
-              )}
-
-              {/* Chat Floating Panel — positioned above FAB, doesn't cover video */}
-              {(studentChatOpen || closingChatPopup) && (
-                <div
-                  className={`fixed bottom-20 right-6 z-[100002] w-[360px] max-w-[calc(100vw-2rem)] bg-zinc-950 border border-white/[0.06] rounded-[20px] shadow-2xl flex flex-col max-h-[500px] ${closingChatPopup ? 'animate-slideDownOut' : 'animate-slideUp'}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ backdropFilter: 'blur(24px)' }}
-                >
-                    {/* Chat Popup Header */}
-                    <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center justify-between shrink-0">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="relative">
-                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-blue/10 border border-brand-cyan/20 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-cyan"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                          </div>
-                          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-zinc-950 bg-brand-emerald" />
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-black uppercase text-white font-heading">Doubt Clearance</h3>
-                          <p className="text-[8px] font-mono text-gray-500">
-                            🟢 Online • ~4 min response
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={closeChatPopup}
-                        className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-
-                    {/* Chat Messages */}
-                    <div
-                      className="flex-grow p-4 overflow-y-auto space-y-3 min-h-0"
-                      ref={el => { if (el) el.scrollTop = el.scrollHeight; }}
-                    >
-                      {studentChatMessages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center text-gray-600 py-12">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                          <p className="text-[11px] font-mono italic text-gray-600">No messages yet. Start a conversation!</p>
-                        </div>
-                      ) : (
-                        studentChatMessages.map((msg) => {
-                          const isMe = msg.sender === studentUser.email;
-                          const timestamp = msg.timestamp
-                            ? new Date(msg.timestamp.seconds ? msg.timestamp.seconds * 1000 : msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : 'just now';
-                          return (
-                            <div key={msg.id} className={`flex flex-col max-w-[80%] ${isMe ? 'self-end items-end text-right' : 'self-start items-start text-left'}`}>
-                              <span className="text-[7px] text-gray-600 font-mono mb-1 uppercase px-1">{msg.name || (isMe ? 'You' : 'Mentor')}</span>
-                              {msg.type === 'text' && (
-                                <div className={`px-3.5 py-2.5 rounded-[14px] text-[11px] leading-relaxed ${
-                                  isMe ? 'bg-brand-cyan text-black border border-brand-cyan/20' : 'bg-[#1f1f23]/60 text-gray-200 border border-white/[0.04]'
-                                }`}>
-                                  {renderParsedTextWeb(msg.text)}
-                                </div>
-                              )}
-                              {msg.type === 'image' && (
-                                <div className="rounded-[14px] border border-white/[0.04] overflow-hidden max-w-[200px] bg-black">
-                                  <img src={msg.fileUrl} alt="Doubt attachment" className="max-h-44 w-full object-cover block" />
-                                  {msg.fileName && <p className="p-2 bg-black/40 text-[8px] font-mono text-gray-400 truncate border-t border-white/[0.04]">{msg.fileName}</p>}
-                                </div>
-                              )}
-                              {msg.type === 'document' && (
-                                <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="px-3.5 py-2.5 rounded-[14px] bg-white/[0.015] border border-white/[0.04] hover:border-brand-cyan/15 text-[11px] flex items-center space-x-2 max-w-[220px]">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-cyan shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                  <span className="truncate text-gray-300 font-bold text-[10px] hover:text-white transition">{msg.fileName || 'Download'}</span>
-                                </a>
-                              )}
-                              <div className="flex items-center space-x-1 text-[7px] font-mono text-gray-600 mt-1 uppercase px-1">
-                                <span>{timestamp}</span>
-                                {isMe && <span className={msg.status === 'read' ? 'text-brand-cyan font-bold' : 'text-gray-600'}>{msg.status === 'read' ? '✓✓' : '✓'}</span>}
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-
-                    {/* Chat Input */}
-                    <div className="px-4 py-3 border-t border-white/[0.05] bg-zinc-950/80 shrink-0">
-                      {studentIsRecording ? (
-                        <div className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-rose-500/10 border border-rose-500/20">
-                          <div className="flex items-center space-x-2">
-                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                            <span className="text-[10px] font-mono text-rose-500">Recording {Math.floor(studentRecordingDuration / 60)}:{String(studentRecordingDuration % 60).padStart(2, '0')}</span>
-                          </div>
-                          <div className="flex items-center space-x-1.5">
-                            <button onClick={cancelStudentVoiceRecording} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                            <button onClick={stopStudentVoiceRecording} className="px-3 py-1.5 h-8 rounded-xl bg-rose-500 text-white text-[9px] font-bold uppercase flex items-center gap-1 hover:scale-[1.02] transition">Send</button>
-                          </div>
-                        </div>
-                      ) : studentUploadingProgress !== null ? (
-                        <div className="flex items-center space-x-3 px-3 py-2 rounded-[14px] bg-brand-cyan/10 border border-brand-cyan/20">
-                          <span className="text-[9px] font-mono font-bold text-brand-cyan uppercase animate-pulse">Uploading {studentUploadingProgress}%</span>
-                          <div className="flex-grow h-1 rounded bg-white/5 overflow-hidden"><div className="h-full bg-brand-cyan transition-all duration-300" style={{ width: `${studentUploadingProgress}%` }} /></div>
-                        </div>
-                      ) : (
-                        <form onSubmit={handleSendStudentMessage} className="flex items-center space-x-2">
-                          <button type="button" onClick={() => setStudentChatEmojiOpen(!studentChatEmojiOpen)} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white transition shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                          </button>
-                          <label className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-white cursor-pointer transition shrink-0">
-                            <input type="file" className="hidden" onChange={handleStudentFileUpload} disabled={studentChatSending} />
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                          </label>
-                          <input type="text" placeholder={studentChatSending ? "Sending..." : "Type your doubt..."} value={studentChatInput} onChange={(e) => setStudentChatInput(e.target.value)} disabled={studentChatSending} className="flex-grow px-3.5 py-2 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-[11px] placeholder-gray-600 focus:outline-none focus:border-brand-cyan/30 transition" style={{ outline: 'none' }} />
-                          <button type="button" onClick={startStudentVoiceRecording} disabled={studentChatSending} className="w-9 h-9 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-gray-400 hover:text-rose-500 transition shrink-0 disabled:opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                          </button>
-                          <button type="submit" disabled={!studentChatInput.trim() || studentChatSending} className="w-9 h-9 rounded-xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center text-black shadow-[0_0_12px_rgba(0,240,255,0.2)] transition disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-0.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-              )}
-            </>
           )}
 
           {/* ===== ADMIN PORTAL OVERLAY ===== */}
@@ -8490,7 +8432,7 @@
                                                     handleMsgClick(e);
                                                     return;
                                                   }
-                                                  setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') });
+                                                  setActivePreviewMedia({ type: 'image', url: getAttachmentUrl(msg.fileUrl, 'image') }); setMediaPreviewLoading(true);
                                                 }}
                                                 className="relative w-full h-auto max-h-[480px] overflow-hidden cursor-pointer select-none"
                                               >
@@ -8524,7 +8466,7 @@
                                                     handleMsgClick(e);
                                                     return;
                                                   }
-                                                  setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') });
+                                                  setActivePreviewMedia({ type: 'video', url: getAttachmentUrl(msg.fileUrl, 'video') }); setMediaPreviewLoading(true);
                                                 }}
                                                 timeStr={timeStr}
                                                 isMentor={isMentor}
@@ -8664,6 +8606,7 @@
                                         className="hidden" 
                                         onChange={handleAdminFileUpload} 
                                         disabled={sendingReply}
+                                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar,.txt,.ppt,.pptx,.xls,.xlsx"
                                       />
                                       
                                       {/* Attachment Button */}
@@ -9066,52 +9009,71 @@
                     )}
                   </main>
 
-                  {/* Media Preview Modal Overlay */}
-                  {activePreviewMedia && (
-                    <div 
-                      onClick={() => setActivePreviewMedia(null)}
-                      className="fixed inset-0 z-[100001] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
-                    >
-                      <button
-                        onClick={() => setActivePreviewMedia(null)}
-                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                      
-                      <div className="max-w-4xl max-h-[85vh] relative" onClick={e => e.stopPropagation()}>
-                        {activePreviewMedia.type === 'image' ? (
-                          <img 
-                            src={activePreviewMedia.url} 
-                            alt="Fullscreen attachment preview" 
-                            className="max-h-[80vh] max-w-full object-contain rounded-2xl border border-white/15" 
-                          />
-                        ) : (() => {
-                          const fileId = getDriveFileId(activePreviewMedia.url);
-                          if (fileId) {
-                            return (
-                              <iframe 
-                                src={`https://drive.google.com/file/d/${fileId}/preview`} 
-                                className="w-[85vw] h-[48vh] md:w-[70vw] md:h-[60vh] max-w-4xl rounded-2xl border border-white/15 bg-black" 
-                                allow="autoplay"
-                                allowFullScreen
-                              />
-                            );
-                          }
-                          return (
-                            <video 
-                              src={activePreviewMedia.url} 
-                              controls 
-                              autoPlay 
-                              className="max-h-[80vh] max-w-full rounded-2xl border border-white/15" 
-                            />
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Media Preview Modal Overlay — at App root level */}
+          {activePreviewMedia && (
+            <div 
+              onClick={() => setActivePreviewMedia(null)}
+              className="fixed inset-0 z-[100010] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+            >
+              <button
+                onClick={() => setActivePreviewMedia(null)}
+                className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+              
+              {mediaPreviewLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-2 border-brand-cyan/20" />
+                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-brand-cyan animate-spin" />
+                    <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-brand-blue animate-spin animation-delay-150" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-cyan/60"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="max-w-4xl max-h-[85vh] relative" onClick={e => e.stopPropagation()} style={{ opacity: mediaPreviewLoading ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+                {activePreviewMedia.type === 'image' ? (
+                  <img 
+                    src={activePreviewMedia.url} 
+                    alt="Fullscreen attachment preview" 
+                    className="max-h-[80vh] max-w-full object-contain rounded-2xl border border-white/15" 
+                    onLoad={() => setMediaPreviewLoading(false)}
+                    style={mediaPreviewLoading ? { display: 'none' } : {}}
+                  />
+                ) : (() => {
+                  const fileId = getDriveFileId(activePreviewMedia.url);
+                  if (fileId) {
+                    return (
+                      <iframe 
+                        src={`https://drive.google.com/file/d/${fileId}/preview`} 
+                        className="w-[85vw] h-[48vh] md:w-[70vw] md:h-[60vh] max-w-4xl rounded-2xl border border-white/15 bg-black" 
+                        allow="autoplay"
+                        allowFullScreen
+                        onLoad={() => setMediaPreviewLoading(false)}
+                        style={mediaPreviewLoading ? { display: 'none' } : {}}
+                      />
+                    );
+                  }
+                  return (
+                    <video 
+                      src={activePreviewMedia.url} 
+                      controls 
+                      autoPlay 
+                      className="max-h-[80vh] max-w-full rounded-2xl border border-white/15" 
+                      onLoadedData={() => setMediaPreviewLoading(false)}
+                      style={mediaPreviewLoading ? { display: 'none' } : {}}
+                    />
+                  );
+                })()}
+              </div>
             </div>
           )}
 
