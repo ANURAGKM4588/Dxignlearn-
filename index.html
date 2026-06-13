@@ -2976,7 +2976,7 @@
       const [mockMessages, setMockMessages] = useState({});
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
-      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec'; // Paste your Google Sheet web app URL here
+      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx9U6UOWeuAnCkjMswy5XzneNuMynWZjljSJRWjKkZe9DT5aaTl1DawcqscERXg3fHumw/exec'; // Paste your Google Sheet web app URL here
 
       const openEnrollModal = (course) => {
         setNameInput('');
@@ -4256,7 +4256,7 @@
       useEffect(() => {
         (async () => {
           try {
-            const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+            const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbx9U6UOWeuAnCkjMswy5XzneNuMynWZjljSJRWjKkZe9DT5aaTl1DawcqscERXg3fHumw/exec';
             const res = await fetch(webhookUrl + '?action=getWhatsAppConfig');
             const config = await res.json();
             setWhatsAppApiUrl(config.apiUrl || '');
@@ -4264,8 +4264,8 @@
             setWhatsAppPhoneId(config.phoneId || '');
             setWhatsAppConfigured(!!config.isConfigured);
             setWelcomeEmailSubject(config.emailSubject || '🎉 Welcome to Dxign Learn! - {course}');
-            setWelcomeEmailBody(config.emailBody || 'Hi {name},\n\nWelcome to Dxign Learn! 🚀\n\nThank you for completing your registration for the {course} program. We are thrilled to have you join our learning community!\n\nHere is what you can expect:\n* Access to all course lectures and materials.\n* Hands-on projects with real-world case studies.\n* Expert mentor support to guide you at every step.\n\nOur team will reach out to you shortly with your student login and portal access details.\n\nIf you have any questions, feel free to reply directly to this email.\n\nBest regards,\nDxign Learn Team');
-            setWelcomeWhatsappBody(config.whatsappBody || 'Hi {name}! 🎉 Welcome to Dxign Learn! Thank you for completing your registration for the *{course}* program. Your learning journey begins now. Our team will reach out shortly with your portal access details. - Dxign Learn Team');
+            setWelcomeEmailBody(config.emailBody || 'Hi {name},\n\nWelcome to Dxign Learn! 🚀\n\nThank you for completing your registration for the {course} program. We are thrilled to have you join our learning community!\n\n📱 How to Access Your Course Portal:\n1. Open the Dxign Learn Mobile App on your phone.\n2. Log in using the email address you registered with: {email}\n3. Enter the 6-digit secure verification OTP code sent to your inbox.\n4. Start streaming lectures, downloading resources, and chatting directly with mentors!\n\nIf you have any questions, feel free to reply directly to this email.\n\nBest regards,\nDxign Learn Team');
+            setWelcomeWhatsappBody(config.whatsappBody || 'Hi {name}! 🎉 Welcome to Dxign Learn! Thank you for completing your registration for the *{course}* program. Your learning journey begins now. To start, open the Dxign Learn Mobile App and log in with your email to receive your OTP. - Dxign Learn Team');
           } catch (_) {}
         })();
       }, []);
@@ -4275,7 +4275,7 @@
         setWhatsAppSaving(true);
         setWhatsAppStatus({ type: '', text: '' });
         try {
-          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbx9U6UOWeuAnCkjMswy5XzneNuMynWZjljSJRWjKkZe9DT5aaTl1DawcqscERXg3fHumw/exec';
           const params = new URLSearchParams({
             action: 'saveWhatsAppConfig',
             apiUrl: whatsAppApiUrl.trim(),
@@ -4313,7 +4313,7 @@
         setWhatsAppSaving(true);
         setWhatsAppStatus({ type: '', text: '' });
         try {
-          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbx9U6UOWeuAnCkjMswy5XzneNuMynWZjljSJRWjKkZe9DT5aaTl1DawcqscERXg3fHumw/exec';
           const res = await fetch(webhookUrl + '?action=testWhatsApp&phone=' + encodeURIComponent(whatsAppTestPhone.trim()));
           const data = await res.json();
           if (data.status === 'success') {

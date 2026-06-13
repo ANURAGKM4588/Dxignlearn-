@@ -60,7 +60,11 @@ function doPost(e) {
     // 2. If the payment was successful, whitelist the student in Firebase + send welcome notifications
     var statusNorm = (data.status || '').toLowerCase();
     if (statusNorm === 'success' || statusNorm.indexOf('success') === 0) {
-      whitelistInFirebase(data.email.toLowerCase().trim(), data.phone.trim(), data.name, data.course);
+      try {
+        whitelistInFirebase(data.email.toLowerCase().trim(), data.phone.trim(), data.name, data.course);
+      } catch (err) {
+        Logger.log('Firebase whitelist failed: ' + err.toString());
+      }
       
       // Send welcome email (free via Google Apps Script MailApp)
       try {
@@ -383,20 +387,116 @@ function sendWelcomeEmail(email, name, course) {
   email = String(email);
   
   var subjectTemplate = getScriptProp('WELCOME_EMAIL_SUBJECT') || "Welcome to Dxign Learn - {course}";
-  var bodyTemplate = getScriptProp('WELCOME_EMAIL_BODY') || 
-    ("Hi {name},\n\n" +
-     "Welcome to Dxign Learn!\n\n" +
-     "Thank you for completing your registration for {course}.\n\n" +
-     "Industry-leading AI skills training with hands-on projects and expert mentorship.\n\n" +
-     "Our team will reach out to you shortly with course access details.\n\n" +
-     "If you have any questions, feel free to reply to this email.\n\n" +
-     "Best regards,\n" +
-     "Dxign Learn Team");
-     
-  var subject = parseTemplate(subjectTemplate, name, course, email, "");
-  var body = parseTemplate(bodyTemplate, name, course, email, "");
+  var bodyTemplate = getScriptProp('WELCOME_EMAIL_BODY');
   
-  MailApp.sendEmail(email, subject, body);
+  var subject = parseTemplate(subjectTemplate, name, course, email, "");
+  
+  if (bodyTemplate) {
+    // If user saved a custom template in the admin dashboard
+    var body = parseTemplate(bodyTemplate, name, course, email, "");
+    
+    // Check if it's already HTML (contains <html> or <p> tags)
+    if (body.indexOf('<html') !== -1 || body.indexOf('<p>') !== -1 || body.indexOf('<br>') !== -1) {
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: body
+      });
+    } else {
+      // Wrap plain text in a nice brand-styled HTML layout
+      var htmlFormattedBody = body.replace(/\n/g, '<br>');
+      var fullHtml = getBeautifulHtmlWrapper(name, course, email, htmlFormattedBody);
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        body: body,
+        htmlBody: fullHtml
+      });
+    }
+  } else {
+    // Send the default gorgeous premium HTML email template
+    var defaultHtml = getBeautifulHtmlWrapper(name, course, email, null);
+    var defaultText = "Hi " + name + ",\n\n" +
+                      "Welcome to Dxign Learn! 🚀\n\n" +
+                      "Thank you for completing your registration for the " + course + " program. We are thrilled to have you join our learning community!\n\n" +
+                      "📱 How to Access Your Course Portal:\n" +
+                      "1. Open the Dxign Learn Mobile App on your phone.\n" +
+                      "2. Log in using the email address you registered with: " + email + "\n" +
+                      "3. Enter the 6-digit secure verification OTP code sent to your inbox.\n" +
+                      "4. Start streaming lectures, downloading resources, and chatting directly with mentors!\n\n" +
+                      "If you have any questions or need assistance, feel free to reply directly to this email.\n\n" +
+                      "Best regards,\n" +
+                      "Dxign Learn Team";
+    
+    MailApp.sendEmail({
+      to: email,
+      subject: subject,
+      body: defaultText,
+      htmlBody: defaultHtml
+    });
+  }
+}
+
+/**
+ * Generates a premium styled HTML wrapper matching the Dxign Learn brand.
+ */
+function getBeautifulHtmlWrapper(name, course, email, customContentHtml) {
+  var contentArea = "";
+  if (customContentHtml) {
+    contentArea = customContentHtml;
+  } else {
+    contentArea = 
+      "<div style='font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 20px;'>Hi " + name + ",</div>" +
+      "<p style='margin: 0 0 16px 0;'>Welcome to <strong>Dxign Learn</strong>! 🚀</p>" +
+      "<p style='margin: 0 0 16px 0;'>Thank you for enrolling in the <span style='color: #00f0ff; font-weight: bold;'>" + course + "</span> program. We are thrilled to have you join our learning community where we master industry-leading creative skills and business automation.</p>" +
+      
+      "<div style='background-color: #121214; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin: 30px 0;'>" +
+        "<div style='font-size: 14px; font-weight: bold; color: #a855f7; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;'>📱 How to Access Your Course Portal</div>" +
+        
+        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
+          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>1</div>" +
+          "<div style='color: #e4e4e7; font-size: 14px;'>Open the <strong>Dxign Learn Mobile App</strong> on your phone.</div>" +
+        "</div>" +
+        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
+          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>2</div>" +
+          "<div style='color: #e4e4e7; font-size: 14px;'>Log in using the email address you registered with: <strong>" + email + "</strong>.</div>" +
+        "</div>" +
+        "<div style='display: flex; margin-bottom: 12px; align-items: flex-start;'>" +
+          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>3</div>" +
+          "<div style='color: #e4e4e7; font-size: 14px;'>Enter the 6-digit secure verification OTP code sent to your inbox.</div>" +
+        "</div>" +
+        "<div style='display: flex; align-items: flex-start;'>" +
+          "<div style='background-color: #00f0ff; color: #050505; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0;'>4</div>" +
+          "<div style='color: #e4e4e7; font-size: 14px;'>Start streaming lectures, downloading resources, and chatting directly with mentors!</div>" +
+        "</div>" +
+      "</div>" +
+      
+      "<p style='margin: 0 0 16px 0;'>If you have any questions, difficulty logging in, or need immediate assistance, simply reply directly to this email or reach out to our support team.</p>" +
+      "<p style='margin: 0 0 16px 0;'>Get ready to vibe code, design, and automate!</p>" +
+      "<p style='margin: 0;'>Best regards,<br><strong>Dxign Learn Team</strong></p>";
+  }
+
+  return "<!DOCTYPE html>" +
+    "<html>" +
+    "<head>" +
+      "<meta charset='utf-8'>" +
+      "<title>Welcome to Dxign Learn</title>" +
+    "</head>" +
+    "<body style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #050505; color: #e5e5e5; margin: 0; padding: 20px;\">" +
+      "<div style='max-width: 600px; margin: 20px auto; background-color: #0b0b0c; border: 1px solid #1a1a1a; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);'>" +
+        "<div style='background: linear-gradient(135deg, #0f172a 0%, #020617 100%); padding: 40px 20px; text-align: center; border-bottom: 1px solid #1e293b;'>" +
+          "<div style='font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #00f0ff; text-transform: uppercase; margin: 0; text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);'>Dxign Learn</div>" +
+        "</div>" +
+        "<div style='padding: 40px 30px; line-height: 1.6; font-size: 15px; color: #cccccc;'>" +
+          contentArea +
+        "</div>" +
+        "<div style='background-color: #070708; padding: 20px; text-align: center; font-size: 12px; color: #52525b; border-top: 1px solid #18181b;'>" +
+          "&copy; 2026 Dxign Learn. All rights reserved.<br>" +
+          "Need help? Email us at <a href='mailto:dxignlearn@gmail.com' style='color: #00f0ff; text-decoration: none;'>dxignlearn@gmail.com</a>" +
+        "</div>" +
+      "</div>" +
+    "</body>" +
+    "</html>";
 }
 
 /**
@@ -533,4 +633,32 @@ function getSheet() {
     return ss.getActiveSheet();
   }
   throw new Error("Could not find active spreadsheet. Open this script from your Google Sheet via Extensions -> Apps Script or configure SPREADSHEET_ID in Code.gs.");
+}
+
+/**
+ * Diagnostic test function you can run directly from the editor.
+ */
+function runDiagnosticTest() {
+  var testEmail = "anuragkm1999@gmail.com"; // Test recipient email
+  Logger.log("=== START DIAGNOSTIC TEST ===");
+  Logger.log("Spreadsheet ID: " + SPREADSHEET_ID);
+  
+  // 1. Test Sheet Connection
+  try {
+    var sheet = getSheet();
+    Logger.log("SUCCESS: Connected to Sheet. Active sheet name: " + sheet.getName());
+  } catch (err) {
+    Logger.log("FAILED: Sheet connection error: " + err.toString());
+  }
+  
+  // 2. Test Email Delivery
+  try {
+    Logger.log("Sending welcome email to: " + testEmail);
+    sendWelcomeEmail(testEmail, "Test Anurag", "AI-Powered UI/UX Design");
+    Logger.log("SUCCESS: Welcome email function executed without errors. Check your inbox and Spam folder!");
+  } catch (err) {
+    Logger.log("FAILED: Email delivery error: " + err.toString());
+  }
+  
+  Logger.log("=== END DIAGNOSTIC TEST ===");
 }
