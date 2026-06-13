@@ -2647,8 +2647,10 @@
       const [adminFilterCourse, setAdminFilterCourse] = useState('All');
       const [adminFilterStatus, setAdminFilterStatus] = useState('All');
 
+      const [showExportModal, setShowExportModal] = useState(false);
+
       // --- App Admin Panel States ---
-      const [adminTab, setAdminTab] = useState('registrations'); // 'registrations' | 'chat' | 'lectures' | 'controls'
+      const [adminTab, setAdminTab] = useState('registrations'); // 'registrations' | 'enquiries' | 'chat' | 'lectures' | 'controls'
       
       // Firebase Config (Replace these placeholder values with actual Firebase keys if connecting a live Firestore db)
       const firebaseConfig = {
@@ -2756,6 +2758,18 @@
       const [whitelistCourses, setWhitelistCourses] = useState([]); // array of selected courses
       const [whitelistingLoading, setWhitelistingLoading] = useState(false);
       const [whitelistStatus, setWhitelistStatus] = useState({ type: '', text: '' }); // type: 'success' | 'error'
+      
+      // WhatsApp automation config
+      const [whatsAppApiUrl, setWhatsAppApiUrl] = useState('');
+      const [whatsAppApiKey, setWhatsAppApiKey] = useState('');
+      const [whatsAppPhoneId, setWhatsAppPhoneId] = useState('');
+      const [whatsAppTestPhone, setWhatsAppTestPhone] = useState('');
+      const [whatsAppConfigured, setWhatsAppConfigured] = useState(false);
+      const [whatsAppSaving, setWhatsAppSaving] = useState(false);
+      const [whatsAppStatus, setWhatsAppStatus] = useState({ type: '', text: '' });
+      const [welcomeEmailSubject, setWelcomeEmailSubject] = useState('🎉 Welcome to Dxign Learn! - {course}');
+      const [welcomeEmailBody, setWelcomeEmailBody] = useState('Hi {name},\n\nWelcome to Dxign Learn! 🚀\n\nThank you for completing your registration for the {course} program. We are thrilled to have you join our learning community!\n\nHere is what you can expect:\n* Access to all course lectures and materials.\n* Hands-on projects with real-world case studies.\n* Expert mentor support to guide you at every step.\n\nOur team will reach out to you shortly with your student login and portal access details.\n\nIf you have any questions, feel free to reply directly to this email.\n\nBest regards,\nDxign Learn Team');
+      const [welcomeWhatsappBody, setWelcomeWhatsappBody] = useState('Hi {name}! 🎉 Welcome to Dxign Learn! Thank you for completing your registration for the *{course}* program. Your learning journey begins now. Our team will reach out shortly with your portal access details. - Dxign Learn Team');
 
       // Full screen media preview
           const [activePreviewMedia, setActivePreviewMedia] = useState(null); // { type: 'image' | 'video', url: '' }
@@ -2962,7 +2976,7 @@
       const [mockMessages, setMockMessages] = useState({});
 
       const RAZORPAY_KEY = 'rzp_live_SAnIWDLh0y6gg5';
-      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDPAWjWdhYJl4ctO-JPCEYjBuoa5Q2RbYCGhgo_0kpzJkFcH4o_PpedSDhNmvGMYN7/exec'; // Paste your Google Sheet web app URL here
+      const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec'; // Paste your Google Sheet web app URL here
 
       const openEnrollModal = (course) => {
         setNameInput('');
@@ -4238,6 +4252,82 @@
         }
       };
 
+      // Load WhatsApp config on admin mount
+      useEffect(() => {
+        (async () => {
+          try {
+            const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+            const res = await fetch(webhookUrl + '?action=getWhatsAppConfig');
+            const config = await res.json();
+            setWhatsAppApiUrl(config.apiUrl || '');
+            setWhatsAppApiKey(config.apiKey || '');
+            setWhatsAppPhoneId(config.phoneId || '');
+            setWhatsAppConfigured(!!config.isConfigured);
+            setWelcomeEmailSubject(config.emailSubject || '🎉 Welcome to Dxign Learn! - {course}');
+            setWelcomeEmailBody(config.emailBody || 'Hi {name},\n\nWelcome to Dxign Learn! 🚀\n\nThank you for completing your registration for the {course} program. We are thrilled to have you join our learning community!\n\nHere is what you can expect:\n* Access to all course lectures and materials.\n* Hands-on projects with real-world case studies.\n* Expert mentor support to guide you at every step.\n\nOur team will reach out to you shortly with your student login and portal access details.\n\nIf you have any questions, feel free to reply directly to this email.\n\nBest regards,\nDxign Learn Team');
+            setWelcomeWhatsappBody(config.whatsappBody || 'Hi {name}! 🎉 Welcome to Dxign Learn! Thank you for completing your registration for the *{course}* program. Your learning journey begins now. Our team will reach out shortly with your portal access details. - Dxign Learn Team');
+          } catch (_) {}
+        })();
+      }, []);
+
+      // Save WhatsApp configuration
+      const handleSaveWhatsAppConfig = async () => {
+        setWhatsAppSaving(true);
+        setWhatsAppStatus({ type: '', text: '' });
+        try {
+          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+          const params = new URLSearchParams({
+            action: 'saveWhatsAppConfig',
+            apiUrl: whatsAppApiUrl.trim(),
+            apiKey: whatsAppApiKey.trim(),
+            phoneId: whatsAppPhoneId.trim(),
+            emailSubject: welcomeEmailSubject.trim(),
+            emailBody: welcomeEmailBody.trim(),
+            whatsappBody: welcomeWhatsappBody.trim()
+          });
+          const res = await fetch(webhookUrl + '?' + params.toString());
+          const data = await res.json();
+          if (data.status === 'success') {
+            setWhatsAppConfigured(!!whatsAppApiUrl.trim());
+            setWhatsAppStatus({ type: 'success', text: 'Automation settings and templates saved successfully!' });
+          } else {
+            setWhatsAppStatus({ type: 'error', text: 'Failed to save: ' + (data.message || 'Unknown error') });
+          }
+        } catch (err) {
+          setWhatsAppStatus({ type: 'error', text: 'Network error: ' + err.message });
+        } finally {
+          setWhatsAppSaving(false);
+        }
+      };
+
+      // Test WhatsApp configuration
+      const handleTestWhatsApp = async () => {
+        if (!whatsAppTestPhone.trim()) {
+          setWhatsAppStatus({ type: 'error', text: 'Enter a test phone number first.' });
+          return;
+        }
+        if (!whatsAppApiUrl.trim()) {
+          setWhatsAppStatus({ type: 'warning', text: 'Save your WhatsApp API URL first before testing.' });
+          return;
+        }
+        setWhatsAppSaving(true);
+        setWhatsAppStatus({ type: '', text: '' });
+        try {
+          const webhookUrl = window.WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbyFy1NDZenqLCptmKPJI4-xfBReaV4fVX-GMhtKzMfPxnwj_hWKeQm2efcDGnYZvz-9/exec';
+          const res = await fetch(webhookUrl + '?action=testWhatsApp&phone=' + encodeURIComponent(whatsAppTestPhone.trim()));
+          const data = await res.json();
+          if (data.status === 'success') {
+            setWhatsAppStatus({ type: 'success', text: 'Test message sent! Check WhatsApp on ' + whatsAppTestPhone });
+          } else {
+            setWhatsAppStatus({ type: 'error', text: 'Test failed: ' + (data.message || 'Unknown error') });
+          }
+        } catch (err) {
+          setWhatsAppStatus({ type: 'error', text: 'Network error: ' + err.message });
+        } finally {
+          setWhatsAppSaving(false);
+        }
+      };
+
       // Handle Manual Student Whitelist
       const handleWhitelistSubmit = async (e) => {
         if (e) e.preventDefault();
@@ -4274,7 +4364,7 @@
               method: 'POST',
               mode: 'no-cors',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain'
               },
               body: JSON.stringify(payload)
             });
@@ -4322,90 +4412,208 @@
         window.location.hash = '';
       };
 
-      const exportToPDF = () => {
-        if (!adminData || adminData.length === 0) {
-          alert('No data to export.');
-          return;
-        }
-
+      const exportToPDF = (type) => {
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         const logoUrl = `${window.location.origin}/public/Images/logo/Dxign-logo.png`;
 
-        const successCount = adminData.filter(r => (r.status||'').toLowerCase() === 'success').length;
-        const initiatedCount = adminData.filter(r => (r.status||'').toLowerCase() === 'initiated').length;
-        const totalRevenue = adminData
+        const isReg = type === 'registrations' || type === 'both';
+        const isEnq = type === 'enquiries' || type === 'both';
+
+        const regData = adminData.filter(r => (r.status||'').toLowerCase() !== 'enquiry');
+        const enqData = adminData.filter(r => (r.status||'').toLowerCase() === 'enquiry');
+
+        const successCount = regData.filter(r => (r.status||'').toLowerCase() === 'success').length;
+        const initiatedCount = regData.filter(r => (r.status||'').toLowerCase() === 'initiated').length;
+        const totalRevenue = regData
           .filter(r => (r.status||'').toLowerCase() === 'success')
           .reduce((sum, r) => sum + (parseInt((r.price||'').replace(/\D/g,'')) || 0), 0);
 
-        const rows = adminData.map((row, i) => {
+        const genRows = (data, startNum) => data.map((row, i) => {
           const isSuccess = (row.status||'').toLowerCase() === 'success';
           const isInitiated = (row.status||'').toLowerCase() === 'initiated';
-          const statusColor = isSuccess ? '#22c55e' : isInitiated ? '#f59e0b' : '#ef4444';
-          const statusBg   = isSuccess ? '#f0fdf4' : isInitiated ? '#fffbeb' : '#fef2f2';
+          const statusColor = isSuccess ? '#22c55e' : isInitiated ? '#f59e0b' : '#3b82f6';
+          const statusBg   = isSuccess ? '#f0fdf4' : isInitiated ? '#fffbeb' : '#eff6ff';
+          const whatsapp = row.phone ? `https://wa.me/${String(row.phone).replace(/[^0-9]/g,'')}?text=Hi ${encodeURIComponent(row.name||'Student')}%21` : '#';
+          const mailto = row.email ? `mailto:${row.email}?subject=${encodeURIComponent('Welcome to Dxign Learn')}` : '#';
           return `
           <tr>
-            <td class="num">${i + 1}</td>
-            <td>${row.date || '—'}</td>
+            <td class="num">${startNum + i + 1}</td>
+            <td>${formatDate(row.date)}</td>
             <td class="name">${row.name || '—'}</td>
             <td>${row.email || '—'}</td>
             <td>${row.phone || '—'}</td>
-            <td>${row.course || '—'}</td>
-            <td class="amount">${row.price || '—'}</td>
+            <td>${(row.course||'').replace(/\[.*\]/,'').trim() || '—'}</td>
+            <td class="amount">${row.price || (type === 'enquiries' ? '—' : '—')}</td>
             <td><span class="badge" style="color:${statusColor};background:${statusBg}">${row.status || '—'}</span></td>
+            <td class="action"><a href="${whatsapp}" style="color:#25D366;text-decoration:none;font-weight:600">WhatsApp</a></td>
+            <td class="action"><a href="${mailto}" style="color:#6366f1;text-decoration:none;font-weight:600">Email</a></td>
           </tr>`;
         }).join('');
+
+        let kpiHtml = '';
+        let tableHtml = '';
+        let title = '';
+
+        if (type === 'registrations') {
+          title = 'Registration Report';
+          if (regData.length === 0) { alert('No registration data to export.'); setShowExportModal(false); return; }
+          kpiHtml = `
+          <div class="stats">
+            <div class="stat" style="--a:#6366f1;--ib:#eef2ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="stat-label">Total Registrations</div>
+              <div class="stat-val">${regData.length}</div>
+              <div class="stat-desc">All registration attempts</div>
+            </div>
+            <div class="stat" style="--a:#22c55e;--ib:#f0fdf4">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div class="stat-label">Confirmed</div>
+              <div class="stat-val">${successCount}</div>
+              <div class="stat-desc">Successful payments</div>
+            </div>
+            <div class="stat" style="--a:#f59e0b;--ib:#fffbeb">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="stat-label">Pending</div>
+              <div class="stat-val">${initiatedCount}</div>
+              <div class="stat-desc">Initiated, not completed</div>
+            </div>
+            <div class="stat" style="--a:#0ea5e9;--ib:#f0f9ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="stat-label">Revenue</div>
+              <div class="stat-val">&#8377;${totalRevenue.toLocaleString('en-IN')}</div>
+              <div class="stat-desc">From confirmed payments</div>
+            </div>
+          </div>`;
+          tableHtml = `<div class="section"><div class="section-title">Registration Details</div><table><thead><tr><th>#</th><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Course</th><th>Amount</th><th>Status</th><th>WhatsApp</th><th>Email</th></tr></thead><tbody>${genRows(regData, 0)}</tbody></table></div>`;
+        } else if (type === 'enquiries') {
+          title = 'Enquiry Report';
+          if (enqData.length === 0) { alert('No enquiry data to export.'); setShowExportModal(false); return; }
+          kpiHtml = `
+          <div class="stats">
+            <div class="stat" style="--a:#6366f1;--ib:#eef2ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="stat-label">Total Enquiries</div>
+              <div class="stat-val">${enqData.length}</div>
+              <div class="stat-desc">Course enquiries received</div>
+            </div>
+            <div class="stat" style="--a:#3b82f6;--ib:#eff6ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+              <div class="stat-label">Cities</div>
+              <div class="stat-val">${new Set(enqData.map(r => r.paymentId).filter(Boolean)).size}</div>
+              <div class="stat-desc">Unique cities covered</div>
+            </div>
+            <div class="stat" style="--a:#22c55e;--ib:#f0fdf4">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div class="stat-label">Courses</div>
+              <div class="stat-val">${new Set(enqData.map(r => (r.course||'').replace(/\[.*\]/,'').trim()).filter(Boolean)).size}</div>
+              <div class="stat-desc">Unique courses enquired</div>
+            </div>
+            <div class="stat" style="--a:#f59e0b;--ib:#fffbeb">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+              <div class="stat-label">Conversion</div>
+              <div class="stat-val">${enqData.length > 0 ? ((regData.filter(r => (r.status||'').toLowerCase() === 'success').length / (enqData.length + regData.length) * 100).toFixed(1)) : 0}%</div>
+              <div class="stat-desc">Overall success rate</div>
+            </div>
+          </div>`;
+          tableHtml = `<div class="section"><div class="section-title">Enquiry Details</div><table><thead><tr><th>#</th><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Course</th><th>City</th><th>Status</th><th>WhatsApp</th><th>Email</th></tr></thead><tbody>${genRows(enqData, 0)}</tbody></table></div>`;
+        } else {
+          title = 'Complete Report';
+          if (regData.length === 0 && enqData.length === 0) { alert('No data to export.'); setShowExportModal(false); return; }
+          kpiHtml = `
+          <div class="stats">
+            <div class="stat" style="--a:#6366f1;--ib:#eef2ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="stat-label">Total Registrations</div>
+              <div class="stat-val">${regData.length}</div>
+              <div class="stat-desc">Course registrations</div>
+            </div>
+            <div class="stat" style="--a:#22c55e;--ib:#f0fdf4">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div class="stat-label">Confirmed</div>
+              <div class="stat-val">${successCount}</div>
+              <div class="stat-desc">Successful payments</div>
+            </div>
+            <div class="stat" style="--a:#3b82f6;--ib:#eff6ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+              <div class="stat-label">Enquiries</div>
+              <div class="stat-val">${enqData.length}</div>
+              <div class="stat-desc">Course enquiries</div>
+            </div>
+            <div class="stat" style="--a:#0ea5e9;--ib:#f0f9ff">
+              <div class="stat-accent"></div>
+              <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="stat-label">Revenue</div>
+              <div class="stat-val">&#8377;${totalRevenue.toLocaleString('en-IN')}</div>
+              <div class="stat-desc">From confirmed payments</div>
+            </div>
+          </div>`;
+          let allRows = '';
+          if (regData.length > 0) allRows += genRows(regData, 0);
+          if (enqData.length > 0) allRows += genRows(enqData, regData.length);
+          tableHtml = `<div class="section"><div class="section-title">All Records (Registrations + Enquiries)</div><table><thead><tr><th>#</th><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Course</th><th>Amount</th><th>Status</th><th>WhatsApp</th><th>Email</th></tr></thead><tbody>${allRows}</tbody></table></div>`;
+        }
 
         const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Dxign.learn — Student Report</title>
+  <title>Dxign.learn — ${title}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',system-ui,sans-serif;background:#fafafa;color:#18181b;font-size:10.5px;min-height:100vh}
-    .header{display:flex;align-items:center;justify-content:space-between;padding:28px 40px 24px;background:#fff;border-bottom:1px solid #e4e4e7}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{height:38px;width:auto;object-fit:contain}
-    .brand-text h1{font-size:17px;font-weight:800;letter-spacing:.5px;color:#09090b;line-height:1}
-    .brand-text p{font-size:8px;font-weight:500;color:#71717a;letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+    body{font-family:'Inter',system-ui,sans-serif;background:#fafafa;color:#18181b;font-size:10px;min-height:100vh}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:24px 36px 20px;background:#fff;border-bottom:1px solid #e4e4e7}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{height:34px;width:auto;object-fit:contain}
+    .brand-text h1{font-size:15px;font-weight:800;letter-spacing:.5px;color:#09090b;line-height:1}
+    .brand-text p{font-size:7px;font-weight:500;color:#71717a;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
     .report-label{text-align:right}
-    .report-label .rtitle{font-size:11px;font-weight:700;color:#09090b;letter-spacing:.3px}
-    .report-label .rsub{font-size:8px;color:#a1a1aa;margin-top:4px}
-    .report-label .rdate{font-size:8.5px;color:#52525b;margin-top:2px;font-weight:500}
-    .contact-bar{display:flex;align-items:center;background:#09090b;padding:10px 40px;flex-wrap:wrap;gap:0}
-    .citem{display:flex;align-items:center;gap:6px;padding:4px 18px 4px 0;margin-right:18px;border-right:1px solid #27272a;color:#a1a1aa;font-size:8.5px;font-weight:400}
+    .report-label .rtitle{font-size:10px;font-weight:700;color:#09090b;letter-spacing:.3px}
+    .report-label .rsub{font-size:7px;color:#a1a1aa;margin-top:3px}
+    .report-label .rdate{font-size:7.5px;color:#52525b;margin-top:2px;font-weight:500}
+    .contact-bar{display:flex;align-items:center;background:#09090b;padding:8px 36px;flex-wrap:wrap;gap:0}
+    .citem{display:flex;align-items:center;gap:5px;padding:3px 14px 3px 0;margin-right:14px;border-right:1px solid #27272a;color:#a1a1aa;font-size:7.5px;font-weight:400}
     .citem:last-child{border-right:none;margin-right:0}
-    .citem svg{flex-shrink:0}
     .citem strong{color:#e4e4e7;font-weight:600}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 40px;background:#fafafa}
-    .stat{background:#fff;border:1px solid #e4e4e7;border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
-    .stat-accent{position:absolute;top:0;left:0;right:0;height:2px;background:var(--a);border-radius:10px 10px 0 0}
-    .stat-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--ib);margin-bottom:10px}
-    .stat-label{font-size:7.5px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px}
-    .stat-val{font-size:22px;font-weight:800;color:#09090b;line-height:1}
-    .stat-desc{font-size:7.5px;color:#a1a1aa;margin-top:3px}
-    .section{padding:0 40px 28px}
-    .section-title{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#71717a;margin-bottom:12px;padding-top:4px;display:flex;align-items:center;gap:8px}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 36px;background:#fafafa}
+    .stat{background:#fff;border:1px solid #e4e4e7;border-radius:8px;padding:12px 14px;position:relative;overflow:hidden}
+    .stat-accent{position:absolute;top:0;left:0;right:0;height:2px;background:var(--a);border-radius:8px 8px 0 0}
+    .stat-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--ib);margin-bottom:8px}
+    .stat-label{font-size:7px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+    .stat-val{font-size:18px;font-weight:800;color:#09090b;line-height:1}
+    .stat-desc{font-size:7px;color:#a1a1aa;margin-top:2px}
+    .section{padding:0 36px 24px}
+    .section-title{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#71717a;margin-bottom:10px;padding-top:4px;display:flex;align-items:center;gap:8px}
     .section-title::after{content:'';flex:1;height:1px;background:#e4e4e7}
-    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e4e4e7;border-radius:10px;overflow:hidden}
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:8px}
     thead tr{background:#09090b}
-    thead th{padding:10px 12px;text-align:left;font-size:7.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a1a1aa;white-space:nowrap}
+    thead th{padding:7px 8px;text-align:left;font-size:6.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#a1a1aa;white-space:nowrap}
     tbody tr{border-bottom:1px solid #f4f4f5}
     tbody tr:last-child{border-bottom:none}
-    tbody td{padding:9px 12px;vertical-align:middle;color:#3f3f46}
-    td.num{color:#d4d4d8;font-size:8px;font-weight:600;width:28px}
+    tbody td{padding:6px 8px;vertical-align:middle;color:#3f3f46}
+    td.num{color:#d4d4d8;font-size:7px;font-weight:600;width:22px}
     td.name{font-weight:600;color:#09090b}
     td.amount{font-weight:700;color:#09090b;font-variant-numeric:tabular-nums}
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:7.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-    .badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block}
-    .footer{display:flex;justify-content:space-between;align-items:center;padding:14px 40px;background:#fff;border-top:1px solid #e4e4e7;font-size:8px;color:#a1a1aa}
+    td.action{text-align:center;white-space:nowrap}
+    .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;font-size:6.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+    .badge::before{content:'';width:3px;height:3px;border-radius:50%;background:currentColor;display:inline-block}
+    .footer{display:flex;justify-content:space-between;align-items:center;padding:10px 36px;background:#fff;border-top:1px solid #e4e4e7;font-size:7px;color:#a1a1aa}
     .footer strong{color:#71717a;font-weight:600}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}@page{size:A4 landscape;margin:0}}
   </style>
 </head>
 <body>
-
   <div class="header">
     <div class="brand">
       <img src="${logoUrl}" alt="Dxign" class="logo" onerror="this.style.display='none'"/>
@@ -4415,82 +4623,26 @@
       </div>
     </div>
     <div class="report-label">
-      <div class="rtitle">Student Registration Report</div>
+      <div class="rtitle">${title}</div>
       <div class="rsub">Confidential &middot; Internal Use Only</div>
       <div class="rdate">Generated: ${dateStr}</div>
     </div>
   </div>
-
   <div class="contact-bar">
-    <div class="citem">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.64 12 19.79 19.79 0 0 1 1.57 3.36 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.51a16 16 0 0 0 6 6l.87-1.16a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 15z"/></svg>
-      <strong>+91 73564 13558</strong>
-    </div>
-    <div class="citem">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-      <strong>contact@aimastery.academy</strong>
-    </div>
-    <div class="citem">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-      <strong>@dxign.learn</strong>
-    </div>
-    <div class="citem">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-      <strong>dxignlearn.vercel.app</strong>
-    </div>
+    <div class="citem"><strong>+91 73564 13558</strong></div>
+    <div class="citem"><strong>contact@aimastery.academy</strong></div>
+    <div class="citem"><strong>dxignlearn.vercel.app</strong></div>
   </div>
-
-  <div class="stats">
-    <div class="stat" style="--a:#6366f1;--ib:#eef2ff">
-      <div class="stat-accent"></div>
-      <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <div class="stat-label">Total Leads</div>
-      <div class="stat-val">${adminData.length}</div>
-      <div class="stat-desc">All registration attempts</div>
-    </div>
-    <div class="stat" style="--a:#22c55e;--ib:#f0fdf4">
-      <div class="stat-accent"></div>
-      <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <div class="stat-label">Confirmed Enrolments</div>
-      <div class="stat-val">${successCount}</div>
-      <div class="stat-desc">Successful payments</div>
-    </div>
-    <div class="stat" style="--a:#f59e0b;--ib:#fffbeb">
-      <div class="stat-accent"></div>
-      <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-      <div class="stat-label">Pending Payments</div>
-      <div class="stat-val">${initiatedCount}</div>
-      <div class="stat-desc">Initiated, not completed</div>
-    </div>
-    <div class="stat" style="--a:#0ea5e9;--ib:#f0f9ff">
-      <div class="stat-accent"></div>
-      <div class="stat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-      <div class="stat-label">Total Revenue</div>
-      <div class="stat-val">&#8377;${totalRevenue.toLocaleString('en-IN')}</div>
-      <div class="stat-desc">From confirmed payments</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Student Registration Details</div>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Date &amp; Time</th><th>Student Name</th><th>Email</th><th>Mobile</th><th>Course</th><th>Amount</th><th>Status</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>
-
+  ${kpiHtml}
+  ${tableHtml}
   <div class="footer">
-    <span>&copy; 2026 <strong>Obtecs</strong> &middot; All Rights Reserved &middot; Confidential Document</span>
-    <span>contact@aimastery.academy &middot; +91 73564 13558 &middot; Total: <strong>${adminData.length} records</strong></span>
+    <span>&copy; 2026 <strong>Dxign.learn</strong> &middot; All Rights Reserved</span>
+    <span>Total: <strong>${type === 'both' ? regData.length + enqData.length : type === 'registrations' ? regData.length : enqData.length} records</strong></span>
   </div>
-
 </body>
 </html>`;
 
+        setShowExportModal(false);
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
         iframe.style.top = '-9999px';
@@ -4509,6 +4661,86 @@
         }, 500);
       };
 
+
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '—';
+        try {
+          const parts = dateStr.split(',');
+          if (parts.length >= 2) {
+            const datePart = parts[0].trim();
+            const timePart = parts[1].trim();
+            const dateSegments = datePart.split('/');
+            if (dateSegments.length === 3) {
+              const d = String(parseInt(dateSegments[0])).padStart(2, '0');
+              const m = String(parseInt(dateSegments[1])).padStart(2, '0');
+              const y = dateSegments[2];
+              const timeMatch = timePart.match(/(\d+):(\d+)/);
+              if (timeMatch) {
+                let h = parseInt(timeMatch[1]);
+                const min = timeMatch[2];
+                const ampm = timePart.toLowerCase().includes('pm') ? 'PM' : 'AM';
+                return `${d}-${m}-${y} - ${h}:${min} ${ampm}`;
+              }
+              return `${d}-${m}-${y}`;
+            }
+          }
+          const d = new Date(dateStr);
+          if (!isNaN(d.getTime())) {
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            let h = d.getHours();
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${dd}-${mm}-${yyyy} - ${h}:${min} ${ampm}`;
+          }
+        } catch (e) {}
+        return dateStr;
+      };
+
+      const getCourseInfo = (courseTitle) => {
+        if (!courseTitle || typeof courseTitle !== 'string') return null;
+        return courseList.find(c => courseTitle.toLowerCase().includes(c.title.toLowerCase()) || c.title.toLowerCase().includes(courseTitle.toLowerCase())) || null;
+      };
+
+      const getWhatsAppLink = (phone, name, courseTitle) => {
+        if (phone === '' || phone === null || phone === undefined) return '#';
+        const phoneStr = String(phone);
+        const safeName = String(name || 'Student');
+        const safeCourse = String(courseTitle || 'our course');
+        const course = getCourseInfo(safeCourse);
+        const desc = course ? course.description : 'Industry-leading AI skills training with hands-on projects and expert mentorship.';
+        const msg = `Hi ${safeName}!%0A%0A🎉 *Welcome to Dxign Learn!*%0A%0AThank you for your interest in *${safeCourse}*.%0A%0A${desc}%0A%0A📞 Our team will reach out to you shortly with more details.%0A%0ABest regards,%0A*Dxign Learn Team*`;
+        const cleanPhone = phoneStr.replace(/[^0-9]/g, '').replace(/^0+/, '');
+        if (!cleanPhone) return '#';
+        return `https://wa.me/${cleanPhone}?text=${msg}`;
+      };
+
+      const getMailtoLink = (email, name, courseTitle) => {
+        if (email === '' || email === null || email === undefined) return '#';
+        const emailStr = String(email);
+        const safeName = String(name || 'Student');
+        const safeCourse = String(courseTitle || 'our course');
+        const course = getCourseInfo(safeCourse);
+        const desc = course ? course.description : 'Industry-leading AI skills training with hands-on projects and expert mentorship.';
+        const subject = encodeURIComponent(`Welcome to Dxign Learn - ${safeCourse}`);
+        const body = encodeURIComponent(
+`Hi ${safeName},
+
+🎉 Welcome to Dxign Learn!
+
+Thank you for your interest in ${safeCourse}.
+
+${desc}
+
+Our team will reach out to you shortly with more details.
+
+Best regards,
+Dxign Learn Team`
+        );
+        return `mailto:${emailStr}?subject=${subject}&body=${body}`;
+      };
 
       const saveToGoogleSheet = async (status, paymentId = '', nameVal = '', emailVal = '', phoneVal = '', courseVal = '', priceVal = '') => {
         const webhookUrl = GOOGLE_SHEET_WEBHOOK_URL;
@@ -4533,7 +4765,7 @@
             method: 'POST',
             mode: 'no-cors',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'text/plain'
             },
             body: JSON.stringify(data)
           });
@@ -6098,6 +6330,181 @@
                 </div>
               </div>
               
+            </div>
+          </section>
+
+          {/* ===== COURSE ENQUIRY SECTION ===== */}
+          <section id="contact" className="bg-brand-bgDarker text-gray-300 py-16 px-6 md:px-12 lg:px-24 border-t border-white/5 z-20 select-none relative">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-10">
+                <span className="text-xs font-mono text-brand-cyan uppercase tracking-[0.2em] font-bold">Get in Touch</span>
+                <h2 className="text-2xl md:text-3xl font-semibold text-white mt-3">Unlock Your Future with AI</h2>
+                <p className="text-sm text-gray-500 mt-2 max-w-xl mx-auto">Take the first step toward mastering industry-leading AI skills.</p>
+              </div>
+
+              {(() => {
+                const [formData, setFormData] = React.useState({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  city: '',
+                  course: ''
+                });
+                const [submitted, setSubmitted] = React.useState(false);
+                const [loading, setLoading] = React.useState(false);
+                const [error, setError] = React.useState('');
+
+                const handleChange = (field) => (e) => {
+                  setFormData(prev => ({ ...prev, [field]: e.target.value }));
+                };
+
+                const handleSubmit = async (e) => {
+                  e.preventDefault();
+                  setError('');
+
+                  if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
+                    setError('Please fill in all required fields.');
+                    return;
+                  }
+
+                  setLoading(true);
+
+                  try {
+                    const formBody = new URLSearchParams();
+                    formBody.append('entry.1506871634', formData.name);
+                    formBody.append('entry.147453066', formData.email);
+                    formBody.append('entry.444412975', formData.phone);
+                    formBody.append('entry.1576637996', formData.city);
+                    formBody.append('entry.1405274902', formData.course);
+                    formBody.append('fvv', '1');
+                    formBody.append('draftResponse', '[]');
+                    formBody.append('pageHistory', '0');
+                    formBody.append('fbzx', '0');
+
+                    await fetch('https://docs.google.com/forms/d/e/1FAIpQLSeae3frdxJ-QvaA74bNos-UwgiOmx8z8tJPpRU8b3PPXwU_6Q/formResponse', {
+                      method: 'POST',
+                      mode: 'no-cors',
+                      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                      body: formBody.toString()
+                    });
+
+                    // Also log to Google Sheets for admin panel visibility
+                    const webhookUrl = GOOGLE_SHEET_WEBHOOK_URL;
+                    if (webhookUrl) {
+                      await fetch(webhookUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({
+                          date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                          name: formData.name.trim(),
+                          email: formData.email.toLowerCase().trim(),
+                          phone: formData.phone.trim(),
+                          course: (formData.course || 'Not specified') + (formData.city ? ' [' + formData.city + ']' : ''),
+                          price: 'Enquiry',
+                          status: 'Enquiry',
+                          paymentId: formData.city || ''
+                        })
+                      });
+                    }
+
+                    setSubmitted(true);
+                    setFormData({ name: '', email: '', phone: '', city: '', course: '' });
+                  } catch (err) {
+                    setError('Something went wrong. Please try again.');
+                  } finally {
+                    setLoading(false);
+                  }
+                };
+
+                const inputClass = "w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition-all duration-300";
+                const labelClass = "text-[10px] font-mono font-bold text-gray-500 uppercase tracking-wider mb-1.5";
+
+                if (submitted) {
+                  return (
+                    <div className="max-w-3xl mx-auto">
+                      <div className="rounded-2xl border border-brand-emerald/20 bg-brand-emerald/5 backdrop-blur-sm p-10 text-center">
+                        <div className="w-14 h-14 rounded-full bg-brand-emerald/20 flex items-center justify-center mx-auto mb-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-brand-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Thank You, {formData.name}!</h3>
+                        <p className="text-sm text-gray-400 mb-6">Your enquiry has been received. We'll get back to you shortly.</p>
+                        <button onClick={() => setSubmitted(false)} className="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:bg-brand-cyan/80 transition-all duration-300">
+                          Submit Another
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <form onSubmit={handleSubmit} className="max-w-3xl mx-auto rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm p-6 md:p-8 space-y-5">
+
+                    {/* Row: Name + Email */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className={labelClass}>Full Name <span className="text-rose-500">*</span></label>
+                        <input type="text" value={formData.name} onChange={handleChange('name')} placeholder="John Doe" className={inputClass} required />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className={labelClass}>Email <span className="text-rose-500">*</span></label>
+                        <input type="email" value={formData.email} onChange={handleChange('email')} placeholder="john@example.com" className={inputClass} required />
+                      </div>
+                    </div>
+
+                    {/* Row: Phone + City */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className={labelClass}>Phone / WhatsApp <span className="text-rose-500">*</span></label>
+                        <input type="tel" value={formData.phone} onChange={handleChange('phone')} placeholder="+91 98765 43210" className={inputClass} required />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className={labelClass}>City / State</label>
+                        <input type="text" value={formData.city} onChange={handleChange('city')} placeholder="Mumbai, Maharashtra" className={inputClass} />
+                      </div>
+                    </div>
+
+                    {/* Course Selection */}
+                    <div className="flex flex-col">
+                      <label className={labelClass}>Which course are you interested in? <span className="text-rose-500">*</span></label>
+                      <select value={formData.course} onChange={handleChange('course')} className={inputClass + " appearance-none cursor-pointer"} required>
+                        <option value="" disabled className="bg-zinc-900 text-gray-500">Select a course</option>
+                        <option value="AI Graphic Design Mastery" className="bg-zinc-900">AI Graphic Design Mastery</option>
+                        <option value="AI Filmmaking & Video Production" className="bg-zinc-900">AI Filmmaking & Video Production</option>
+                        <option value="No-Code AI Website Creation" className="bg-zinc-900">No-Code AI Website Creation</option>
+                        <option value="AI-Powered UI/UX Design" className="bg-zinc-900">AI-Powered UI/UX Design</option>
+                        <option value="AI Content Creation & Marketing" className="bg-zinc-900">AI Content Creation & Marketing</option>
+                        <option value="Other" className="bg-zinc-900">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Error */}
+                    {error && (
+                      <div className="text-rose-500 text-[10px] font-mono bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-lg flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>{error}</span>
+                      </div>
+                    )}
+
+                    {/* Submit */}
+                    <button type="submit" disabled={loading} className="w-full py-3.5 rounded-2xl text-xs font-bold uppercase tracking-widest text-black bg-brand-cyan hover:bg-brand-cyan/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(0,240,255,0.15)] hover:shadow-[0_0_35px_rgba(0,240,255,0.3)]">
+                      {loading ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                          <span>Sending...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                          <span>Send Enquiry</span>
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-center text-[10px] font-mono text-gray-600">Your information is securely stored via Google Forms.</p>
+                  </form>
+                );
+              })()}
             </div>
           </section>
 
@@ -7710,7 +8117,7 @@
                         Refresh
                       </button>
                       <button
-                        onClick={exportToPDF}
+                        onClick={() => setShowExportModal(true)}
                         className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2"
                       >
                         <i data-lucide="file-text" className="w-3.5 h-3.5"></i>
@@ -7726,6 +8133,52 @@
                     </div>
                   </header>
 
+                  {/* Export Report Modal */}
+                  {showExportModal && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                      <div className="liquid-glass border border-white/10 rounded-3xl p-8 max-w-lg w-full relative overflow-hidden text-center">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-violet" />
+                        <div className="w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center mx-auto mb-5 text-brand-cyan">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        </div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-white font-heading mb-1">Export Report</h3>
+                        <p className="text-[10px] font-mono text-gray-500 mb-6">Choose the type of report to download</p>
+                        <div className="flex flex-col gap-3">
+                          <button onClick={() => exportToPDF('registrations')} className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-cyan/30 transition-all duration-200 text-left flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-white">Registration Report</div>
+                              <div className="text-[9px] font-mono text-gray-500">Paid &amp; initiated course registrations</div>
+                            </div>
+                          </button>
+                          <button onClick={() => exportToPDF('enquiries')} className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-sky-400/30 transition-all duration-200 text-left flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-white">Enquiry Report</div>
+                              <div className="text-[9px] font-mono text-gray-500">Course enquiry form submissions</div>
+                            </div>
+                          </button>
+                          <button onClick={() => exportToPDF('both')} className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-violet/30 transition-all duration-200 text-left flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-white">Complete Report</div>
+                              <div className="text-[9px] font-mono text-gray-500">Registrations &amp; enquiries combined</div>
+                            </div>
+                          </button>
+                        </div>
+                        <button onClick={() => setShowExportModal(false)} className="mt-4 text-[9px] font-mono text-gray-600 hover:text-gray-400 transition-all duration-200 uppercase tracking-wider">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Main Scrollable Content */}
                   <main className={`flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 lg:h-0 lg:min-h-0 lg:flex-1 min-h-0 ${adminTab === 'chat' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
                     {adminTab === 'registrations' && (
@@ -7734,13 +8187,14 @@
                       <>
                         {/* Metrics/KPI Cards */}
                         {(() => {
-                          const successRows = adminData.filter(r => (r.status || '').toLowerCase() === 'success');
+                          const regData = adminData.filter(r => (r.status || '').toLowerCase() !== 'enquiry');
+                          const successRows = regData.filter(r => (r.status || '').toLowerCase() === 'success');
                           const totalSales = successRows.length;
                           const totalRevenue = successRows.reduce((sum, r) => {
                             const cleanPrice = parseInt((r.price || '').replace(/\D/g, '')) || 0;
                             return sum + cleanPrice;
                           }, 0);
-                          const conversionRate = adminData.length > 0 ? ((totalSales / adminData.length) * 100).toFixed(1) : 0;
+                          const conversionRate = regData.length > 0 ? ((totalSales / regData.length) * 100).toFixed(1) : 0;
 
                           return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
@@ -7750,7 +8204,7 @@
                                   <i data-lucide="users" className="w-12 h-12 lg:w-16 lg:h-16"></i>
                                 </div>
                                 <span className="text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold">Total Leads</span>
-                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-cyan-glow">{adminLoading ? '...' : adminData.length}</h3>
+                                <h3 className="text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-cyan-glow">{adminLoading ? '...' : regData.length}</h3>
                                 <p className="text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2">Registration attempts initiated</p>
                               </div>
 
@@ -7835,126 +8289,153 @@
                           </div>
                         </div>
 
-                        {/* Registrations List Table */}
-                        <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[300px]">
-                          {adminLoading && (
-                            <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                              <div className="flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest">
-                                <i data-lucide="refresh-cw" className="w-5 h-5 animate-spin"></i>
-                                <span>Fetching Live Data...</span>
-                              </div>
+                        {/* Two-Column Grid: Registrations (Left) + Enquiries (Right) */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                          
+                          {/* ===== LEFT COLUMN: REGISTRATIONS ===== */}
+                          <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[200px]">
+                            <div className="px-6 lg:px-8 pt-5 pb-2 border-b border-white/[0.04]">
+                              <span className="text-[10px] lg:text-xs font-mono text-brand-cyan uppercase tracking-widest font-bold">Registration Details</span>
                             </div>
-                          )}
-
-                          {adminError && (
-                            <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center">
-                              <div className="max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center">
-                                <i data-lucide="alert-triangle" className="w-8 h-8 text-rose-500 mb-3"></i>
-                                <h4 className="text-xs font-mono font-bold uppercase text-white tracking-widest mb-1">Retrieval Failed</h4>
-                                <p className="text-[11px] text-gray-500 mb-4 font-mono">{adminError}</p>
-                                <button
-                                  onClick={fetchAdminData}
-                                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200"
-                                >
-                                  Retry Fetch
-                                </button>
+                            {adminLoading && (
+                              <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                                <div className="flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest">
+                                  <i data-lucide="refresh-cw" className="w-5 h-5 animate-spin"></i>
+                                  <span>Fetching Live Data...</span>
+                                </div>
                               </div>
-                            </div>
-                          )}
-
-                          {(() => {
-                            const filteredRows = adminData.filter(row => {
-                              const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                              const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                              const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
-                              const searchMatch = nameMatch || emailMatch || phoneMatch;
-                              const courseMatch = adminFilterCourse === 'All' || 
-                                (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
-                                (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
-                              const statusMatch = adminFilterStatus === 'All' || 
-                                (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
-                              return searchMatch && courseMatch && statusMatch;
-                            });
-
-                            const noDataBlock = (
-                              <div className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">No Student Records Found</div>
-                            );
-
-                            if (filteredRows.length === 0) {
-                              return <>{noDataBlock}</>;
-                            }
-
-                            return (
-                              <>
-                                {/* Mobile card view (hidden on md+) */}
-                                <div className="block md:hidden p-4 space-y-3">
+                            )}
+                            {adminError && (
+                              <div className="absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center">
+                                <div className="max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center">
+                                  <i data-lucide="alert-triangle" className="w-8 h-8 text-rose-500 mb-3"></i>
+                                  <h4 className="text-xs font-mono font-bold uppercase text-white tracking-widest mb-1">Retrieval Failed</h4>
+                                  <p className="text-[11px] text-gray-500 mb-4 font-mono">{adminError}</p>
+                                  <button onClick={fetchAdminData} className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200">Retry Fetch</button>
+                                </div>
+                              </div>
+                            )}
+                            {(() => {
+                              const filteredRows = adminData.filter(row => {
+                                const isEnquiry = (row.status || '').toLowerCase() === 'enquiry';
+                                if (isEnquiry) return false;
+                                const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+                                const searchMatch = nameMatch || emailMatch || phoneMatch;
+                                const courseMatch = adminFilterCourse === 'All' || 
+                                  (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() ||
+                                  (adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses'));
+                                const statusMatch = adminFilterStatus === 'All' || 
+                                  (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+                                return searchMatch && courseMatch && statusMatch;
+                              });
+                              if (filteredRows.length === 0) {
+                                return <div className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">No Registrations Found</div>;
+                              }
+                              return (
+                                <div className="p-3 lg:p-4 space-y-2">
                                   {filteredRows.map((row, index) => {
                                     const isSuccess = (row.status || '').toLowerCase() === 'success';
                                     return (
-                                      <div key={index} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-left space-y-2">
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-sans font-bold text-white text-sm">{row.name || '—'}</span>
-                                          <span className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
+                                      <div key={index} className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.03] transition-all duration-200">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <span className="text-[9px] lg:text-[10px] font-mono text-gray-500">{formatDate(row.date)}</span>
+                                          <span className={`shrink-0 px-2 py-0.5 rounded text-[7px] uppercase tracking-wider font-bold border ${
                                             isSuccess 
                                               ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' 
                                               : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                           }`}>{row.status}</span>
                                         </div>
-                                        <div className="text-[10px] font-mono text-gray-500 space-y-1">
-                                          <div className="flex justify-between"><span>Email</span><span className="text-gray-300">{row.email}</span></div>
-                                          <div className="flex justify-between"><span>Phone</span><span className="text-gray-300">{row.phone}</span></div>
-                                          <div className="flex justify-between"><span>Course</span><span className="text-white uppercase font-bold text-[10px]">{row.course}</span></div>
-                                          <div className="flex justify-between"><span>Price</span><span className="text-cyan-glow font-bold">{row.price}</span></div>
-                                          <div className="flex justify-between"><span>Date</span><span className="text-gray-400">{row.date}</span></div>
+                                        <div className="font-sans font-bold text-white text-sm lg:text-base leading-tight">{row.name || '—'}</div>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Email</div>
+                                            <div className="text-[10px] lg:text-[11px] text-gray-300 truncate">{row.email || '—'}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Phone</div>
+                                            <div className="text-[10px] lg:text-[11px] text-gray-300">{row.phone || '—'}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Course</div>
+                                            <div className="text-[9px] lg:text-[10px] text-white uppercase font-bold truncate">{row.course}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Price</div>
+                                            <div className="text-[10px] lg:text-[11px] text-cyan-glow font-bold">{row.price}</div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <a href={getWhatsAppLink(row.phone, row.name, row.course)} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald hover:bg-brand-emerald hover:text-white transition-all duration-200" title="Send WhatsApp">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                          </a>
+                                          <a href={getMailtoLink(row.email, row.name, row.course)} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 hover:bg-sky-500 hover:text-white transition-all duration-200" title="Send Email">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 7L2 4"/></svg>
+                                          </a>
                                         </div>
                                       </div>
                                     );
                                   })}
                                 </div>
+                              );
+                            })()}
+                          </div>
 
-                                {/* Desktop table view (hidden below md) */}
-                                <div className="hidden md:block overflow-x-auto w-full">
-                                  <table className="min-w-full divide-y divide-white/5 text-left text-xs lg:text-sm font-mono">
-                                    <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-wider text-[10px] lg:text-xs">
-                                      <tr>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Date</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Name</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Email</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Phone</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5">Course</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Price</th>
-                                        <th className="px-6 lg:px-8 py-4 lg:py-5 text-center">Status</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5 text-gray-300">
-                                      {filteredRows.map((row, index) => {
-                                        const isSuccess = (row.status || '').toLowerCase() === 'success';
-                                        return (
-                                          <tr key={index} className="hover:bg-white/[0.01] transition-all duration-200">
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap text-gray-500">{row.date}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.name || '—'}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 font-sans font-bold text-white selection:bg-brand-cyan/30">{row.email}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 whitespace-nowrap">{row.phone}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-white uppercase font-bold tracking-tight text-[11px] lg:text-xs">{row.course}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap text-cyan-glow font-bold">{row.price}</td>
-                                            <td className="px-6 lg:px-8 py-4 lg:py-5 text-center whitespace-nowrap">
-                                              <span className={`px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold border ${
-                                                isSuccess 
-                                                  ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
-                                                  : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                              }`}>
-                                                {row.status}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
+                          {/* ===== RIGHT COLUMN: ENQUIRIES ===== */}
+                          <div className="liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[200px]">
+                            <div className="px-6 lg:px-8 pt-5 pb-2 border-b border-white/[0.04]">
+                              <span className="text-[10px] lg:text-xs font-mono text-sky-400 uppercase tracking-widest font-bold">Enquiry Details</span>
+                            </div>
+                            {(() => {
+                              const enquiryRows = adminData.filter(r => (r.status || '').toLowerCase() === 'enquiry');
+                              if (enquiryRows.length === 0) {
+                                return <div className="px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]">No Enquiries Yet</div>;
+                              }
+                              return (
+                                <div className="p-3 lg:p-4 space-y-2">
+                                  {enquiryRows.map((row, index) => {
+                                    const courseClean = (row.course || '').replace(/\[.*\]/, '').trim();
+                                    return (
+                                      <div key={index} className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.03] transition-all duration-200">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <span className="text-[9px] lg:text-[10px] font-mono text-gray-500">{formatDate(row.date)}</span>
+                                        </div>
+                                        <div className="font-sans font-bold text-white text-sm lg:text-base leading-tight">{row.name || '—'}</div>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Email</div>
+                                            <div className="text-[10px] lg:text-[11px] text-gray-300 truncate">{row.email || '—'}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Phone</div>
+                                            <div className="text-[10px] lg:text-[11px] text-gray-300">{row.phone || '—'}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">Course</div>
+                                            <div className="text-[9px] lg:text-[10px] text-white uppercase font-bold truncate">{courseClean}</div>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5">City</div>
+                                            <div className="text-[10px] lg:text-[11px] text-gray-400">{row.paymentId || '—'}</div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <a href={getWhatsAppLink(row.phone, row.name, courseClean)} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald hover:bg-brand-emerald hover:text-white transition-all duration-200" title="Send WhatsApp">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                          </a>
+                                          <a href={getMailtoLink(row.email, row.name, courseClean)} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 hover:bg-sky-500 hover:text-white transition-all duration-200" title="Send Email">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 7L2 4"/></svg>
+                                          </a>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              </>
-                            );
-                          })()}
+                              );
+                            })()}
+                          </div>
+
                         </div>
                       </>
                         </div>
@@ -8140,6 +8621,191 @@
                             </button>
                           </div>
                         </form>
+
+                        {/* WhatsApp Automation Config */}
+                        <div className="p-8 lg:p-10 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8">
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-emerald to-brand-cyan" />
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                            <div>
+                              <h3 className="text-xs lg:text-sm font-black uppercase tracking-wider text-white font-heading">Welcome Automation</h3>
+                              <p className="text-[9px] lg:text-[11px] font-mono text-gray-500 mt-0.5">Auto-send welcome messages on payment success</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            {/* Email status (always on) */}
+                            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan shrink-0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-white">Welcome Email</span>
+                                    <span className="text-[9px] font-mono bg-brand-emerald/10 text-brand-emerald px-2 py-0.5 rounded-full border border-brand-emerald/20">ACTIVE</span>
+                                  </div>
+                                  <p className="text-[9px] font-mono text-gray-500 mt-0.5">Auto-sent via Google Apps Script MailApp (free)</p>
+                                </div>
+                              </div>
+                            </div>
+                            {/* WhatsApp config */}
+                            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="w-8 h-8 rounded-lg bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-white">WhatsApp Notification (Optional)</span>
+                                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${whatsAppConfigured ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' : 'bg-white/10 text-white/40 border-white/10'}`}>
+                                      {whatsAppConfigured ? 'ACTIVE' : 'DISABLED'}
+                                    </span>
+                                  </div>
+                                  <p className="text-[9px] font-mono text-gray-500 mt-0.5">Optional. Leave credentials blank to run in Mail-only mode (Free).</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">API Endpoint URL</label>
+                                  <input
+                                    type="text"
+                                    placeholder="https://api.ultramsg.com/instance12345/messages/chat"
+                                    value={whatsAppApiUrl}
+                                    onChange={(e) => setWhatsAppApiUrl(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">API Key / Bearer Token</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Your API key or bearer token"
+                                    value={whatsAppApiKey}
+                                    onChange={(e) => setWhatsAppApiKey(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Phone Number ID (WhatsApp Cloud API only)</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Leave blank for other providers"
+                                    value={whatsAppPhoneId}
+                                    onChange={(e) => setWhatsAppPhoneId(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Test Phone Number (for test message)</label>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder="+919876543210"
+                                      value={whatsAppTestPhone}
+                                      onChange={(e) => setWhatsAppTestPhone(e.target.value)}
+                                      className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleTestWhatsApp}
+                                      disabled={whatsAppSaving}
+                                      className="px-4 py-2.5 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-[9px] font-mono font-bold hover:bg-brand-emerald/20 transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
+                                    >
+                                      {whatsAppSaving ? 'Sending...' : 'Test'}
+                                    </button>
+                                  </div>
+                                </div>
+                                
+                                <div className="border-t border-white/5 pt-4 my-2">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-white font-heading mb-3">Notification Templates</h4>
+                                  <p className="text-[9px] font-mono text-gray-500 mb-4">
+                                    You can use placeholders: <code className="text-brand-cyan font-bold">{'{name}'}</code>, <code className="text-brand-cyan font-bold">{'{course}'}</code>
+                                  </p>
+                                  
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome Email Subject</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Welcome to Dxign Learn - {course}"
+                                        value={welcomeEmailSubject}
+                                        onChange={(e) => setWelcomeEmailSubject(e.target.value)}
+                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome Email Body</label>
+                                      <textarea
+                                        rows={5}
+                                        placeholder="Hi {name}, Welcome to Dxign Learn!..."
+                                        value={welcomeEmailBody}
+                                        onChange={(e) => setWelcomeEmailBody(e.target.value)}
+                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5">Welcome WhatsApp Body</label>
+                                      <textarea
+                                        rows={4}
+                                        placeholder="Hi {name}! Welcome to Dxign Learn! Thank you for completing your registration for the {course} program..."
+                                        value={welcomeWhatsappBody}
+                                        onChange={(e) => setWelcomeWhatsappBody(e.target.value)}
+                                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {whatsAppStatus.text && (
+                                  <div className={`p-3 rounded-xl border text-[10px] font-mono ${
+                                    whatsAppStatus.type === 'success'
+                                      ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald'
+                                      : whatsAppStatus.type === 'warning'
+                                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                      : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                  }`}>
+                                    {whatsAppStatus.text}
+                                  </div>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={handleSaveWhatsAppConfig}
+                                  disabled={whatsAppSaving}
+                                  className="w-full py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-emerald to-brand-cyan shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+                                >
+                                  {whatsAppSaving ? 'Saving...' : 'Save Settings & Templates'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Setup guide */}
+                            <details className="group">
+                              <summary className="text-[9px] font-mono text-gray-500 hover:text-gray-400 cursor-pointer uppercase tracking-wider py-2">
+                                <span className="group-open:hidden">+ </span>
+                                <span className="hidden group-open:inline">- </span>
+                                Free WhatsApp Provider Setup Guide
+                              </summary>
+                              <div className="mt-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 text-[9px] font-mono text-gray-400 space-y-3 leading-relaxed">
+                                <p><span className="text-white font-bold">Option 1: UltraMsg (50 msgs/day free)</span></p>
+                                <p>1. Sign up at <a href="https://ultramsg.com" target="_blank" className="text-brand-cyan hover:underline">ultramsg.com</a></p>
+                                <p>2. Get your instance ID and token from the dashboard</p>
+                                <p>3. API URL format: <code className="text-white">https://api.ultramsg.com/{'{instanceId}'}/messages/chat</code></p>
+                                <p>4. Paste the token as the API Key above</p>
+                                <div className="border-t border-white/5 pt-3 mt-3">
+                                  <p><span className="text-white font-bold">Option 2: WhatsApp Cloud API (free tier)</span></p>
+                                  <p>1. Go to <a href="https://developers.facebook.com" target="_blank" className="text-brand-cyan hover:underline">Meta for Developers</a></p>
+                                  <p>2. Create a WhatsApp Business App, get your token &amp; phone number ID</p>
+                                  <p>3. API URL format: <code className="text-white">https://graph.facebook.com/v22.0/</code></p>
+                                  <p>4. Enter both token and Phone Number ID above (this provider auto-detected)</p>
+                                </div>
+                              </div>
+                            </details>
+                          </div>
+                        </div>
                       </div>
                     )}
 
