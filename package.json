@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "node build.js",
+    "start": "node server.js"
+  },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
