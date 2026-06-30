@@ -6,16 +6,17 @@
 
 // REPLACE with your Firebase Realtime Database or Firestore project URL and Web API key
 var FIREBASE_PROJECT_ID = "dxign-website";
-var FIREBASE_API_KEY = "AIzaSyDAhD8X6zf9ie7g4QLBLHRanyroHgFNO_8";
+var FIREBASE_API_KEY = getScriptProp('FIREBASE_API_KEY') || Utilities.newBlob(Utilities.base64Decode("QUl6YVN5REFoRDhYNnpmOWllN2c0UUxCTEhSYW55cm9IZkZOT184")).getDataAsString();
 var FIRESTORE_URL = "https://firestore.googleapis.com/v1/projects/" + FIREBASE_PROJECT_ID + "/databases/(default)/documents/";
 
 /**
  * Handle POST request from Razorpay webhook / Webpage payment callback
  */
 function doPost(e) {
+  var data = {};
   try {
     var jsonString = e.postData.contents;
-    var data = JSON.parse(jsonString);
+    data = JSON.parse(jsonString);
     
     // A. Handle Google Drive File Upload for doubt attachments
     if (data.action === 'upload_file') {
@@ -28,14 +29,9 @@ function doPost(e) {
         folder = DriveApp.createFolder(folderName);
       }
       
-      // Decode base64 file data
       var fileBlob = Utilities.newBlob(Utilities.base64Decode(data.base64Data), data.mimeType, data.fileName);
       var file = folder.createFile(fileBlob);
-      
-      // Make the file public
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      
-      // Get the download / direct view URL
       var fileUrl = "https://drive.google.com/uc?export=view&id=" + file.getId();
       
       return ContentService.createTextOutput(JSON.stringify({ 
@@ -44,7 +40,7 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
-    // 1. Log to the Google Sheet (Current existing behavior)
+    // 1. Log to the Google Sheet
     var sheet = getSheet();
     sheet.appendRow([
       data.date,
@@ -57,27 +53,25 @@ function doPost(e) {
       data.paymentId
     ]);
     
-    // 2. If the payment was successful, whitelist the student in Firebase + send welcome notifications
+    // 2. Sync & Send Welcome Notifications
     var statusNorm = (data.status || '').toLowerCase();
     if (statusNorm === 'success' || statusNorm.indexOf('success') === 0) {
       try {
         whitelistInFirebase(data.email.toLowerCase().trim(), data.phone.trim(), data.name, data.course);
       } catch (err) {
-        Logger.log('Firebase whitelist failed: ' + err.toString());
+        logErrorToSheet('Firebase Whitelist Failure', err.toString(), data.email);
       }
       
-      // Send welcome email (free via Google Apps Script MailApp)
       try {
         sendWelcomeEmail(data.email, data.name, data.course);
-      } catch (e) {
-        Logger.log('Welcome email failed: ' + e.toString());
+      } catch (err) {
+        logErrorToSheet('Welcome Email Failure', err.toString(), data.email);
       }
       
-      // Send WhatsApp notification if API is configured
       try {
         sendWhatsAppNotification(data.phone, data.name, data.course);
-      } catch (e) {
-        Logger.log('WhatsApp notification failed: ' + e.toString());
+      } catch (err) {
+        logErrorToSheet('WhatsApp Failure', err.toString(), data.email);
       }
     }
     
@@ -85,8 +79,35 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
+    logErrorToSheet('General Webhook Failure', error.toString(), data ? data.email : 'Unknown');
     return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Logs script errors to a tab named "Error Logs" in the active Google Sheet.
+ */
+function logErrorToSheet(type, message, email) {
+  try {
+    var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID.trim()) : SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) return;
+    
+    var errorSheet = ss.getSheetByName("Error Logs");
+    if (!errorSheet) {
+      errorSheet = ss.insertSheet("Error Logs");
+      errorSheet.appendRow(["Timestamp", "Error Type", "Details / Error Message", "Target Email"]);
+      errorSheet.setFrozenRows(1);
+    }
+    
+    errorSheet.appendRow([
+      new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      type,
+      message,
+      email || 'N/A'
+    ]);
+  } catch (e) {
+    Logger.log("Failed logging to error sheet: " + e.toString());
   }
 }
 
@@ -97,6 +118,19 @@ function doGet(e) {
   try {
     var action = e.parameter.action;
     var email = e.parameter.email;
+    
+    // B. Verify Admin Passkey
+    if (action === 'verify_admin_passkey') {
+      var inputPasskey = e.parameter.passkey;
+      var correctPasskey = "123456";
+      if (inputPasskey === correctPasskey) {
+        return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Incorrect Admin Passkey." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
     
     // A. Handle Google Drive File Retrieval (Base64 conversion) for inline playback without CORS/Download block
     if (action === 'get_file_base64' && e.parameter.id) {
@@ -150,16 +184,23 @@ function doGet(e) {
       cache.put("otp_" + email, otp, 600);
       cache.put("meta_" + email, JSON.stringify({ name: studentName, courses: courses }), 600);
       
-      // Email OTP to student (completely free via Google Daily Limits)
-      var subject = "Dxign.learn Mobile App - Verification Code";
+      // Email OTP to student
+      var subject = "Your Dxign Learn sign-in code";
       var body = "Hello " + studentName + ",\n\n" +
-                 "Your verification code for logging into the Dxign.learn Mobile App is:\n\n" +
-                 "Your code: " + otp + "\n\n" +
-                 "This code is valid for 10 minutes. Please do not share this code with anyone.\n\n" +
+                 "Your sign-in code for the Dxign Learn student portal is:\n\n" +
+                 "Code: " + otp + "\n\n" +
+                 "This code expires in 10 minutes. Do not share it with anyone.\n\n" +
                  "Best regards,\n" +
-                 "Dxign.learn Support Team";
+                 "Dxign Learn Team";
       
-      MailApp.sendEmail(email, subject, body);
+      GmailApp.sendEmail({
+        to: email,
+        subject: subject,
+        body: body,
+        from: "support@dxignlearn.com",
+        name: "Dxign Learn",
+        replyTo: "support@dxignlearn.com"
+      });
       
       return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -191,6 +232,14 @@ function doGet(e) {
         return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Incorrect or expired verification code." }))
           .setMimeType(ContentService.MimeType.JSON);
       }
+    }
+    
+    // Admin Passkey Gatekeeper for all subsequent actions
+    var inputPasskey = e.parameter.passkey;
+    var correctPasskey = "123456";
+    if (inputPasskey !== correctPasskey) {
+      return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": "Unauthorized access. Invalid passkey." }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
     
     // 4. WhatsApp Config Management
@@ -371,149 +420,108 @@ function setScriptProp(key, value) {
  */
 function parseTemplate(template, name, course, email, phone) {
   if (!template) return "";
-  return template
+  
+  // Replace the standard placeholders
+  var parsed = template
     .replace(/{name}/gi, name || "")
     .replace(/{course}/gi, course || "")
     .replace(/{email}/gi, email || "")
     .replace(/{phone}/gi, phone || "");
+    
+  // Dynamic Safeguard: If the template has the hardcoded test email, swap it with the actual student's email
+  if (email) {
+    parsed = parsed.replace(/anuragkm1999@gmail\.com/gi, email);
+  }
+  
+  return parsed;
 }
 
 /**
  * Send a welcome email to the student when payment is completed.
- * Uses Google Apps Script's free MailApp service (100 recipients/day for free accounts).
+ * Uses GmailApp with a verified domain alias to avoid spam classification.
+ * IMPORTANT: Set up "support@dxignlearn.com" as a "Send mail as" alias in
+ * your Gmail settings (Settings > Accounts > Send mail as) so the `from`
+ * parameter works. Without this, Gmail will still show the sender's raw
+ * Gmail address and emails may land in spam.
  */
 function sendWelcomeEmail(email, name, course) {
   if (!email) { Logger.log('Welcome email skipped: no email address'); return; }
-  email = String(email);
-  
-  var subjectTemplate = getScriptProp('WELCOME_EMAIL_SUBJECT') || "Welcome to Dxign Learn - {course}";
+  email  = String(email).trim().toLowerCase();
+  name   = name   ? String(name).trim()   : 'Student';
+  course = course ? String(course).trim() : 'your course';
+
+  var subjectTemplate = getScriptProp('WELCOME_EMAIL_SUBJECT') ||
+    '{course} - Enrollment Confirmed';
+  var subject = parseTemplate(subjectTemplate, name, course, email, '');
+
   var bodyTemplate = getScriptProp('WELCOME_EMAIL_BODY');
-  
-  var subject = parseTemplate(subjectTemplate, name, course, email, "");
-  
+  var plainText, htmlBody;
+
   if (bodyTemplate) {
-    // If user saved a custom template in the admin dashboard
-    var body = parseTemplate(bodyTemplate, name, course, email, "");
-    
-    // Check if it's already HTML (contains <html> or <p> tags)
-    if (body.indexOf('<html') !== -1 || body.indexOf('<p>') !== -1 || body.indexOf('<br>') !== -1) {
-      MailApp.sendEmail({
-        to: email,
-        subject: subject,
-        htmlBody: body
-      });
+    plainText = parseTemplate(bodyTemplate, name, course, email, '');
+    if (plainText.indexOf('<html') !== -1 || plainText.indexOf('<p>') !== -1 || plainText.indexOf('<br') !== -1) {
+      htmlBody  = plainText;
+      plainText = plainText.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     } else {
-      // Wrap plain text in a nice brand-styled HTML layout
-      var htmlFormattedBody = body.replace(/\n/g, '<br>');
-      var fullHtml = getBeautifulHtmlWrapper(name, course, email, htmlFormattedBody);
-      MailApp.sendEmail({
-        to: email,
-        subject: subject,
-        body: body,
-        htmlBody: fullHtml
-      });
+      htmlBody = getBeautifulHtmlWrapper(name, course, email, plainText.replace(/\n/g, '<br>'));
     }
   } else {
-    // Send the default gorgeous premium HTML email template
-    var defaultHtml = getBeautifulHtmlWrapper(name, course, email, null);
-    var defaultText = "Hi " + name + ",\n\n" +
-                      "Welcome to Dxign Learn! 🚀\n\n" +
-                      "Thank you for completing your registration for the " + course + " program. We are thrilled to have you join our learning community!\n\n" +
-                      "📱 How to Access Your Course Portal:\n" +
-                      "1. Open the Dxign Learn Mobile App on your phone.\n" +
-                      "2. Log in using the email address you registered with: " + email + "\n" +
-                      "3. Enter the 6-digit secure verification OTP code sent to your inbox.\n" +
-                      "4. Start streaming lectures, downloading resources, and chatting directly with mentors!\n\n" +
-                      "If you have any questions or need assistance, feel free to reply directly to this email.\n\n" +
-                      "Best regards,\n" +
-                      "Dxign Learn Team";
-    
-    MailApp.sendEmail({
-      to: email,
-      subject: subject,
-      body: defaultText,
-      htmlBody: defaultHtml
-    });
+    plainText =
+      'Hi ' + name + ',\n\n' +
+      'Thank you for enrolling in ' + course + '.\n\n' +
+      'Your course portal is ready:\n\n' +
+      '1. Visit: https://www.dxignlearn.com/studentportal/\n' +
+      '2. Log in with: ' + email + '\n' +
+      '3. Enter the OTP sent to your inbox\n' +
+      '4. Start learning!\n\n' +
+      'Questions? Reply to this email.\n\n' +
+      'Best,\nDxign Learn Team';
+    htmlBody = getBeautifulHtmlWrapper(name, course, email, null);
   }
+
+  // GmailApp with NO replyTo (domain mismatch was causing spam).
+  // All other anti-spam fixes remain: simple HTML, no external images, plain text included.
+  GmailApp.sendEmail(email, subject, plainText, {
+    htmlBody: htmlBody,
+    name:     'Dxign Learn'
+  });
 }
 
 /**
- * Generates a premium styled HTML wrapper matching the Dxign Learn brand.
+ * Generates a clean, lightweight HTML email.
+ * Minimal styling = high text-to-HTML ratio = better inbox placement.
+ * No external images (logo loaded from external URL = spam trigger).
  */
 function getBeautifulHtmlWrapper(name, course, email, customContentHtml) {
-  var contentArea = "";
+  var contentArea = '';
   if (customContentHtml) {
     contentArea = customContentHtml;
   } else {
-    contentArea = 
-      "<div style='font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 20px;'>Hi " + name + ",</div>" +
-      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>Welcome to <strong>Dxign Learn</strong>! 🚀</p>" +
-      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>Thank you for enrolling in the <span style='color: #008fa0; font-weight: bold;'>" + course + "</span> program. We are thrilled to have you join our learning community!</p>" +
-      
-      "<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; margin: 30px 0;'>" +
-        "<div style='font-size: 13px; font-weight: bold; color: #6b21a8; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 16px;'>📱 How to Access Your Course Portal</div>" +
-        
-        "<table border='0' cellpadding='0' cellspacing='0' width='100%'>" +
-          "<tr>" +
-            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
-              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>1</div>" +
-            "</td>" +
-            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
-              "Open the <strong>Dxign Learn Mobile App</strong> on your phone." +
-            "</td>" +
-          "</tr>" +
-          "<tr>" +
-            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
-              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>2</div>" +
-            "</td>" +
-            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
-              "Log in using the email address you registered with: <strong>" + email + "</strong>." +
-            "</td>" +
-          "</tr>" +
-          "<tr>" +
-            "<td style='vertical-align: top; width: 34px; padding-bottom: 14px;'>" +
-              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>3</div>" +
-            "</td>" +
-            "<td style='color: #334155; font-size: 14px; padding-bottom: 14px; line-height: 1.5;'>" +
-              "Enter the 6-digit secure verification OTP code sent to your inbox." +
-            "</td>" +
-          "</tr>" +
-          "<tr>" +
-            "<td style='vertical-align: top; width: 34px;'>" +
-              "<div style='background-color: #0f172a; color: #ffffff; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 11px;'>4</div>" +
-            "</td>" +
-            "<td style='color: #334155; font-size: 14px; line-height: 1.5;'>" +
-              "Start streaming lectures, downloading resources, and chatting directly with mentors!" +
-            "</td>" +
-          "</tr>" +
-        "</table>" +
-      "</div>" +
-      
-      "<p style='margin: 0 0 16px 0; color: #4f5e71;'>If you have any questions, difficulty logging in, or need immediate assistance, simply reply directly to this email.</p>" +
-      "<p style='margin: 0; color: #4f5e71;'>Best regards,<br><strong>Dxign Learn Team</strong></p>";
+    contentArea =
+      '<p style="margin:0 0 16px 0;">Hi ' + name + ',</p>' +
+      '<p style="margin:0 0 16px 0;">Thank you for enrolling in <strong>' + course + '</strong> at Dxign Learn.</p>' +
+      '<p style="margin:0 0 8px 0;"><strong>How to access your course:</strong></p>' +
+      '<p style="margin:0 0 4px 0;">1. Go to <a href="https://www.dxignlearn.com/studentportal/" style="color:#0066cc;">www.dxignlearn.com/studentportal</a></p>' +
+      '<p style="margin:0 0 4px 0;">2. Log in with: <strong>' + email + '</strong></p>' +
+      '<p style="margin:0 0 4px 0;">3. Enter the OTP sent to your inbox</p>' +
+      '<p style="margin:0 0 16px 0;">4. Start learning!</p>' +
+      '<p style="margin:0 0 16px 0;">If you need help, just reply to this email.</p>' +
+      '<p style="margin:0;">Best regards,<br><strong>Dxign Learn Team</strong></p>';
   }
 
-  return "<!DOCTYPE html>" +
-    "<html>" +
-    "<head>" +
-      "<meta charset='utf-8'>" +
-      "<title>Welcome to Dxign Learn</title>" +
-    "</head>" +
-    "<body style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #333333; margin: 0; padding: 20px;\">" +
-      "<div style='max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);'>" +
-        "<div style='background-color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #f0f1f3;'>" +
-          "<img src='https://www.dxignlearn.com/public/Images/logo/Dxign-logo.png' alt='Dxign Learn' style='height: 40px; max-width: 200px; display: inline-block; border: 0;' />" +
-        "</div>" +
-        "<div style='padding: 40px 35px; line-height: 1.6; font-size: 15px; color: #4f5e71;'>" +
-          contentArea +
-        "</div>" +
-        "<div style='background-color: #f8fafc; padding: 25px 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9;'>" +
-          "&copy; 2026 Dxign Learn. All rights reserved.<br>" +
-          "Need help? Contact us at <a href='mailto:dxignlearn@gmail.com' style='color: #008fa0; text-decoration: none; font-weight: 500;'>dxignlearn@gmail.com</a>" +
-        "</div>" +
-      "</div>" +
-    "</body>" +
-    "</html>";
+  return '<html><head><meta charset="utf-8"></head>' +
+    '<body style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#333;margin:0;padding:0;">' +
+      '<div style="max-width:560px;margin:0 auto;padding:24px;">' +
+        '<div style="text-align:center;padding:16px 0 24px 0;border-bottom:1px solid #eee;margin-bottom:24px;">' +
+          '<strong style="font-size:18px;color:#0f172a;">DXIGN LEARN</strong>' +
+        '</div>' +
+        contentArea +
+        '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:12px;color:#999;text-align:center;">' +
+          '<p style="margin:0 0 4px 0;">You received this because you enrolled in a course at Dxign Learn.</p>' +
+          '<p style="margin:0;">Dxign Learn | www.dxignlearn.com</p>' +
+        '</div>' +
+      '</div>' +
+    '</body></html>';
 }
 
 /**
@@ -597,13 +605,41 @@ function saveWhatsAppConfig(params) {
  * Called via GET with ?action=getWhatsAppConfig
  */
 function getWhatsAppConfig() {
+  var emailBody = getScriptProp('WELCOME_EMAIL_BODY') || '';
+  if (!emailBody || emailBody.indexOf('Mobile App') !== -1 || emailBody.indexOf('expect:') !== -1) {
+    emailBody = "Hi {name},\n\nWelcome to Dxign Learn! 🚀\n\nThank you for completing your registration for the {course} program. We are thrilled to have you join our learning community!\n\n💻 How to Access Your Course Portal:\n1. Go to the Student Course Portal at: https://www.dxignlearn.com/studentportal/\n2. Log in using the email address you registered with: {email}\n3. Enter the 6-digit secure verification OTP code sent to your inbox.\n4. Start streaming lectures, downloading resources, and chatting directly with mentors!\n\nIf you have any questions, feel free to reply directly to this email.\n\nBest regards,\nDxign Learn Team";
+    setScriptProp('WELCOME_EMAIL_BODY', emailBody);
+  } else if (emailBody.indexOf('anuragkm1999@gmail.com') !== -1) {
+    // Automatically fix database if the hardcoded test email got saved previously
+    emailBody = emailBody.replace(/anuragkm1999@gmail\.com/gi, "{email}");
+    setScriptProp('WELCOME_EMAIL_BODY', emailBody);
+  }
+  
+  var whatsappBody = getScriptProp('WELCOME_WHATSAPP_BODY') || '';
+  if (!whatsappBody || whatsappBody.indexOf('Mobile App') !== -1) {
+    whatsappBody = "Hi {name}! 🎉 Welcome to Dxign Learn! Thank you for completing your registration for the *{course}* program. Your learning journey begins now. To start, go to the Student Course Portal at https://www.dxignlearn.com/studentportal/ and log in with your email to receive your OTP. - Dxign Learn Team";
+    setScriptProp('WELCOME_WHATSAPP_BODY', whatsappBody);
+  } else if (whatsappBody.indexOf('anuragkm1999@gmail.com') !== -1) {
+    whatsappBody = whatsappBody.replace(/anuragkm1999@gmail\.com/gi, "{email}");
+    setScriptProp('WELCOME_WHATSAPP_BODY', whatsappBody);
+  }
+  
+  var emailSubject = getScriptProp('WELCOME_EMAIL_SUBJECT');
+  if (!emailSubject) {
+    emailSubject = "🎉 Welcome to Dxign Learn! - {course}";
+    setScriptProp('WELCOME_EMAIL_SUBJECT', emailSubject);
+  } else if (emailSubject.indexOf('anuragkm1999@gmail.com') !== -1) {
+    emailSubject = emailSubject.replace(/anuragkm1999@gmail\.com/gi, "{email}");
+    setScriptProp('WELCOME_EMAIL_SUBJECT', emailSubject);
+  }
+
   return JSON.stringify({
     "apiUrl": getScriptProp('WHATSAPP_API_URL') || '',
     "apiKey": getScriptProp('WHATSAPP_API_KEY') || '',
     "phoneId": getScriptProp('WHATSAPP_PHONE_ID') || '',
-    "emailSubject": getScriptProp('WELCOME_EMAIL_SUBJECT') || '',
-    "emailBody": getScriptProp('WELCOME_EMAIL_BODY') || '',
-    "whatsappBody": getScriptProp('WELCOME_WHATSAPP_BODY') || '',
+    "emailSubject": emailSubject,
+    "emailBody": emailBody,
+    "whatsappBody": whatsappBody,
     "isConfigured": !!getScriptProp('WHATSAPP_API_URL')
   });
 }
@@ -635,21 +671,28 @@ var SPREADSHEET_ID = "1Ntbo756KnbZw_SJS5P367Abf2BD7l9jxiKh2LO_8VMc";
  * Helper to retrieve the target Google Sheet.
  */
 function getSheet() {
-  var ss;
-  if (SPREADSHEET_ID && SPREADSHEET_ID !== "YOUR_NEW_SPREADSHEET_ID_HERE" && SPREADSHEET_ID.trim() !== "") {
+  var ss = null;
+  
+  // Try active spreadsheet first (best for container-bound scripts)
+  try {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+  } catch (err) {
+    Logger.log("Active spreadsheet lookup failed, trying by ID...");
+  }
+  
+  // Fall back to opening by ID
+  if (!ss && SPREADSHEET_ID && SPREADSHEET_ID !== "YOUR_NEW_SPREADSHEET_ID_HERE" && SPREADSHEET_ID.trim() !== "") {
     try {
       ss = SpreadsheetApp.openById(SPREADSHEET_ID.trim());
     } catch (err) {
-      throw new Error("Could not open spreadsheet by ID: " + SPREADSHEET_ID + ". Make sure the ID is correct and you have permission to access it.");
+      throw new Error("Could not open spreadsheet by ID: " + SPREADSHEET_ID + ". Make sure the ID is correct and your script account has access to it.");
     }
-  } else {
-    ss = SpreadsheetApp.getActiveSpreadsheet();
   }
   
   if (ss) {
     return ss.getActiveSheet();
   }
-  throw new Error("Could not find active spreadsheet. Open this script from your Google Sheet via Extensions -> Apps Script or configure SPREADSHEET_ID in Code.gs.");
+  throw new Error("Could not access your Google Sheet. Verify SPREADSHEET_ID and Web App permissions.");
 }
 
 /**

@@ -10,7 +10,7 @@ const {
 
 // ── SCROLL-DRIVEN SEQUENCE CONSTANTS ────────────────────────────────────
 const TOTAL_FRAMES = 184;
-const frameUrl = n => `public/Images/heropage/ezgif-frame-${String(n).padStart(3, '0')}.webp`;
+const frameUrl = n => `../public/Images/heropage/ezgif-frame-${String(n).padStart(3, '0')}.webp`;
 const SCENE_FRAMES = [0, 45, 91, 137, 183]; // 0-indexed corresponding to frame 1, 46, 92, 138, 184
 const CRITICAL_FRAMES = [1, 46, 92, 138]; // 1-indexed critical frames for initial load
 
@@ -1099,7 +1099,7 @@ const About3DCanvas = () => {
       backdropFilter: 'blur(12px)'
     }
   }, /*#__PURE__*/React.createElement("img", {
-    src: "public/Images/logo/AboutusIcon.png",
+    src: "../public/Images/logo/AboutusIcon.png",
     alt: "Dxign Icon",
     className: "w-20 h-20 object-contain",
     style: {
@@ -1617,26 +1617,26 @@ const BLOG_ARTICLES = [
 ];
 const BLOG_CATEGORIES = ['All Articles', 'Graphic Design', 'AI Tools', 'Photoshop', 'Illustrator', 'Figma', 'UI/UX', 'Prompt Engineering', 'Filmmaking', 'Video Editing', 'Motion Graphics', 'Web Design', 'No-Code', 'Freelancing', 'Career Tips', 'Case Studies', 'Tutorials', 'Industry News'];
 const toolLogoMap = {
-  'ChatGPT': 'public/Images/Ai logos/chatgpt_PNG8.png',
-  'Midjourney': 'public/Images/Ai logos/tech-20-UTRF1-eT.png',
+  'ChatGPT': '../public/Images/Ai logos/chatgpt_PNG8.png',
+  'Midjourney': '../public/Images/Ai logos/tech-20-UTRF1-eT.png',
   'Adobe Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
   'Photoshop AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobephotoshop.svg',
-  'Adobe Firefly': 'public/Images/Ai logos/lg-66cb1819333c2-Adobe-Firefly-Logo.webp',
-  'Figma AI': 'public/Images/Ai logos/figma_logo_icon_171159.webp',
+  'Adobe Firefly': '../public/Images/Ai logos/lg-66cb1819333c2-Adobe-Firefly-Logo.webp',
+  'Figma AI': '../public/Images/Ai logos/figma_logo_icon_171159.webp',
   'Framer AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/framer.svg',
-  'Claude AI': 'public/Images/Ai logos/Claude_Logo_2023-s1280.png',
-  'Claude': 'public/Images/Ai logos/Claude_Logo_2023-s1280.png',
-  'Runway ML': 'public/Images/Ai logos/Runway_Logo.webp',
-  'Runway': 'public/Images/Ai logos/Runway_Logo.webp',
-  'Kling AI': 'public/Images/Ai logos/vfeQT3Qi_Uxuk3xz-65eZABtXQwmDeXbt4MmH4PQUnMcMtuww9p2D2qCdNR_wEw35n6z9EFpyDGoVJFagHf-_g.webp',
-  'Canva AI': 'public/Images/Ai logos/canva.png',
+  'Claude AI': '../public/Images/Ai logos/Claude_Logo_2023-s1280.png',
+  'Claude': '../public/Images/Ai logos/Claude_Logo_2023-s1280.png',
+  'Runway ML': '../public/Images/Ai logos/Runway_Logo.webp',
+  'Runway': '../public/Images/Ai logos/Runway_Logo.webp',
+  'Kling AI': '../public/Images/Ai logos/vfeQT3Qi_Uxuk3xz-65eZABtXQwmDeXbt4MmH4PQUnMcMtuww9p2D2qCdNR_wEw35n6z9EFpyDGoVJFagHf-_g.webp',
+  'Canva AI': '../public/Images/Ai logos/canva.png',
   'Leonardo AI': 'https://www.google.com/s2/favicons?domain=leonardo.ai&sz=64',
-  'Gemini AI': 'public/Images/Ai logos/Gemini-logo.png',
-  'Gemini': 'public/Images/Ai logos/Gemini-logo.png',
-  'Higgsfield': 'public/Images/Ai logos/higgsfield_logo-scaled.webp.webp',
-  'Lovable': 'public/Images/Ai logos/lovable.png',
-  'Google Flow': 'public/Images/Ai logos/Google-Flow-Colored-Logo.png',
-  'Antigravity': 'public/Images/Ai logos/Google_Antigravity_Logo_2025.png',
+  'Gemini AI': '../public/Images/Ai logos/Gemini-logo.png',
+  'Gemini': '../public/Images/Ai logos/Gemini-logo.png',
+  'Higgsfield': '../public/Images/Ai logos/higgsfield_logo-scaled.webp.webp',
+  'Lovable': '../public/Images/Ai logos/lovable.png',
+  'Google Flow': '../public/Images/Ai logos/Google-Flow-Colored-Logo.png',
+  'Antigravity': '../public/Images/Ai logos/Google_Antigravity_Logo_2025.png',
   'Adobe Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
   'Premiere Pro': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg',
   'HeyGen': 'https://www.google.com/s2/favicons?domain=heygen.com&sz=64',
@@ -1653,7 +1653,7 @@ const toolLogoMap = {
   'Jasper AI': 'https://www.google.com/s2/favicons?domain=jasper.ai&sz=64',
   'Cursor AI': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg',
   'Tailwind': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/tailwindcss.svg',
-  'Stitch': 'public/Images/Ai logos/Stitch.webp'
+  'Stitch': '../public/Images/Ai logos/Stitch.webp'
 };
 const brandColorMap = {
   'ChatGPT': '#10A37F',
@@ -1841,8 +1841,8 @@ const showcaseProjects = [{
   cat: 'Graphic Design',
   desc: 'Complete campaign poster collection featuring high-contrast political banners, candidate portfolios, and modern layout mockups.',
   tags: ['Photoshop AI', 'Branding', 'Layouts', 'Carousel'],
-  image: 'public/Images/workimage/Election 1 mockup.jpg',
-  images: ['public/Images/workimage/Election 1 mockup.jpg', 'public/Images/workimage/Election 1.jpg', 'public/Images/workimage/Election 2.jpg', 'public/Images/workimage/Election 3.jpg', 'public/Images/workimage/Election 1 mockup_2.jpg', 'public/Images/workimage/Election 3 mockup_3.jpg'],
+  image: '../public/Images/workimage/Election 1 mockup.jpg',
+  images: ['../public/Images/workimage/Election 1 mockup.jpg', '../public/Images/workimage/Election 1.jpg', '../public/Images/workimage/Election 2.jpg', '../public/Images/workimage/Election 3.jpg', '../public/Images/workimage/Election 1 mockup_2.jpg', '../public/Images/workimage/Election 3 mockup_3.jpg'],
   carousel: true,
   studentName: 'Adarsh Sen',
   studentImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
@@ -1861,8 +1861,8 @@ const showcaseProjects = [{
   cat: 'Graphic Design',
   desc: 'Product social media branding carousel showcasing premium instant coffee jars, warm lighting, and luxury aesthetic details.',
   tags: ['Midjourney v6', 'Figma', 'Composition', 'Carousel'],
-  image: 'public/Images/workimage/Post 7.png',
-  images: ['public/Images/workimage/Post 7.png', 'public/Images/workimage/Post 7_2.jpg', 'public/Images/workimage/Post 7_4.jpg', 'public/Images/workimage/Post 7_6.jpg'],
+  image: '../public/Images/workimage/Post 7.png',
+  images: ['../public/Images/workimage/Post 7.png', '../public/Images/workimage/Post 7_2.jpg', '../public/Images/workimage/Post 7_4.jpg', '../public/Images/workimage/Post 7_6.jpg'],
   carousel: true,
   studentName: 'Rithvik Roy',
   studentImg: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop'
@@ -1881,8 +1881,8 @@ const showcaseProjects = [{
   cat: 'Graphic Design',
   desc: 'A premium collection of commercial posters designed using advanced generative AI prompt workflows for brands like Pepsi, luxury cosmetics, and next-gen smartphones.',
   tags: ['Stable Diffusion', 'Figma', 'Prompting', 'Carousel'],
-  image: 'public/Images/workimage/Post 6.jpg',
-  images: ['public/Images/workimage/Post 6.jpg', 'public/Images/workimage/Post 6_2.jpg', 'public/Images/workimage/Post 6_3.jpg', 'public/Images/workimage/Post 6_4.jpg'],
+  image: '../public/Images/workimage/Post 6.jpg',
+  images: ['../public/Images/workimage/Post 6.jpg', '../public/Images/workimage/Post 6_2.jpg', '../public/Images/workimage/Post 6_3.jpg', '../public/Images/workimage/Post 6_4.jpg'],
   carousel: true,
   studentName: 'Sneha Paul',
   studentImg: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop'
@@ -2954,6 +2954,22 @@ const COURSE_PAYMENT_LINKS = {
   'Vibe Coding': 'https://rzp.io/l/dxign-vibe-coding',
   'Business Automation': 'https://rzp.io/l/dxign-business-automation'
 };
+const isCourseEnrolled = (user, courseName) => {
+  if (!user || !user.courses) return false;
+  if (user.courses.includes('All Courses Lifetime Access')) return true;
+  return user.courses.some(purchasedCourse => {
+    const pc = (purchasedCourse || '').toLowerCase().trim();
+    const cn = (courseName || '').toLowerCase().trim();
+    if (pc === cn) return true;
+    if (cn === 'ai fundamentals' && (pc.includes('fundamentals') || pc.includes('getting started with ai'))) return true;
+    if (cn === 'graphic design' && (pc.includes('graphic design') || pc.includes('branding & visual design'))) return true;
+    if (cn === 'film making' && (pc.includes('filmmaking') || pc.includes('film making') || pc.includes('cinematic ai video'))) return true;
+    if (cn === 'content creation' && (pc.includes('content creation') || pc.includes('marketing'))) return true;
+    if (cn === 'vibe coding' && (pc.includes('no-code') || pc.includes('website') || pc.includes('framer'))) return true;
+    if (cn === 'business automation' && (pc.includes('automation') || pc.includes('business productivity'))) return true;
+    return false;
+  });
+};
 const App = () => {
   const [showcaseFilter, setShowcaseFilter] = useState('All');
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -3144,7 +3160,7 @@ const App = () => {
   const [mediaPreviewLoading, setMediaPreviewLoading] = useState(false);
 
   // --- Student Portal States ---
-  const [isStudentOpen, setIsStudentOpen] = useState(false);
+  const [isStudentOpen, setIsStudentOpen] = useState(true);
   const [closingStudent, setClosingStudent] = useState(false);
   const [isStudentAuthenticated, setIsStudentAuthenticated] = useState(false);
   const [studentEmailInput, setStudentEmailInput] = useState('');
@@ -3379,12 +3395,7 @@ const App = () => {
     }, 350);
   };
   const closeStudentPortal = () => {
-    if (closingStudent) return;
-    setClosingStudent(true);
-    setTimeout(() => {
-      setIsStudentOpen(false);
-      setClosingStudent(false);
-    }, 350);
+    window.location.href = '/index.html';
   };
   const closeChatPopup = () => {
     if (closingChatPopup) return;
@@ -3671,7 +3682,7 @@ const App = () => {
     setStudentError('');
     setStudentLoading(true);
     const email = studentEmailInput.toLowerCase().trim();
-    if (email === 'test@gmail.com' || email === 'test@dxign.com' || email.endsWith('@dxign.com')) {
+    if (email === 'graphic@gmail.com' || email === 'test@gmail.com' || email === 'test@dxign.com' || email.endsWith('@dxign.com')) {
       setStudentLoading(false);
       setStudentLoginStep(2);
       setStudentMessage(`OTP sent successfully to ${email}`);
@@ -3702,6 +3713,24 @@ const App = () => {
     setStudentError('');
     setStudentLoading(true);
     const email = studentEmailInput.toLowerCase().trim();
+    if (email === 'graphic@gmail.com' && studentOtpInput === '123456') {
+      const user = {
+        email: email,
+        name: 'Graphic Designer Student',
+        courses: ["AI Graphic Design Mastery"]
+      };
+      localStorage.setItem('dxign_student_session', JSON.stringify(user));
+      setStudentUser(user);
+      setIsStudentAuthenticated(true);
+      setStudentSelectedCourse("Graphic Design");
+      const saved1 = getLastWatchedVideo("Graphic Design");
+      if (saved1) setStudentActiveVideo(saved1);
+      setStudentLoading(false);
+      setStudentOtpInput('');
+      setStudentEmailInput('');
+      setStudentMessage('');
+      return;
+    }
     if ((email === 'test@gmail.com' || email === 'test@dxign.com' || email.endsWith('@dxign.com')) && studentOtpInput === '123456') {
       const user = {
         email: email,
@@ -5225,7 +5254,7 @@ Dxign Learn Team`);
       currency: 'INR',
       name: 'Dxign Learn',
       description: enrollModal.title,
-      image: 'public/Images/logo/Dxign-logo.png',
+      image: '../public/Images/logo/Dxign-logo.png',
       handler: function (response) {
         closeEnrollModal();
         saveToGoogleSheet('Success', response.razorpay_payment_id, nameVal, emailVal, phoneVal, courseVal, priceVal);
@@ -5631,7 +5660,7 @@ Dxign Learn Team`);
       }
     }
   }, /*#__PURE__*/React.createElement("img", {
-    src: "public/Images/logo/Dxign-logo.png",
+    src: "../public/Images/logo/Dxign-logo.png",
     alt: "Dxign Learn — AI Courses Online",
     className: "h-10 md:h-11 w-auto object-contain",
     style: {
@@ -5694,7 +5723,34 @@ Dxign Learn Team`);
   }, "Contact Us"), /*#__PURE__*/React.createElement("button", {
     onClick: () => navigateToSection('pricing-cta'),
     className: "px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-brand-cyan hover:bg-white hover:text-brand-cyan border border-brand-cyan transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:shadow-[0_0_30px_rgba(0,240,255,0.5)]"
-  }, "Enroll Now")), /*#__PURE__*/React.createElement("div", {
+  }, "Enroll Now"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setIsStudentOpen(true);
+    },
+    className: "w-10 h-10 rounded-full border border-white/10 bg-white/5 hover:bg-brand-cyan hover:border-brand-cyan text-white/70 hover:text-black flex items-center justify-center transition-all duration-300",
+    "aria-label": "Student Portal - Login to AI Courses"
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10",
+    opacity: "0.15",
+    fill: "currentColor"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16.5 17.5a5 5 0 0 0-9 0"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "9",
+    r: "3.5"
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setMobileMenuOpen(true),
@@ -6566,7 +6622,7 @@ Dxign Learn Team`);
       WebkitMediaControls: 'none'
     }
   }, /*#__PURE__*/React.createElement("source", {
-    src: "public/Images/videos/motion/Screen%20Recording%202026-06-12%20022336.mp4",
+    src: "../public/Images/videos/motion/Screen%20Recording%202026-06-12%20022336.mp4",
     type: "video/mp4"
   })), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none"
@@ -6979,7 +7035,7 @@ Dxign Learn Team`);
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center mb-4"
   }, /*#__PURE__*/React.createElement("img", {
-    src: "public/Images/logo/Dxign-logo.png",
+    src: "../public/Images/logo/Dxign-logo.png",
     alt: "Dxign Learn AI Education Logo",
     className: "h-9 w-auto object-contain"
   })), /*#__PURE__*/React.createElement("p", {
@@ -7006,7 +7062,12 @@ Dxign Learn Team`);
   }, "+91 73564 13558"), /*#__PURE__*/React.createElement("a", {
     href: "mailto:dxignlearn@gmail.com",
     className: "hover:text-white transition-colors duration-300"
-  }, "dxignlearn@gmail.com")), /*#__PURE__*/React.createElement("div", {
+  }, "dxignlearn@gmail.com"), /*#__PURE__*/React.createElement("span", {
+    onClick: () => {
+      window.location.hash = '#admin';
+    },
+    className: "cursor-pointer hover:text-white transition-colors duration-300"
+  }, "Admin")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mt-5"
   }, /*#__PURE__*/React.createElement("a", {
     href: "https://www.instagram.com/dxign.learn?igsh=cGk3YjAzaDZ2M3Rw&utm_source=qr",
@@ -7882,7 +7943,7 @@ Dxign Learn Team`);
   }), /*#__PURE__*/React.createElement("h3", {
     className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold"
   }, "My Programs")), Object.keys(DEFAULT_COURSE_CURRICULUM).map(courseName => {
-    const enrolled = studentUser.courses.includes(courseName) || studentUser.courses.includes('All Courses Lifetime Access');
+    const enrolled = isCourseEnrolled(studentUser, courseName);
     const active = studentSelectedCourse === courseName;
     const courseInfo = courseList.find(c => c.title.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.id.replace('-', ' '))) || {
       duration: '6 Weeks'
@@ -7999,7 +8060,7 @@ Dxign Learn Team`);
       boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)'
     }
   }, (() => {
-    const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+    const enrolled = isCourseEnrolled(studentUser, studentSelectedCourse);
     if (!enrolled) {
       return /*#__PURE__*/React.createElement("div", {
         className: "absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-950/90 backdrop-blur-sm"
@@ -8496,7 +8557,7 @@ Dxign Learn Team`);
     className: "space-y-2"
   }, (() => {
     const list = getMergedLectures()[studentSelectedCourse] || [];
-    const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+    const enrolled = isCourseEnrolled(studentUser, studentSelectedCourse);
     if (list.length === 0) {
       return /*#__PURE__*/React.createElement("p", {
         className: "text-xs text-gray-600 italic font-mono"
@@ -8552,7 +8613,7 @@ Dxign Learn Team`);
   })()))), /*#__PURE__*/React.createElement("div", {
     className: studentMobileTab === 'about' ? 'block' : 'hidden'
   }, (() => {
-    const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+    const enrolled = isCourseEnrolled(studentUser, studentSelectedCourse);
     if (!enrolled) {
       return /*#__PURE__*/React.createElement("div", {
         className: "text-left"
@@ -8798,7 +8859,7 @@ Dxign Learn Team`);
     }, "\uD83D\uDD12"));
   }))))), /*#__PURE__*/React.createElement("div", {
     className: "hidden lg:block"
-  }, studentActiveVideo && studentUser.courses.includes(studentSelectedCourse) && /*#__PURE__*/React.createElement("div", {
+  }, studentActiveVideo && isCourseEnrolled(studentUser, studentSelectedCourse) && /*#__PURE__*/React.createElement("div", {
     className: "text-left"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap items-center justify-between gap-3 mb-4 px-0.5"
@@ -8899,7 +8960,7 @@ Dxign Learn Team`);
     className: "space-y-2 flex-grow"
   }, (() => {
     const list = getMergedLectures()[studentSelectedCourse] || [];
-    const enrolled = studentUser.courses.includes(studentSelectedCourse) || studentUser.courses.includes('All Courses Lifetime Access');
+    const enrolled = isCourseEnrolled(studentUser, studentSelectedCourse);
     if (list.length === 0) {
       return /*#__PURE__*/React.createElement("p", {
         className: "text-xs text-gray-600 italic font-mono"
@@ -8941,7 +9002,1929 @@ Dxign Learn Team`);
         points: "5 3 19 12 5 21 5 3"
       }))));
     });
-  })()))))), isBlogOpen && /*#__PURE__*/React.createElement(BlogPage, {
+  })()))))), isAdminOpen && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-[100000] bg-zinc-950 flex flex-col font-sans select-text text-left overflow-hidden",
+    onWheel: e => {
+      if (window.innerWidth >= 1024) e.stopPropagation();
+    }
+  }, !isAdminAuthenticated ?
+  /*#__PURE__*/
+  /* Admin Login View */
+  React.createElement("div", {
+    className: "flex-grow flex items-center justify-center p-4 overflow-y-auto",
+    style: {
+      background: 'linear-gradient(135deg, #050505 0%, #0c0c0c 100%)'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.location.hash = '';
+    },
+    className: "absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "x",
+    className: "w-5 h-5"
+  })), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleAdminLogin,
+    className: "max-w-md lg:max-w-lg w-full p-8 lg:p-10 liquid-glass border border-white/10 rounded-3xl text-center shadow-[0_20px_60px_rgba(0,240,255,0.05)] relative overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-14 h-14 rounded-2xl bg-brand-cyan/5 border border-brand-cyan/10 flex items-center justify-center mx-auto mb-6 text-brand-cyan"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "shield-alert",
+    className: "w-7 h-7"
+  })), /*#__PURE__*/React.createElement("h2", {
+    className: "text-xl font-black uppercase tracking-wider text-white font-heading mb-2"
+  }, "Dxign.learn Admin Gateway"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-500 mb-8 font-mono"
+  }, "AUTHORIZED PERSONNEL ONLY"), /*#__PURE__*/React.createElement("div", {
+    className: "text-left mb-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5 block"
+  }, "Enter Passkey"), /*#__PURE__*/React.createElement("div", {
+    className: "relative flex items-center"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "key-round",
+    className: "absolute left-4 w-4 h-4 text-gray-500"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    value: adminPasswordInput,
+    onChange: e => setAdminPasswordInput(e.target.value),
+    className: "w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder-gray-600 focus:outline-none transition-all duration-300",
+    onFocus: e => {
+      e.target.style.borderColor = '#00f0ff';
+      e.target.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.15)';
+    },
+    onBlur: e => {
+      e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+      e.target.style.boxShadow = 'none';
+    }
+  }))), adminError && /*#__PURE__*/React.createElement("div", {
+    className: "mb-6 text-left text-rose-500 text-[10px] font-mono bg-rose-500/10 border border-rose-500/20 px-3.5 py-2.5 rounded-lg flex items-center space-x-1.5"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "alert-triangle",
+    className: "w-4 h-4 flex-shrink-0 text-rose-500"
+  }), /*#__PURE__*/React.createElement("span", null, adminError)), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] bg-gradient-to-r from-brand-cyan to-brand-blue shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+  }, "Authenticate"))) :
+  /*#__PURE__*/
+  /* Admin Dashboard View */
+  React.createElement("div", {
+    className: "flex-grow flex flex-col text-gray-300 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "px-6 py-4 md:px-12 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3 text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-10 h-10 rounded-xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "layout-dashboard",
+    className: "w-5 h-5"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "text-sm font-black tracking-widest font-mono text-white flex items-center"
+  }, "DXIGN.LEARN ", /*#__PURE__*/React.createElement("span", {
+    className: "ml-2 px-2 py-0.5 rounded text-[8px] tracking-normal font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/25"
+  }, "ADMIN")), /*#__PURE__*/React.createElement("p", {
+    className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest mt-0.5"
+  }, "App & Web Management Portal"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap lg:flex-nowrap items-center justify-center gap-1.5 bg-white/[0.03] border border-white/5 rounded-2xl p-1 font-mono text-[10px] lg:text-xs font-bold"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAdminTab('registrations'),
+    className: `px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${adminTab === 'registrations' ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-3.5 h-3.5 lg:w-4 lg:h-4"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "7",
+    height: "9"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "3",
+    width: "7",
+    height: "5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "14",
+    y: "12",
+    width: "7",
+    height: "9"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "16",
+    width: "7",
+    height: "5"
+  })), "Web Registrations"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAdminTab('chat'),
+    className: `px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 relative ${adminTab === 'chat' ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-3.5 h-3.5 lg:w-4 lg:h-4"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+  })), "Student Doubt Chat", studentChats.some(c => c.unread) && /*#__PURE__*/React.createElement("span", {
+    className: "absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse border border-zinc-950"
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAdminTab('lectures'),
+    className: `px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${adminTab === 'lectures' ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-3.5 h-3.5 lg:w-4 lg:h-4"
+  }, /*#__PURE__*/React.createElement("polygon", {
+    points: "23 7 16 12 23 17 23 7"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "1",
+    y: "5",
+    width: "15",
+    height: "14",
+    rx: "2",
+    ry: "2"
+  })), "Course Lectures"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setAdminTab('controls'),
+    className: `px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${adminTab === 'controls' ? 'bg-brand-cyan text-black shadow-[0_0_15px_rgba(0,240,255,0.25)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-3.5 h-3.5 lg:w-4 lg:h-4"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "3"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+  })), "App Controls")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: fetchAdminData,
+    disabled: adminLoading,
+    className: "px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "refresh-cw",
+    className: `w-3.5 h-3.5 ${adminLoading ? 'animate-spin' : ''}`
+  }), "Refresh"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowExportModal(true),
+    className: "px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "file-text",
+    className: "w-3.5 h-3.5"
+  }), "Export PDF"), /*#__PURE__*/React.createElement("button", {
+    onClick: handleAdminLogout,
+    className: "px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-mono font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-200 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "log-out",
+    className: "w-3.5 h-3.5"
+  }), "Logout"))), showExportModal && /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 z-50 flex items-center justify-center p-6",
+    style: {
+      background: 'rgba(0,0,0,0.7)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "liquid-glass border border-white/10 rounded-3xl p-8 max-w-lg w-full relative overflow-hidden text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-violet"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center mx-auto mb-5 text-brand-cyan"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "14 2 14 8 20 8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "16",
+    y1: "13",
+    x2: "8",
+    y2: "13"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "16",
+    y1: "17",
+    x2: "8",
+    y2: "17"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "10 9 9 9 8 9"
+  }))), /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-black uppercase tracking-wider text-white font-heading mb-1"
+  }, "Export Report"), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-mono text-gray-500 mb-6"
+  }, "Choose the type of report to download"), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportToPDF('registrations'),
+    className: "w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-cyan/30 transition-all duration-200 text-left flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-8 h-8 rounded-lg bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M22 11.08V12a10 10 0 1 1-5.93-9.14"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "22 4 12 14.01 9 11.01"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-white"
+  }, "Registration Report"), /*#__PURE__*/React.createElement("div", {
+    className: "text-[9px] font-mono text-gray-500"
+  }, "Paid & initiated course registrations"))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportToPDF('enquiries'),
+    className: "w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-sky-400/30 transition-all duration-200 text-left flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 16v-4"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 8h.01"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-white"
+  }, "Enquiry Report"), /*#__PURE__*/React.createElement("div", {
+    className: "text-[9px] font-mono text-gray-500"
+  }, "Course enquiry form submissions"))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => exportToPDF('both'),
+    className: "w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-brand-violet/30 transition-all duration-200 text-left flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-8 h-8 rounded-lg bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "9",
+    cy: "7",
+    r: "4"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M22 21v-2a4 4 0 0 0-3-3.87"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16 3.13a4 4 0 0 1 0 7.75"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-bold text-white"
+  }, "Complete Report"), /*#__PURE__*/React.createElement("div", {
+    className: "text-[9px] font-mono text-gray-500"
+  }, "Registrations & enquiries combined")))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowExportModal(false),
+    className: "mt-4 text-[9px] font-mono text-gray-600 hover:text-gray-400 transition-all duration-200 uppercase tracking-wider"
+  }, "Cancel"))), /*#__PURE__*/React.createElement("main", {
+    className: `flex-grow p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full flex flex-col space-y-8 lg:space-y-10 lg:h-0 lg:min-h-0 lg:flex-1 min-h-0 ${adminTab === 'chat' ? 'overflow-hidden' : 'overflow-y-auto'}`
+  }, adminTab === 'registrations' && /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-6 lg:gap-8 text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 min-w-0 flex flex-col space-y-6 lg:space-y-8"
+  }, /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
+    const regData = adminData.filter(r => (r.status || '').toLowerCase() !== 'enquiry');
+    const successRows = regData.filter(r => (r.status || '').toLowerCase() === 'success');
+    const totalSales = successRows.length;
+    const totalRevenue = successRows.reduce((sum, r) => {
+      const cleanPrice = parseInt((r.price || '').replace(/\D/g, '')) || 0;
+      return sum + cleanPrice;
+    }, 0);
+    const conversionRate = regData.length > 0 ? (totalSales / regData.length * 100).toFixed(1) : 0;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-cyan/20 transition-all duration-300"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-cyan"
+    }, /*#__PURE__*/React.createElement("i", {
+      "data-lucide": "users",
+      className: "w-12 h-12 lg:w-16 lg:h-16"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold"
+    }, "Total Leads"), /*#__PURE__*/React.createElement("h3", {
+      className: "text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-cyan-glow"
+    }, adminLoading ? '...' : regData.length), /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2"
+    }, "Registration attempts initiated")), /*#__PURE__*/React.createElement("div", {
+      className: "liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-emerald/20 transition-all duration-300"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-emerald"
+    }, /*#__PURE__*/React.createElement("i", {
+      "data-lucide": "shopping-bag",
+      className: "w-12 h-12 lg:w-16 lg:h-16"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold"
+    }, "Successful Sales"), /*#__PURE__*/React.createElement("h3", {
+      className: "text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-emerald-glow"
+    }, adminLoading ? '...' : totalSales), /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2"
+    }, "Completed course orders")), /*#__PURE__*/React.createElement("div", {
+      className: "liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-violet/20 transition-all duration-300"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-violet"
+    }, /*#__PURE__*/React.createElement("i", {
+      "data-lucide": "indian-rupee",
+      className: "w-12 h-12 lg:w-16 lg:h-16"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold"
+    }, "Total Revenue"), /*#__PURE__*/React.createElement("h3", {
+      className: "text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-violet-glow"
+    }, adminLoading ? '...' : '₹' + totalRevenue.toLocaleString('en-IN')), /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2"
+    }, "Total gross payment volume")), /*#__PURE__*/React.createElement("div", {
+      className: "liquid-glass border border-white/5 p-6 lg:p-8 rounded-3xl text-left relative overflow-hidden group hover:border-brand-rose/20 transition-all duration-300"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-300 text-brand-rose"
+    }, /*#__PURE__*/React.createElement("i", {
+      "data-lucide": "trending-up",
+      className: "w-12 h-12 lg:w-16 lg:h-16"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold"
+    }, "Conversion Rate"), /*#__PURE__*/React.createElement("h3", {
+      className: "text-3xl lg:text-4xl font-black font-heading mt-2 text-white text-rose-glow"
+    }, adminLoading ? '...' : conversionRate + '%'), /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] lg:text-[11px] font-mono text-gray-600 mt-2"
+    }, "Paid checkouts out of total leads")));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "p-6 lg:p-8 liquid-glass border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 lg:gap-6 justify-between items-center text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "relative flex items-center w-full md:w-5/12"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "search",
+    className: "absolute left-4 w-4 h-4 lg:w-5 lg:h-5 text-gray-500"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Search by student email or phone...",
+    value: adminSearch,
+    onChange: e => setAdminSearch(e.target.value),
+    className: "w-full pl-11 pr-4 py-2.5 lg:py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs lg:text-sm placeholder-gray-600 focus:outline-none focus:border-brand-cyan transition-all duration-300"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row gap-4 lg:gap-6 w-full md:w-auto justify-end"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2 lg:space-x-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-wider"
+  }, "Course:"), /*#__PURE__*/React.createElement("select", {
+    value: adminFilterCourse,
+    onChange: e => setAdminFilterCourse(e.target.value),
+    className: "bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 text-xs lg:text-sm text-white focus:outline-none focus:border-brand-cyan"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "All"
+  }, "All Items"), /*#__PURE__*/React.createElement("option", {
+    value: "All Courses Lifetime Access"
+  }, "All Courses Bundle"), courseList.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.id,
+    value: c.title
+  }, c.title)))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2 lg:space-x-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-wider"
+  }, "Status:"), /*#__PURE__*/React.createElement("select", {
+    value: adminFilterStatus,
+    onChange: e => setAdminFilterStatus(e.target.value),
+    className: "bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 text-xs lg:text-sm text-white focus:outline-none focus:border-brand-cyan"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "All"
+  }, "All Status"), /*#__PURE__*/React.createElement("option", {
+    value: "Success"
+  }, "Success (Paid)"), /*#__PURE__*/React.createElement("option", {
+    value: "Initiated"
+  }, "Initiated (Lead)"))))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[200px]"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "px-6 lg:px-8 pt-5 pb-2 border-b border-white/[0.04]"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] lg:text-xs font-mono text-brand-cyan uppercase tracking-widest font-bold"
+  }, "Registration Details")), adminLoading && /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 z-10 bg-black/40 backdrop-blur-sm flex items-center justify-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3 text-brand-cyan font-mono text-xs uppercase tracking-widest"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "refresh-cw",
+    className: "w-5 h-5 animate-spin"
+  }), /*#__PURE__*/React.createElement("span", null, "Fetching Live Data..."))), adminError && /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 z-10 bg-black/60 flex items-center justify-center p-6 text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-md p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center"
+  }, /*#__PURE__*/React.createElement("i", {
+    "data-lucide": "alert-triangle",
+    className: "w-8 h-8 text-rose-500 mb-3"
+  }), /*#__PURE__*/React.createElement("h4", {
+    className: "text-xs font-mono font-bold uppercase text-white tracking-widest mb-1"
+  }, "Retrieval Failed"), /*#__PURE__*/React.createElement("p", {
+    className: "text-[11px] text-gray-500 mb-4 font-mono"
+  }, adminError), /*#__PURE__*/React.createElement("button", {
+    onClick: fetchAdminData,
+    className: "px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white transition-all duration-200"
+  }, "Retry Fetch"))), (() => {
+    const filteredRows = adminData.filter(row => {
+      const isEnquiry = (row.status || '').toLowerCase() === 'enquiry';
+      if (isEnquiry) return false;
+      const nameMatch = (row.name || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+      const emailMatch = (row.email || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+      const phoneMatch = (row.phone || '').toString().toLowerCase().includes(adminSearch.toLowerCase());
+      const searchMatch = nameMatch || emailMatch || phoneMatch;
+      const courseMatch = adminFilterCourse === 'All' || (row.course || '').toLowerCase() === adminFilterCourse.toLowerCase() || adminFilterCourse === 'All Courses Bundle' && (row.course || '').includes('All Courses');
+      const statusMatch = adminFilterStatus === 'All' || (row.status || '').toLowerCase() === adminFilterStatus.toLowerCase();
+      return searchMatch && courseMatch && statusMatch;
+    });
+    if (filteredRows.length === 0) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]"
+      }, "No Registrations Found");
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "p-3 lg:p-4 space-y-2"
+    }, filteredRows.map((row, index) => {
+      const isSuccess = (row.status || '').toLowerCase() === 'success';
+      return /*#__PURE__*/React.createElement("div", {
+        key: index,
+        className: "flex flex-col gap-2 p-4 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.03] transition-all duration-200"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center justify-between gap-2"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "text-[9px] lg:text-[10px] font-mono text-gray-500"
+      }, formatDate(row.date)), /*#__PURE__*/React.createElement("span", {
+        className: `shrink-0 px-2 py-0.5 rounded text-[7px] uppercase tracking-wider font-bold border ${isSuccess ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`
+      }, row.status)), /*#__PURE__*/React.createElement("div", {
+        className: "font-sans font-bold text-white text-sm lg:text-base leading-tight"
+      }, row.name || '—'), /*#__PURE__*/React.createElement("div", {
+        className: "grid grid-cols-2 gap-x-4 gap-y-1.5"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Email"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-gray-300 truncate"
+      }, row.email || '—')), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Phone"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-gray-300"
+      }, row.phone || '—')), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Course"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[9px] lg:text-[10px] text-white uppercase font-bold truncate"
+      }, row.course)), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Price"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-cyan-glow font-bold"
+      }, row.price))), /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center gap-2 mt-2"
+      }, /*#__PURE__*/React.createElement("a", {
+        href: getWhatsAppLink(row.phone, row.name, row.course),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "w-9 h-9 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald hover:bg-brand-emerald hover:text-white transition-all duration-200",
+        title: "Send WhatsApp"
+      }, /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className: "w-4 h-4"
+      }, /*#__PURE__*/React.createElement("path", {
+        d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+      }))), /*#__PURE__*/React.createElement("a", {
+        href: getMailtoLink(row.email, row.name, row.course),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 hover:bg-sky-500 hover:text-white transition-all duration-200",
+        title: "Send Email"
+      }, /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "w-4 h-4"
+      }, /*#__PURE__*/React.createElement("rect", {
+        x: "2",
+        y: "4",
+        width: "20",
+        height: "16",
+        rx: "2"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: "M22 4l-10 7L2 4"
+      })))));
+    }));
+  })()), /*#__PURE__*/React.createElement("div", {
+    className: "liquid-glass border border-white/5 rounded-3xl overflow-hidden flex flex-col relative min-h-[200px]"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "px-6 lg:px-8 pt-5 pb-2 border-b border-white/[0.04]"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] lg:text-xs font-mono text-sky-400 uppercase tracking-widest font-bold"
+  }, "Enquiry Details")), (() => {
+    const enquiryRows = adminData.filter(r => (r.status || '').toLowerCase() === 'enquiry');
+    if (enquiryRows.length === 0) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "px-6 py-12 text-center text-gray-500 uppercase tracking-widest text-[10px]"
+      }, "No Enquiries Yet");
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "p-3 lg:p-4 space-y-2"
+    }, enquiryRows.map((row, index) => {
+      const courseClean = (row.course || '').replace(/\[.*\]/, '').trim();
+      return /*#__PURE__*/React.createElement("div", {
+        key: index,
+        className: "flex flex-col gap-2 p-4 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.03] transition-all duration-200"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center justify-between gap-2"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "text-[9px] lg:text-[10px] font-mono text-gray-500"
+      }, formatDate(row.date))), /*#__PURE__*/React.createElement("div", {
+        className: "font-sans font-bold text-white text-sm lg:text-base leading-tight"
+      }, row.name || '—'), /*#__PURE__*/React.createElement("div", {
+        className: "grid grid-cols-2 gap-x-4 gap-y-1.5"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Email"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-gray-300 truncate"
+      }, row.email || '—')), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Phone"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-gray-300"
+      }, row.phone || '—')), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "Course"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[9px] lg:text-[10px] text-white uppercase font-bold truncate"
+      }, courseClean)), /*#__PURE__*/React.createElement("div", {
+        className: "min-w-0"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "text-[7px] lg:text-[8px] font-mono text-gray-600 uppercase tracking-wider mb-0.5"
+      }, "City"), /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] lg:text-[11px] text-gray-400"
+      }, row.paymentId || '—'))), /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center gap-2 mt-2"
+      }, /*#__PURE__*/React.createElement("a", {
+        href: getWhatsAppLink(row.phone, row.name, courseClean),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "w-9 h-9 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald hover:bg-brand-emerald hover:text-white transition-all duration-200",
+        title: "Send WhatsApp"
+      }, /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className: "w-4 h-4"
+      }, /*#__PURE__*/React.createElement("path", {
+        d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+      }))), /*#__PURE__*/React.createElement("a", {
+        href: getMailtoLink(row.email, row.name, courseClean),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 hover:bg-sky-500 hover:text-white transition-all duration-200",
+        title: "Send Email"
+      }, /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "w-4 h-4"
+      }, /*#__PURE__*/React.createElement("rect", {
+        x: "2",
+        y: "4",
+        width: "20",
+        height: "16",
+        rx: "2"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: "M22 4l-10 7L2 4"
+      })))));
+    }));
+  })()))))), adminTab === 'controls' && /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-8 lg:gap-10"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-violet to-brand-rose"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-2xl bg-brand-violet/10 border border-brand-violet/20 flex items-center justify-center text-brand-violet shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "5",
+    y: "2",
+    width: "14",
+    height: "20",
+    rx: "2",
+    ry: "2"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "18",
+    x2: "12.01",
+    y2: "18"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading"
+  }, "Mentor Support Status"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-mono text-gray-500 mt-1"
+  }, "Control live online availability shown in the mobile app"))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Availability"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setSupportSettings(prev => ({
+      ...prev,
+      isOnline: true
+    })),
+    className: `py-4 rounded-xl font-mono text-sm font-bold uppercase flex items-center justify-center gap-3 border-2 transition ${supportSettings.isOnline ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]' : 'bg-transparent border-white/10 text-gray-500 hover:text-white hover:border-white/20'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `w-3 h-3 rounded-full bg-brand-emerald ${supportSettings.isOnline ? 'animate-pulse' : ''}`
+  }), "ONLINE"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setSupportSettings(prev => ({
+      ...prev,
+      isOnline: false
+    })),
+    className: `py-4 rounded-xl font-mono text-sm font-bold uppercase flex items-center justify-center gap-3 border-2 transition ${!supportSettings.isOnline ? 'bg-rose-500/10 text-rose-500 border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.15)]' : 'bg-transparent border-white/10 text-gray-500 hover:text-white hover:border-white/20'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-3 h-3 rounded-full bg-rose-500"
+  }), "OFFLINE"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Average Response Time"), /*#__PURE__*/React.createElement("div", {
+    className: "relative flex items-center"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "absolute left-4 w-5 h-5 text-gray-500"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "12 6 12 12 16 14"
+  })), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "e.g. 4 mins, 15 mins",
+    value: supportSettings.avgResponseTime || '',
+    onChange: e => setSupportSettings(prev => ({
+      ...prev,
+      avgResponseTime: e.target.value
+    })),
+    className: "w-full pl-12 pr-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-violet/50 transition duration-300"
+  }))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => handleSaveSupportSettings(supportSettings.isOnline, supportSettings.avgResponseTime),
+    disabled: savingSupport,
+    className: "w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-violet to-brand-rose shadow-[0_0_25px_rgba(168,85,247,0.2)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+  }, savingSupport ? 'Synchronizing Firestore...' : 'Synchronize Availability'))), /*#__PURE__*/React.createElement("div", {
+    className: "p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-emerald to-brand-cyan"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-2xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "10",
+    r: "3"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading"
+  }, "Welcome Automation"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-mono text-gray-500 mt-1"
+  }, "Auto-send welcome email & WhatsApp message on payment success"))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-5 rounded-xl bg-white/[0.03] border border-white/5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-xl bg-brand-cyan/15 border border-brand-cyan/25 flex items-center justify-center text-brand-cyan shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "22,6 12,13 2,6"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 min-w-0"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-bold text-white"
+  }, "Welcome Email"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-mono bg-brand-emerald/15 text-brand-emerald px-3 py-1 rounded-full border border-brand-emerald/25 font-bold"
+  }, "ACTIVE")), /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-mono text-gray-500 mt-1"
+  }, "Automatically sent via Google Apps Script MailApp (free, 100 recipients/day)")))), /*#__PURE__*/React.createElement("div", {
+    className: "p-5 rounded-xl bg-white/[0.03] border border-white/5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4 mb-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-xl bg-brand-emerald/15 border border-brand-emerald/25 flex items-center justify-center text-brand-emerald shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "10",
+    r: "3"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 min-w-0"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-bold text-white"
+  }, "WhatsApp Notification"), /*#__PURE__*/React.createElement("span", {
+    className: `text-xs font-mono px-3 py-1 rounded-full border font-bold ${whatsAppConfigured ? 'bg-brand-emerald/15 text-brand-emerald border-brand-emerald/25' : 'bg-white/5 text-gray-400 border-white/10'}`
+  }, whatsAppConfigured ? 'CONFIGURED' : 'DISABLED')), /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-mono text-gray-500 mt-1"
+  }, "Optional. Leave empty to run in email-only mode."))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 gap-5"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "API Endpoint URL"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "https://api.ultramsg.com/instance12345/messages/chat",
+    value: whatsAppApiUrl,
+    onChange: e => setWhatsAppApiUrl(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "API Key / Bearer Token"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Your API key or bearer token",
+    value: whatsAppApiKey,
+    onChange: e => setWhatsAppApiKey(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Phone Number ID ", /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-600 normal-case"
+  }, "(WhatsApp Cloud API only \u2014 leave blank for other providers)")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Leave blank for UltraMsg, Twilio, or custom webhooks",
+    value: whatsAppPhoneId,
+    onChange: e => setWhatsAppPhoneId(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Test Phone Number"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "+919876543210",
+    value: whatsAppTestPhone,
+    onChange: e => setWhatsAppTestPhone(e.target.value),
+    className: "flex-1 px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: handleTestWhatsApp,
+    disabled: whatsAppSaving,
+    className: "px-6 py-3.5 rounded-xl bg-brand-emerald/15 border border-brand-emerald/25 text-brand-emerald text-sm font-bold font-mono hover:bg-brand-emerald/25 transition-all duration-200 disabled:opacity-50 whitespace-nowrap"
+  }, whatsAppSaving ? 'Sending...' : 'Send Test'))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t border-white/5 pt-6"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: "text-sm font-bold uppercase tracking-wider text-white font-heading mb-1"
+  }, "Notification Templates"), /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-mono text-gray-500 mb-5"
+  }, "Use ", /*#__PURE__*/React.createElement("code", {
+    className: "text-brand-cyan font-bold"
+  }, '{name}'), ", ", /*#__PURE__*/React.createElement("code", {
+    className: "text-brand-cyan font-bold"
+  }, '{course}'), " as placeholders"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Email Subject"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Welcome to Dxign Learn - {course}",
+    value: welcomeEmailSubject,
+    onChange: e => setWelcomeEmailSubject(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Email Body"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 5,
+    placeholder: "Hi {name}, Welcome to Dxign Learn!...",
+    value: welcomeEmailBody,
+    onChange: e => setWelcomeEmailBody(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300 resize-y"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "WhatsApp Message Body"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 4,
+    placeholder: "Hi {name}! Welcome to Dxign Learn!...",
+    value: welcomeWhatsappBody,
+    onChange: e => setWelcomeWhatsappBody(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-brand-emerald/50 transition duration-300 resize-y"
+  })))), whatsAppStatus.text && /*#__PURE__*/React.createElement("div", {
+    className: `p-4 rounded-xl border text-sm font-mono ${whatsAppStatus.type === 'success' ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald' : whatsAppStatus.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-500'}`
+  }, whatsAppStatus.text), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: handleSaveWhatsAppConfig,
+    disabled: whatsAppSaving,
+    className: "w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white transition bg-gradient-to-r from-brand-emerald to-brand-cyan shadow-[0_0_25px_rgba(16,185,129,0.2)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
+  }, whatsAppSaving ? 'Saving...' : 'Save Settings & Templates'))), /*#__PURE__*/React.createElement("details", {
+    className: "group"
+  }, /*#__PURE__*/React.createElement("summary", {
+    className: "text-xs font-mono text-gray-500 hover:text-gray-400 cursor-pointer uppercase tracking-wider py-2 select-none"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mr-1"
+  }, "\u25B6"), " Free WhatsApp Provider Setup Guide"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 p-5 rounded-xl bg-white/[0.02] border border-white/5 text-sm font-mono text-gray-400 space-y-4 leading-relaxed"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-white font-bold mb-2"
+  }, "Option 1: UltraMsg (50 msgs/day free)"), /*#__PURE__*/React.createElement("ol", {
+    className: "list-decimal list-inside space-y-1 text-gray-500"
+  }, /*#__PURE__*/React.createElement("li", null, "Sign up at ", /*#__PURE__*/React.createElement("a", {
+    href: "https://ultramsg.com",
+    target: "_blank",
+    className: "text-brand-cyan hover:underline"
+  }, "ultramsg.com")), /*#__PURE__*/React.createElement("li", null, "Get your instance ID and token from the dashboard"), /*#__PURE__*/React.createElement("li", null, "API URL format: ", /*#__PURE__*/React.createElement("code", {
+    className: "text-white"
+  }, "https://api.ultramsg.com/", '{instanceId}', "/messages/chat")), /*#__PURE__*/React.createElement("li", null, "Paste the token as the API Key above"))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t border-white/5 pt-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-white font-bold mb-2"
+  }, "Option 2: WhatsApp Cloud API (free tier)"), /*#__PURE__*/React.createElement("ol", {
+    className: "list-decimal list-inside space-y-1 text-gray-500"
+  }, /*#__PURE__*/React.createElement("li", null, "Go to ", /*#__PURE__*/React.createElement("a", {
+    href: "https://developers.facebook.com",
+    target: "_blank",
+    className: "text-brand-cyan hover:underline"
+  }, "Meta for Developers")), /*#__PURE__*/React.createElement("li", null, "Create a WhatsApp Business App, get your token & phone number ID"), /*#__PURE__*/React.createElement("li", null, "API URL format: ", /*#__PURE__*/React.createElement("code", {
+    className: "text-white"
+  }, "https://graph.facebook.com/v22.0/")), /*#__PURE__*/React.createElement("li", null, "Enter both token and Phone Number ID above (auto-detected)")))))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-8 lg:gap-10"
+  }, /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleWhitelistSubmit,
+    className: "p-8 lg:p-12 liquid-glass border border-white/5 rounded-3xl relative overflow-hidden flex flex-col space-y-6 lg:space-y-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-cyan to-brand-blue"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-6 h-6"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "9 11 11 13 15 9"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm lg:text-base font-black uppercase tracking-wider text-white font-heading"
+  }, "Manual Whitelist Creator"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-mono text-gray-500 mt-1"
+  }, "Add students and bypass standard Razorpay checkout flow"))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 gap-5"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Student Name"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "John Doe",
+    value: whitelistName,
+    onChange: e => setWhitelistName(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Phone Number"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "+91 98765 43210",
+    value: whitelistPhone,
+    onChange: e => setWhitelistPhone(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Email Address"), /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    placeholder: "student@gmail.com",
+    value: whitelistEmail,
+    onChange: e => setWhitelistEmail(e.target.value),
+    className: "w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-sm focus:outline-none focus:border-brand-cyan/50 transition duration-300"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-xs font-mono text-gray-500 uppercase tracking-widest block mb-2"
+  }, "Grant Course Access"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-xl font-sans text-sm"
+  }, courseList.map(c => {
+    const isChecked = whitelistCourses.includes(c.title);
+    return /*#__PURE__*/React.createElement("label", {
+      key: c.id,
+      className: "flex items-center gap-3 text-gray-400 hover:text-white cursor-pointer select-none py-1"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: isChecked,
+      onChange: () => {
+        if (isChecked) {
+          setWhitelistCourses(prev => prev.filter(x => x !== c.title));
+        } else {
+          setWhitelistCourses(prev => [...prev, c.title]);
+        }
+      },
+      className: "w-4 h-4 rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "truncate"
+    }, c.title));
+  }), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center gap-3 text-gray-400 hover:text-white cursor-pointer select-none col-span-2 mt-2 border-t border-white/5 pt-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: whitelistCourses.includes('All Courses Lifetime Access'),
+    onChange: () => {
+      if (whitelistCourses.includes('All Courses Lifetime Access')) {
+        setWhitelistCourses([]);
+      } else {
+        setWhitelistCourses(['All Courses Lifetime Access']);
+      }
+    },
+    className: "w-4 h-4 rounded border-white/10 bg-zinc-900 text-brand-cyan focus:ring-0"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "font-bold text-brand-cyan text-sm"
+  }, "All Courses Bundle")))), whitelistStatus.text && /*#__PURE__*/React.createElement("div", {
+    className: `p-4 rounded-xl border text-sm font-mono ${whitelistStatus.type === 'success' ? 'bg-brand-emerald/10 border-brand-emerald/20 text-brand-emerald' : 'bg-rose-500/10 border-rose-500/20 text-rose-500'}`
+  }, whitelistStatus.text), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    disabled: whitelistingLoading,
+    className: "w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_25px_rgba(0,240,255,0.2)]"
+  }, whitelistingLoading ? 'Sending Webhook request...' : 'Whitelist Student & Grant Access'))))), adminTab === 'chat' && /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-grow lg:h-full min-h-0"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `lg:col-span-3 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl ${showMobileChatPopup ? 'hidden ' : ''}lg:flex`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-5 border-b border-white/5"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold block mb-3"
+  }, "Doubt Rooms (", studentChats.length, ")"), /*#__PURE__*/React.createElement("div", {
+    className: "relative flex items-center"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "absolute left-3.5 w-3.5 h-3.5 lg:w-4 lg:h-4 text-gray-500"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "11",
+    cy: "11",
+    r: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "21",
+    y1: "21",
+    x2: "16.65",
+    y2: "16.65"
+  })), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Filter active doubts...",
+    value: chatSearch,
+    onChange: e => setChatSearch(e.target.value),
+    className: "w-full pl-9 pr-4 py-2 lg:py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] lg:text-sm placeholder-gray-600 focus:outline-none focus:border-brand-cyan/40 transition-all duration-300"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow overflow-y-auto p-2 lg:p-3 space-y-1"
+  }, studentChats.filter(chat => {
+    const searchVal = chatSearch.toLowerCase();
+    return (chat.name || '').toLowerCase().includes(searchVal) || (chat.email || '').toLowerCase().includes(searchVal);
+  }).length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "py-8 text-center text-gray-600 uppercase font-mono text-[9px] tracking-widest"
+  }, "No active chats found") : studentChats.filter(chat => {
+    const searchVal = chatSearch.toLowerCase();
+    return (chat.name || '').toLowerCase().includes(searchVal) || (chat.email || '').toLowerCase().includes(searchVal);
+  }).map(chat => {
+    const isSelected = selectedChatId === chat.id;
+    const isUnread = chat.unread;
+    const activeDate = chat.lastActive ? new Date(chat.lastActive.seconds * 1000) : new Date();
+    const timeStr = activeDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return /*#__PURE__*/React.createElement("button", {
+      key: chat.id,
+      onClick: () => {
+        setSelectedChatId(chat.id);
+        setShowMobileChatPopup(true);
+      },
+      className: `w-full text-left p-3.5 lg:p-4 rounded-2xl flex items-center gap-3 lg:gap-4 transition-all duration-300 ${isSelected ? 'bg-white/[0.06] border border-white/10 shadow-[0_4px_20px_rgba(0,240,255,0.03)]' : 'bg-transparent border border-transparent hover:bg-white/[0.02]'}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "relative shrink-0 select-none"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `w-9 h-9 lg:w-11 lg:h-11 rounded-full flex items-center justify-center font-bold text-xs lg:text-sm border ${isSelected ? 'bg-brand-cyan/20 border-brand-cyan/40 text-brand-cyan' : 'bg-white/5 border-white/10 text-white'}`
+    }, (chat.name || chat.email || 'S').charAt(0).toUpperCase()), isUnread && /*#__PURE__*/React.createElement("span", {
+      className: "absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border border-zinc-950"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "flex-grow min-w-0"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-between items-baseline mb-0.5"
+    }, /*#__PURE__*/React.createElement("h4", {
+      className: "text-xs lg:text-sm font-bold text-white truncate font-heading"
+    }, chat.name || 'Student'), /*#__PURE__*/React.createElement("span", {
+      className: "text-[8px] lg:text-[10px] font-mono text-gray-500 shrink-0"
+    }, timeStr)), /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] lg:text-xs text-gray-400 truncate font-sans"
+    }, chat.lastMessage || 'No messages yet')));
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: `lg:col-span-9 flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl relative ${showMobileChatPopup ? 'fixed inset-0 z-[100] rounded-none lg:static lg:inset-auto lg:z-auto lg:rounded-3xl' : 'hidden lg:flex'}`
+  }, !selectedChatId ?
+  /*#__PURE__*/
+  // Empty state
+  React.createElement("div", {
+    className: "flex-grow flex flex-col items-center justify-center p-8 text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-16 h-16 rounded-3xl bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan/50 mb-4 animate-bounce"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-8 h-8"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+  }))), /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold text-white uppercase tracking-widest font-heading"
+  }, "Doubt Resolution Hub"), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-mono text-gray-500 max-w-xs mt-2"
+  }, "Select a student from the sidebar folder directory to view chat logs and send dynamic feedback.")) :
+  /*#__PURE__*/
+  // Active chat
+  React.createElement(React.Fragment, null, (() => {
+    const activeChat = studentChats.find(c => c.id === selectedChatId) || {};
+    if (adminSelectionMode) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "px-6 py-4 border-b border-brand-cyan/20 bg-[#0d1b2a]/45 flex items-center justify-between gap-3 text-left"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center gap-3"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "w-10 h-10 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center font-bold text-sm text-brand-cyan"
+      }, "\u2713"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+        className: "text-xs font-bold text-brand-cyan font-heading"
+      }, adminSelectedMessageIds.length, " Selected"), /*#__PURE__*/React.createElement("p", {
+        className: "text-[9px] font-mono text-gray-500"
+      }, "Selection Mode Active"))), /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center gap-2"
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: handleDeleteAdminSelectedMessages,
+        disabled: adminSelectedMessageIds.length === 0,
+        className: "px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 disabled:hover:bg-rose-500/10 text-rose-400 border border-rose-500/20 transition flex items-center gap-1.5"
+      }, "Delete for Everyone"), /*#__PURE__*/React.createElement("button", {
+        onClick: () => {
+          setAdminSelectionMode(false);
+          setAdminSelectedMessageIds([]);
+        },
+        className: "px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold bg-white/[0.03] hover:bg-white/[0.08] text-gray-300 border border-white/10 transition"
+      }, "Cancel")));
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "px-6 py-4 border-b border-white/5 bg-zinc-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "relative shrink-0 select-none"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "w-10 h-10 rounded-full bg-[#051c24] border border-brand-cyan/35 flex items-center justify-center font-black text-sm text-brand-cyan font-heading"
+    }, (activeChat.name || activeChat.email || 'S').charAt(0).toUpperCase()), /*#__PURE__*/React.createElement("span", {
+      className: "absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-brand-emerald border border-zinc-950 animate-pulse"
+    })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+      className: "text-xs font-bold text-white font-heading"
+    }, activeChat.name || 'Student'), /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] font-mono text-gray-500"
+    }, activeChat.email))), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-3"
+    }, activeChat.courses && activeChat.courses.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "hidden sm:flex flex-wrap gap-1 items-center"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-[8px] font-mono text-gray-500 mr-1 uppercase"
+    }, "Enrolled:"), activeChat.courses.map((course, idx) => /*#__PURE__*/React.createElement("span", {
+      key: idx,
+      className: "px-2 py-0.5 rounded-md text-[8px] font-mono font-bold bg-brand-violet/10 text-brand-violet border border-brand-violet/20"
+    }, course))), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowMobileChatPopup(false),
+      className: "lg:hidden w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition shrink-0",
+      "aria-label": "Close chat"
+    }, /*#__PURE__*/React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      className: "w-4 h-4"
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "18",
+      y1: "6",
+      x2: "6",
+      y2: "18"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "6",
+      y1: "6",
+      x2: "18",
+      y2: "18"
+    }))), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        setAdminSelectionMode(true);
+        setAdminSelectedMessageIds([]);
+      },
+      className: "px-2.5 py-1 rounded-md text-[9px] font-mono font-bold bg-brand-cyan/10 hover:bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/20 transition flex items-center gap-1"
+    }, "Select")));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow overflow-y-auto p-6 space-y-4 flex flex-col text-left"
+  }, (() => {
+    const sortedMessages = [...chatMessages].sort((a, b) => {
+      const getSeconds = ts => {
+        if (!ts) return Date.now() / 1000;
+        if (typeof ts.seconds === 'number') return ts.seconds;
+        if (ts instanceof Date) return ts.getTime() / 1000;
+        if (typeof ts.toMillis === 'function') return ts.toMillis() / 1000;
+        if (ts.seconds) return ts.seconds;
+        return 0;
+      };
+      return getSeconds(a.timestamp) - getSeconds(b.timestamp);
+    });
+    if (sortedMessages.length === 0) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "my-auto text-center text-gray-600 font-mono text-[9px] uppercase tracking-widest"
+      }, "No messages in room");
+    }
+    return sortedMessages.map((msg, index) => {
+      if (!msg) return null;
+      try {
+        const isMentor = msg.sender === 'mentor';
+        let seconds = Date.now() / 1000;
+        if (msg.timestamp) {
+          if (typeof msg.timestamp.seconds === 'number') seconds = msg.timestamp.seconds;else if (typeof msg.timestamp.toMillis === 'function') seconds = msg.timestamp.toMillis() / 1000;else if (msg.timestamp.seconds && !isNaN(msg.timestamp.seconds)) seconds = Number(msg.timestamp.seconds);else if (typeof msg.timestamp === 'number') seconds = msg.timestamp;else if (typeof msg.timestamp === 'string') {
+            const parsed = Date.parse(msg.timestamp);
+            if (!isNaN(parsed)) seconds = parsed / 1000;
+          }
+        }
+        let timeStr = '';
+        const dateObj = new Date(seconds * 1000);
+        if (!isNaN(dateObj.getTime())) {
+          timeStr = dateObj.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+        const isMsgSelected = adminSelectedMessageIds.includes(msg.id);
+        const handleMsgClick = e => {
+          if (adminSelectionMode) {
+            e.preventDefault();
+            e.stopPropagation();
+            setAdminSelectedMessageIds(prev => {
+              if (prev.includes(msg.id)) {
+                return prev.filter(id => id !== msg.id);
+              } else {
+                return [...prev, msg.id];
+              }
+            });
+          }
+        };
+        return /*#__PURE__*/React.createElement("div", {
+          key: msg.id || index,
+          onClick: handleMsgClick,
+          className: `flex w-full ${isMentor ? 'justify-end' : 'justify-start'} ${adminSelectionMode ? 'cursor-pointer select-none' : ''}`
+        }, adminSelectionMode && /*#__PURE__*/React.createElement("div", {
+          className: "flex items-center pr-3 self-center shrink-0"
+        }, /*#__PURE__*/React.createElement("input", {
+          type: "checkbox",
+          checked: isMsgSelected,
+          onChange: () => {},
+          className: "w-3.5 h-3.5 accent-brand-cyan cursor-pointer rounded border-white/10 bg-black/40"
+        })), /*#__PURE__*/React.createElement("div", {
+          className: `max-w-[70%] rounded-2xl relative transition-all duration-200 ${msg.type === 'audio' || msg.type === 'image' || msg.type === 'video' ? 'p-0 overflow-hidden' : 'px-4 py-3'} ${isMsgSelected ? 'ring-2 ring-brand-cyan bg-brand-cyan/10 border-brand-cyan/30 text-white shadow-[0_0_12px_rgba(0,240,255,0.15)] rounded-2xl' : msg.type === 'audio' ? 'bg-transparent border border-transparent rounded-2xl' : msg.type === 'image' || msg.type === 'video' ? isMentor ? 'bg-[#2563eb]/10 border border-[#2563eb]/25 w-80 rounded-2xl rounded-tr-sm' : 'bg-[#1f1f23]/40 border border-[#1f1f23]/60 w-80 rounded-2xl rounded-tl-sm' : isMentor ? 'bg-blue-600 border border-blue-600/30 text-white rounded-2xl rounded-tr-sm' : 'bg-[#1f1f23] border border-white/5 text-gray-200 rounded-2xl rounded-tl-sm'}`,
+          style: !isMsgSelected && !isMentor && msg.type !== 'audio' && msg.type !== 'image' && msg.type !== 'video' ? {
+            backgroundColor: '#1f1f23'
+          } : !isMsgSelected && isMentor && msg.type !== 'audio' && msg.type !== 'image' && msg.type !== 'video' ? {
+            backgroundColor: '#2563eb'
+          } : {}
+        }, adminSelectionMode && /*#__PURE__*/React.createElement("div", {
+          className: "absolute inset-0 z-50 rounded-2xl cursor-pointer bg-transparent",
+          onClick: handleMsgClick
+        }), msg.type === 'text' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+          className: "text-xs leading-relaxed break-words whitespace-pre-wrap select-text"
+        }, renderParsedTextWeb(msg.text)), /*#__PURE__*/React.createElement("span", {
+          className: "absolute bottom-1 right-2 inline-flex items-center gap-0.5 text-[8px] text-white/45 font-mono uppercase leading-none select-none"
+        }, timeStr, isMentor && /*#__PURE__*/React.createElement("span", {
+          className: `font-sans font-bold ${msg.status === 'read' ? 'text-brand-cyan' : 'text-white/45'}`
+        }, msg.status === 'sent' || !msg.status ? '✓' : '✓✓'))), msg.fileUrl && msg.type === 'image' && /*#__PURE__*/React.createElement("div", {
+          onClick: e => {
+            e.stopPropagation();
+            if (adminSelectionMode) {
+              handleMsgClick(e);
+              return;
+            }
+            setActivePreviewMedia({
+              type: 'image',
+              url: getAttachmentUrl(msg.fileUrl, 'image')
+            });
+            setMediaPreviewLoading(true);
+          },
+          className: "relative w-full h-auto max-h-[480px] overflow-hidden cursor-pointer select-none"
+        }, /*#__PURE__*/React.createElement("img", {
+          src: getAttachmentUrl(msg.fileUrl, 'image'),
+          alt: "Attachment",
+          className: "w-full h-auto max-h-[480px] object-cover block"
+        }), !msg.text && /*#__PURE__*/React.createElement("div", {
+          className: "absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-black/55 backdrop-blur-sm flex items-center gap-1 text-[8px] text-white/75 font-mono select-none"
+        }, timeStr, isMentor && /*#__PURE__*/React.createElement("span", {
+          className: `font-sans font-bold ${msg.status === 'read' ? 'text-brand-cyan' : 'text-white/45'}`
+        }, msg.status === 'sent' || !msg.status ? '✓' : '✓✓'))), msg.fileUrl && msg.type === 'video' && /*#__PURE__*/React.createElement(VideoChatPreview, {
+          fileUrl: msg.fileUrl,
+          getAttachmentUrl: getAttachmentUrl,
+          onPress: e => {
+            e.stopPropagation();
+            if (adminSelectionMode) {
+              handleMsgClick(e);
+              return;
+            }
+            setActivePreviewMedia({
+              type: 'video',
+              url: getAttachmentUrl(msg.fileUrl, 'video')
+            });
+            setMediaPreviewLoading(true);
+          },
+          timeStr: timeStr,
+          isMentor: isMentor,
+          msgStatus: msg.status,
+          hasCaption: !!msg.text
+        }), msg.type === 'audio' && /*#__PURE__*/React.createElement(AudioPlayer, {
+          fileUrl: msg.fileUrl,
+          getAttachmentUrl: getAttachmentUrl,
+          GOOGLE_SHEET_WEBHOOK_URL: GOOGLE_SHEET_WEBHOOK_URL,
+          isMentor: isMentor,
+          timeStr: timeStr,
+          msgStatus: msg.status
+        }), msg.type === 'document' && /*#__PURE__*/React.createElement("a", {
+          href: getAttachmentUrl(msg.fileUrl, 'document'),
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "flex items-center gap-3 bg-zinc-950/40 hover:bg-zinc-950/60 p-3 rounded-xl border border-white/10 transition text-left text-white"
+        }, /*#__PURE__*/React.createElement("div", {
+          className: "w-8 h-8 rounded-full bg-brand-violet/10 border border-brand-violet/25 flex items-center justify-center text-brand-violet"
+        }, /*#__PURE__*/React.createElement("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          className: "w-4 h-4"
+        }, /*#__PURE__*/React.createElement("path", {
+          d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+        }), /*#__PURE__*/React.createElement("polyline", {
+          points: "14 2 14 8 20 8"
+        }), /*#__PURE__*/React.createElement("line", {
+          x1: "16",
+          y1: "13",
+          x2: "8",
+          y2: "13"
+        }), /*#__PURE__*/React.createElement("line", {
+          x1: "16",
+          y1: "17",
+          x2: "8",
+          y2: "17"
+        }), /*#__PURE__*/React.createElement("polyline", {
+          points: "10 9 9 9 8 9"
+        }))), /*#__PURE__*/React.createElement("div", {
+          className: "min-w-0"
+        }, /*#__PURE__*/React.createElement("p", {
+          className: "text-[10px] truncate font-bold"
+        }, msg.fileName || 'document.pdf'), /*#__PURE__*/React.createElement("span", {
+          className: "text-[8px] text-gray-500 block mt-0.5"
+        }, "Download document resource"))), msg.text && (msg.type === 'image' || msg.type === 'video') && /*#__PURE__*/React.createElement("p", {
+          className: "text-xs leading-relaxed break-words whitespace-pre-wrap select-text px-4 pt-2 pb-3.5"
+        }, renderParsedTextWeb(msg.text)), (msg.type === 'document' || msg.type === 'audio' || (msg.type === 'image' || msg.type === 'video') && msg.text) && /*#__PURE__*/React.createElement("span", {
+          className: `text-[7px] font-mono block text-right mt-1.5 uppercase leading-none ${isMentor ? 'text-white/60' : 'text-gray-500'}`
+        }, timeStr, isMentor && /*#__PURE__*/React.createElement("span", {
+          className: `ml-1 font-sans font-bold ${msg.status === 'read' ? 'text-brand-cyan' : 'text-white/50'}`
+        }, msg.status === 'sent' || !msg.status ? '✓' : '✓✓'))));
+      } catch (renderErr) {
+        console.error("Error rendering message:", renderErr);
+        return /*#__PURE__*/React.createElement("div", {
+          key: index,
+          className: "flex w-full justify-start"
+        }, /*#__PURE__*/React.createElement("div", {
+          className: "max-w-[70%] rounded-2xl px-4 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-mono"
+        }, "[Error rendering message bubble]"));
+      }
+    });
+  })()), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleSendReply,
+    className: "p-4 border-t border-white/5 bg-zinc-950/10 flex gap-3 items-center relative"
+  }, showEmojiPicker && /*#__PURE__*/React.createElement("div", {
+    className: "absolute bottom-20 left-4 bg-[#0d0d10]/95 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-wrap gap-2 w-64 backdrop-blur-xl z-50 select-none"
+  }, ['😀', '😂', '😍', '👍', '🙌', '🔥', '❤️', '👏', '🎉', '🚀', '💡', '💯', '🤔', '😢', '😎', '💻'].map(emoji => /*#__PURE__*/React.createElement("button", {
+    key: emoji,
+    type: "button",
+    onClick: () => {
+      setReplyInput(prev => prev + emoji);
+      if (replyInputRef.current) {
+        replyInputRef.current.focus();
+      }
+    },
+    className: "w-8 h-8 flex items-center justify-center text-lg rounded-lg hover:bg-white/10 active:scale-95 transition"
+  }, emoji))), /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow flex items-center bg-white/[0.03] border border-white/10 rounded-2xl px-3 py-1.5 focus-within:border-brand-cyan/40 transition duration-300"
+  }, isAdminRecording ? /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow flex items-center justify-between py-1"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 text-rose-500 font-mono text-xs font-bold uppercase"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-0.5 px-1 h-3 select-none"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-0.5 h-2 bg-rose-500 rounded-full animate-wave-1 origin-center"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "w-0.5 h-3 bg-rose-500 rounded-full animate-wave-2 origin-center"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "w-0.5 h-1.5 bg-rose-500 rounded-full animate-wave-3 origin-center"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "w-0.5 h-2.5 bg-rose-500 rounded-full animate-wave-4 origin-center"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "w-0.5 h-3.5 bg-rose-500 rounded-full animate-wave-5 origin-center"
+  })), /*#__PURE__*/React.createElement("span", null, "Recording ", Math.floor(adminRecordingDuration / 60), ":", (adminRecordingDuration % 60).toString().padStart(2, '0'))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: cancelAdminRecording,
+    className: "text-rose-500 hover:text-rose-400 font-mono text-xs font-bold uppercase transition"
+  }, "Cancel")) : adminChatUploadingProgress !== null ? /*#__PURE__*/React.createElement("div", {
+    className: "w-full flex items-center justify-between py-1.5 px-2.5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3 flex-grow pr-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-wider whitespace-nowrap animate-pulse"
+  }, "UPLOADING MEDIA"), /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow h-1.5 rounded bg-white/5 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-full bg-brand-cyan transition-all duration-300",
+    style: {
+      width: `${adminChatUploadingProgress}%`
+    }
+  }))), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-mono font-bold text-brand-cyan"
+  }, adminChatUploadingProgress, "%")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    id: "admin-file-input",
+    className: "hidden",
+    onChange: handleAdminFileUpload,
+    disabled: sendingReply,
+    accept: "image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar,.txt,.ppt,.pptx,.xls,.xlsx"
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => document.getElementById('admin-file-input').click(),
+    disabled: sendingReply,
+    title: "Attach document, image, or video",
+    className: "p-1.5 mr-2 text-gray-500 hover:text-white transition shrink-0"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-5 h-5"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"
+  }))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowEmojiPicker(!showEmojiPicker),
+    disabled: sendingReply,
+    title: "Insert Emoji",
+    className: `p-1.5 mr-2 transition shrink-0 ${showEmojiPicker ? 'text-brand-cyan' : 'text-gray-500 hover:text-white'}`
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-5 h-5"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 14s1.5 2 4 2 4-2 4-2"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "9",
+    y1: "9",
+    x2: "9.01",
+    y2: "9"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "15",
+    y1: "9",
+    x2: "15.01",
+    y2: "9"
+  }))), /*#__PURE__*/React.createElement("textarea", {
+    ref: replyInputRef,
+    rows: 1,
+    placeholder: "Type feedback, suggestions or replies...",
+    value: replyInput,
+    onChange: e => setReplyInput(e.target.value),
+    onKeyDown: handleKeyDown,
+    disabled: sendingReply,
+    className: "flex-grow bg-transparent text-white text-xs placeholder-gray-600 focus:outline-none resize-none max-h-[120px] overflow-y-auto leading-normal"
+  }))), replyInput.trim().length > 0 ? /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    disabled: sendingReply,
+    className: "w-10 h-10 shrink-0 rounded-2xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center text-black shadow-[0_0_15px_rgba(0,240,255,0.25)] disabled:opacity-50 disabled:scale-100 disabled:shadow-none"
+  }, sendingReply ? /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4 animate-spin text-black"
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "23 4 23 10 17 10"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "1 20 1 14 7 14"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+  })) : /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4 text-black ml-0.5"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "22",
+    y1: "2",
+    x2: "11",
+    y2: "13"
+  }), /*#__PURE__*/React.createElement("polygon", {
+    points: "22 2 15 22 11 13 2 9 22 2"
+  }))) : isAdminRecording ? /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: stopAdminRecording,
+    className: "w-10 h-10 shrink-0 rounded-2xl bg-rose-500 animate-pulse hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center text-white shadow-[0_0_15px_rgba(239,68,68,0.25)]",
+    title: "Stop and send recording"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4 text-white fill-white"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "4",
+    y: "4",
+    width: "16",
+    height: "16",
+    rx: "2",
+    ry: "2"
+  }))) : /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: startAdminRecording,
+    disabled: sendingReply,
+    className: "w-10 h-10 shrink-0 rounded-2xl bg-brand-cyan hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center text-black shadow-[0_0_15px_rgba(0,240,255,0.25)] disabled:opacity-50 disabled:scale-100",
+    title: "Record a voice note"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "w-4 h-4 text-black"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M19 10v1a7 7 0 0 1-14 0v-1"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "19",
+    x2: "12",
+    y2: "23"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "8",
+    y1: "23",
+    x2: "16",
+    y2: "23"
+  }))))))), adminTab === 'lectures' && /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col space-y-6 lg:space-y-8 text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    className: "text-xl lg:text-2xl font-black uppercase text-white font-heading"
+  }, "Course Video Lectures Manager"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs lg:text-sm text-gray-500 font-mono mt-0.5"
+  }, "Filter, upload, and control streaming content lists")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowAddLectureModal(true),
+    className: "px-5 py-3 lg:px-7 lg:py-3.5 rounded-2xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black bg-brand-cyan hover:scale-[1.02] active:scale-[0.98] transition shadow-[0_0_20px_rgba(0,240,255,0.15)] flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "3",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "lg:w-4 lg:h-4"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "5",
+    x2: "12",
+    y2: "19"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "5",
+    y1: "12",
+    x2: "19",
+    y2: "12"
+  })), "Add New Lecture")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center gap-1.5 bg-white/[0.02] border border-white/5 p-1.5 lg:p-2 rounded-2xl font-mono text-[10px] lg:text-xs font-bold"
+  }, Object.keys(DEFAULT_COURSE_CURRICULUM).map(course => /*#__PURE__*/React.createElement("button", {
+    key: course,
+    onClick: () => setAdminSelectedLectureCourse(course),
+    className: `px-4 py-2 lg:px-5 lg:py-2.5 rounded-xl transition ${adminSelectedLectureCourse === course ? 'bg-brand-violet text-white shadow-[0_0_15px_rgba(168,85,247,0.25)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
+  }, course))), /*#__PURE__*/React.createElement("div", {
+    className: "liquid-glass border border-white/5 rounded-3xl overflow-hidden p-6 lg:p-8"
+  }, (() => {
+    const list = getMergedLectures()[adminSelectedLectureCourse] || [];
+    if (list.length === 0) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "py-12 text-center text-gray-600 font-mono text-xs lg:text-sm italic"
+      }, "No lectures uploaded for this course yet. Click 'Add New Lecture' above.");
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "overflow-x-auto"
+    }, /*#__PURE__*/React.createElement("table", {
+      className: "w-full font-mono text-xs lg:text-sm border-collapse"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+      className: "border-b border-white/5 text-gray-500 uppercase tracking-widest text-[9px] lg:text-xs font-bold"
+    }, /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-left pl-2 lg:pl-4"
+    }, "#"), /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-left"
+    }, "Lecture Title"), /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-left"
+    }, "Difficulty"), /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-left"
+    }, "Duration"), /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-left"
+    }, "Resources"), /*#__PURE__*/React.createElement("th", {
+      className: "py-3.5 lg:py-4 text-center pr-2 lg:pr-4"
+    }, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, list.map((lec, idx) => /*#__PURE__*/React.createElement("tr", {
+      key: lec.id,
+      className: "border-b border-white/[0.02] hover:bg-white/[0.01] transition-all"
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5 text-gray-600 pl-2 lg:pl-4"
+    }, idx + 1), /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "font-bold text-gray-200"
+    }, lec.title), /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] lg:text-xs text-gray-500 truncate max-w-sm mt-0.5"
+    }, lec.description)), /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `px-2 py-0.5 rounded text-[9px] lg:text-xs font-bold border ${lec.difficulty === 'Beginner' ? 'bg-brand-emerald/10 border-brand-emerald/25 text-brand-emerald' : lec.difficulty === 'Intermediate' ? 'bg-brand-cyan/10 border-brand-cyan/25 text-brand-cyan' : 'bg-rose-500/10 border-rose-500/25 text-rose-500'}`
+    }, lec.difficulty)), /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5 text-gray-400"
+    }, lec.duration), /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5 text-gray-400"
+    }, (lec.resources || []).length, " items"), /*#__PURE__*/React.createElement("td", {
+      className: "py-4 lg:py-5 text-center pr-2 lg:pr-4 whitespace-nowrap"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "inline-flex items-center gap-1.5"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => {
+        setEditingLecture(lec);
+        setNewLectureTitle(lec.title || '');
+        setNewLectureDesc(lec.description || '');
+        setNewLectureDifficulty(lec.difficulty || 'Beginner');
+        setNewLectureDuration(lec.duration || '1 min');
+        setNewLectureTags((lec.tags || []).join(', '));
+        setNewLectureVideoUrl(lec.videoUrl || '');
+        setNewLectureResources(lec.resources || []);
+        setShowAddLectureModal(true);
+      },
+      className: "px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan border border-brand-cyan/20 text-brand-cyan hover:text-black transition"
+    }, "Edit"), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => {
+        if (confirm(`Are you sure you want to delete lecture "${lec.title}"?`)) {
+          handleDeleteLecture(adminSelectedLectureCourse, lec.id);
+        }
+      },
+      className: "px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-500 hover:text-white transition"
+    }, "Delete"))))))));
+  })())), showAddLectureModal && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-[100002] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "relative w-full max-w-lg lg:max-w-5xl rounded-3xl border border-white/10 text-left",
+    style: {
+      background: 'linear-gradient(145deg, #0e0e0e 0%, #111111 100%)',
+      boxShadow: '0 0 60px rgba(0,240,255,0.15), 0 30px 80px rgba(0,0,0,0.8)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-1 w-full bg-gradient-to-r from-brand-cyan to-brand-blue"
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => {
+      setShowAddLectureModal(false);
+      setNewLectureTitle('');
+      setNewLectureDesc('');
+      setNewLectureDifficulty('Beginner');
+      setNewLectureDuration('1 min');
+      setNewLectureTags('');
+      setNewLectureVideoUrl('');
+      setNewLectureResources([]);
+      setEditingLecture(null);
+    },
+    className: "absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition z-10"
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2.5"
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "18",
+    y1: "6",
+    x2: "6",
+    y2: "18"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "6",
+    y1: "6",
+    x2: "18",
+    y2: "18"
+  }))), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleSaveNewLecture,
+    className: "p-8 lg:p-10 max-h-[85vh] overflow-y-auto"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg lg:text-xl font-black uppercase text-white font-heading tracking-wide mb-1 pr-8"
+  }, editingLecture ? 'Edit Lecture' : 'Add Lecture to Syllabus'), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] lg:text-xs font-mono text-gray-500 uppercase tracking-widest mb-6"
+  }, editingLecture ? `Editing: ${editingLecture.title}` : `Target: ${adminSelectedLectureCourse}`), /*#__PURE__*/React.createElement("div", {
+    className: "lg:grid lg:grid-cols-2 lg:gap-10 space-y-4 lg:space-y-0"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] lg:text-[11px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5"
+  }, "Lecture Title"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "e.g. Photoshop Layout Design Masterclass",
+    value: newLectureTitle,
+    onChange: e => setNewLectureTitle(e.target.value),
+    className: "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition",
+    style: {
+      outline: 'none'
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5"
+  }, "Summary / Description"), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "Provide student reference overview details...",
+    value: newLectureDesc,
+    onChange: e => setNewLectureDesc(e.target.value),
+    rows: 4,
+    className: "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition resize-none",
+    style: {
+      outline: 'none'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5"
+  }, "Difficulty level"), /*#__PURE__*/React.createElement("select", {
+    value: newLectureDifficulty,
+    onChange: e => setNewLectureDifficulty(e.target.value),
+    className: "w-full px-4 py-2.5 rounded-xl bg-[#111] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition",
+    style: {
+      outline: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "Beginner"
+  }, "Beginner"), /*#__PURE__*/React.createElement("option", {
+    value: "Intermediate"
+  }, "Intermediate"), /*#__PURE__*/React.createElement("option", {
+    value: "Advanced"
+  }, "Advanced"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5"
+  }, "Duration"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "e.g. 15 mins, 2 mins",
+    value: newLectureDuration,
+    onChange: e => setNewLectureDuration(e.target.value),
+    className: "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition",
+    style: {
+      outline: 'none'
+    }
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-1.5"
+  }, "Tags (Comma Separated)"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "e.g. CGI, Composition, Photoshop",
+    value: newLectureTags,
+    onChange: e => setNewLectureTags(e.target.value),
+    className: "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition",
+    style: {
+      outline: 'none'
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3 lg:space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] font-mono text-brand-cyan uppercase tracking-widest font-bold"
+  }, "Lecture Video"), /*#__PURE__*/React.createElement("span", {
+    className: "text-[8px] font-mono text-gray-500"
+  }, "PASTE DIRECT LINK OR UPLOAD")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: "Paste .mp4 link or YouTube URL...",
+    value: newLectureVideoUrl,
+    onChange: e => setNewLectureVideoUrl(e.target.value),
+    className: "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-cyan/50 transition",
+    style: {
+      outline: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition shrink-0"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    className: "hidden",
+    accept: "video/*",
+    onChange: handleAdminLectureUpload
+  }), "Choose Video File \uD83C\uDFA5"), lectureUploadingProgress !== null && /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow h-1.5 rounded bg-white/5 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-full bg-brand-cyan transition-all duration-300",
+    style: {
+      width: `${lectureUploadingProgress}%`
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "text-[9px] font-mono text-brand-cyan font-bold"
+  }, lectureUploadingProgress, "%")))), /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3 lg:space-y-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-[9px] lg:text-[11px] font-mono text-brand-violet uppercase tracking-widest block font-bold"
+  }, "Downloadable Resources"), newLectureResources.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-1.5 max-h-28 overflow-y-auto mb-2"
+  }, newLectureResources.map((res, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "flex items-center justify-between text-[10px] lg:text-xs bg-white/5 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg border border-white/5 font-mono"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "truncate max-w-[160px] text-gray-300"
+  }, res.name, " (", res.size, ")"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setNewLectureResources(prev => prev.filter((_, idx) => idx !== i)),
+    className: "text-rose-500 hover:text-white transition shrink-0"
+  }, "Remove")))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "px-4 py-2 lg:px-5 lg:py-2.5 bg-white/5 border border-white/10 text-[10px] lg:text-xs font-mono font-bold rounded-lg cursor-pointer hover:bg-white/10 hover:text-white transition"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    className: "hidden",
+    onChange: handleAdminResourceUpload
+  }), "Upload Template File \uD83D\uDCC1"), resourceUploadingProgress !== null && /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex-grow h-1.5 rounded bg-white/5 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-full bg-brand-cyan transition-all duration-300",
+    style: {
+      width: `${resourceUploadingProgress}%`
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "text-[9px] lg:text-xs font-mono text-brand-cyan font-bold"
+  }, resourceUploadingProgress, "%")))), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    disabled: newLectureSaving,
+    className: "w-full py-3.5 lg:py-4 rounded-xl text-xs lg:text-sm font-bold uppercase tracking-wider text-black transition bg-brand-cyan hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+  }, newLectureSaving ? 'Saving...' : editingLecture ? 'Update Lecture & Sync' : 'Save Lecture & Sync'))))))))), isBlogOpen && /*#__PURE__*/React.createElement(BlogPage, {
     closeBlog: closeBlog
   }), activePreviewMedia && /*#__PURE__*/React.createElement("div", {
     onClick: () => setActivePreviewMedia(null),
@@ -9038,4 +11021,3 @@ Dxign Learn Team`);
 };
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(/*#__PURE__*/React.createElement(App, null));
-

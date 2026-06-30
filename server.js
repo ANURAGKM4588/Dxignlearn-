@@ -42,7 +42,16 @@ const server = http.createServer((req, res) => {
     // Strip query parameters and hash, then decode URI
     const urlPath = req.url.split('?')[0].split('#')[0];
     const decodedPath = decodeURIComponent(urlPath === '/' ? '/index.html' : urlPath);
-    const filePath = path.join(__dirname, decodedPath);
+    let filePath = path.join(__dirname, decodedPath);
+    
+    // Support directory index files (e.g. /studentportal/ -> /studentportal/index.html)
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      if (!urlPath.endsWith('/')) {
+        res.writeHead(301, { 'Location': urlPath + '/' });
+        return res.end();
+      }
+      filePath = path.join(filePath, 'index.html');
+    }
     
     // Safety check: ensure filePath stays within workspace
     if (!filePath.startsWith(__dirname)) {
